@@ -1,6 +1,6 @@
 import { BaseChunk } from "./baseChunk";
-import { DataType } from "./dataType";
-import { vec4 } from "./tuples";
+import { DataType } from "../dataType";
+import { vec4 } from "../tuples";
 
 export class ColorChunk extends BaseChunk<vec4> {
     protected _view: Float32Array;

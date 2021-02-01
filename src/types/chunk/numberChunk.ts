@@ -1,5 +1,5 @@
 import { BaseChunk } from "./baseChunk";
-import { DataType } from "./dataType";
+import { DataType } from "../dataType";
 
 export class NumberChunk extends BaseChunk<number> {
     protected _view: Float32Array;

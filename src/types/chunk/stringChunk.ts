@@ -1,5 +1,5 @@
 import { BaseChunk } from "./baseChunk";
-import { DataType } from "./dataType";
+import { DataType } from "../dataType";
 
 export class StringChunk extends BaseChunk<string> {
     public constructor(length: number) {

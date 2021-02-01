@@ -1,4 +1,4 @@
-import { DataType } from "./dataType";
+import { DataType } from "../dataType";
 
 export abstract class BaseChunk<T> {
     protected _data: SharedArrayBuffer;

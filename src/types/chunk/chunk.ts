@@ -1,5 +1,5 @@
 import { ColorChunk } from "./colorChunk";
-import { DataType } from "./dataType";
+import { DataType } from "../dataType";
 import { NumberChunk } from "./numberChunk";
 import { StringChunk } from "./stringChunk";
 
