@@ -1,4 +1,4 @@
-import { Chunk } from "webpack";
+import { Chunk } from "../chunk/chunk";
 import { DataType } from "../dataType";
 import { ColorColumn } from "./colorColumn";
 import { NumberColumn } from "./numberColumn";
