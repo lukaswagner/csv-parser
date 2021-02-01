@@ -4,6 +4,8 @@
     "description": "Multi-treaded csv parser using web workers.",
     "main": "dist/index.js",
     "scripts": {
+        "build": "tsc -b",
+        "pretest": "npm run build ",
         "test": "cd test && webpack-dev-server --open"
     },
     "repository": {
