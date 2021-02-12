@@ -1,3 +1,2 @@
-// const csv = require('../../lib/csv');
-import csv from '../..'
+const csv = require('../../lib/loose/csv');
 csv.test("js -> lib");

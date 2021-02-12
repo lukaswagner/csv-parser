@@ -2,12 +2,13 @@
     "name": "csv-parser",
     "version": "1.0.0",
     "description": "Multi-treaded csv parser using web workers.",
-    "browser": "lib/csv.js",
-    "types": "lib/csv.d.ts",
+    "browser": "lib/bundled/csv.js",
+    "types": "lib/loose/csv.d.ts",
     "scripts": {
-        "build": "webpack build --mode=production",
-        "test-webpack-js": "cd test/webpack-js && webpack build",
-        "test-webpack-ts": "cd test/webpack-ts && webpack build",
+        "build": "tsc -b",
+        "postbuild": "webpack build",
+        "test-webpack-js": "cd test/webpack-js && webpack serve",
+        "test-webpack-ts": "cd test/webpack-ts && webpack serve",
         "test-express": "cd test/express && node server.js"
     },
     "repository": {

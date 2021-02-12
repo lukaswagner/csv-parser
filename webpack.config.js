@@ -4,20 +4,14 @@ const path = require('path');
 
 module.exports = function () {
     return {
-        entry: './src/csv.ts',
+        entry: './lib/loose/csv.js',
+        mode: 'production',
+        devtool: 'source-map',
         output: {
-            path: path.resolve(__dirname, 'lib'),
+            path: path.resolve(__dirname, 'lib/bundled'),
             filename: 'csv.js',
             library: 'csv',
-            libraryTarget: 'umd'
-        },
-        optimization: {
-            minimize: false
-        },
-        module: {
-            rules: [
-                { test: /\.ts$/, use: { loader: 'ts-loader' } },
-            ],
+            libraryTarget: 'umd',
         },
     };
 }

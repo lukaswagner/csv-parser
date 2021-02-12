@@ -1,4 +1,4 @@
-const subWorker = new Worker(new URL("../sub/sub.worker.ts", import.meta.url));
+const subWorker = new Worker(new URL("../sub/sub.worker", import.meta.url));
 
 const mainWorker: Worker = self as any;
 

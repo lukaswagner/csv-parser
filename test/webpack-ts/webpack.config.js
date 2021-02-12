@@ -11,9 +11,6 @@ module.exports = function () {
                 { test: /\.pug$/, use: { loader: 'pug-loader' } },
             ],
         },
-        optimization: {
-            minimize: false
-        },
         plugins: [
             new HtmlWebpackPlugin({
                 filename: 'index.html',
