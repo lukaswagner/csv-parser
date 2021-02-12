@@ -1,5 +1,4 @@
-import Worker from './worker/main/worker.ts';
-const worker = new Worker();
+const worker = new Worker(new URL("./worker/main/main.worker.ts", import.meta.url));
 
 export function test(text: string): void {
     console.log('lib:', text);

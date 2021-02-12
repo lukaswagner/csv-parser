@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/",
+        "outDir": "./lib/",
         "noImplicitAny": true,
-        "module": "commonjs",
+        "module": "ES2020",
         "target": "ES2020",
         "lib": [
             "WebWorker",
@@ -11,9 +11,9 @@
         "declaration": true
     },
     "files": [
-        "src/index.ts",
+        "src/csv.ts",
         "src/typings/worker.d.ts",
-        "src/worker/main/worker.ts",
-        "src/worker/sub/worker.ts",
+        "src/worker/main/main.worker.ts",
+        "src/worker/sub/sub.worker.ts",
     ],
 }
