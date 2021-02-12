@@ -4,14 +4,16 @@
         "noImplicitAny": true,
         "module": "commonjs",
         "target": "ES2020",
-        "esModuleInterop": true,
-        "declaration": true,
         "lib": [
             "WebWorker",
             "ES2020"
         ],
+        "declaration": true
     },
-    "include": [
-        "src/*.ts"
-    ]
+    "files": [
+        "src/index.ts",
+        "src/typings/worker.d.ts",
+        "src/worker/main/worker.ts",
+        "src/worker/sub/worker.ts",
+    ],
 }
