@@ -12,8 +12,7 @@
     },
     "files": [
         "src/csv.ts",
-        "src/worker/main/main.worker.ts",
-        "src/worker/sub/sub.worker.ts",
-        "src/typings/worker.d.ts",
+        "src/worker/main/worker.ts",
+        "src/worker/sub/worker.ts",
     ],
 }
