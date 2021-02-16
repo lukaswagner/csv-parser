@@ -9,6 +9,7 @@ module.exports = function () {
         module: {
             rules: [
                 { test: /\.pug$/, use: { loader: 'pug-loader' } },
+                { test: /\.ts$/, use: { loader: 'ts-loader' } },
             ],
         },
         plugins: [

@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "outDir": "./lib/loose/",
+        "declaration": true,
+        "outDir": "./lib/types",
         "noImplicitAny": true,
         "module": "ES2020",
         "target": "ES2020",
@@ -8,7 +9,6 @@
             "WebWorker",
             "ES2020"
         ],
-        "declaration": true
     },
     "files": [
         "src/csv.ts",

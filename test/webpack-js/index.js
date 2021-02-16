@@ -1,2 +1,2 @@
-const csv = require('../../lib/loose/csv');
+const csv = require('../..');
 csv.test("js -> lib");

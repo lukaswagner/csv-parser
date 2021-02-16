@@ -1,4 +1,5 @@
-const subWorker = new Worker(new URL("../sub/worker", import.meta.url));
+// @ts-ignore
+const subWorker = new Worker(SUB_WORKER_SOURCE);
 
 const mainWorker: Worker = self as any;
 
