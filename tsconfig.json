@@ -15,4 +15,7 @@
         "src/worker/main/worker.ts",
         "src/worker/sub/worker.ts",
     ],
+    "include": [
+        "src/**/*.ts"
+    ]
 }
