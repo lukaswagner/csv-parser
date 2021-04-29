@@ -1,16 +1,19 @@
 import { BaseChunk } from "./baseChunk";
-import { DataType } from "../dataType";
+import { DataType } from "../interface/dataType";
 
 export class StringChunk extends BaseChunk<string> {
-    public constructor(length: number) {
-        super(DataType.String, length);
-        this._data = new SharedArrayBuffer(0);
+    protected _data: Array<string>;
+
+    public constructor(length: number, offset: number) {
+        super(DataType.String, length, offset);
+        this._data = new Array<string>(length);
     }
 
     public get(index: number): string {
-        return 'Not implemented';
+        return this._data[index];
     }
 
     public set(index: number, value: string): void {
+        this._data[index] = value;
     }
 }

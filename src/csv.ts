@@ -1,6 +1,6 @@
 import { Column } from "./types/column/column";
 import { CsvLoaderOptions } from "./types/options";
-import { UpdateCallback } from "./types/callbacks";
+import { TypeDeduction, TypeDeductionCallback, UpdateCallback } from "./types/callbacks";
 import { Loader } from "./loader";
 
 // @ts-ignore
@@ -15,19 +15,21 @@ export function test(text: string): void {
 export function loadFile(
     file: File,
     options: CsvLoaderOptions,
-    update: UpdateCallback
+    update: UpdateCallback,
+    types: TypeDeductionCallback = TypeDeduction.KeepAll
 ): Promise<Column[]> {
     const optionsClone = Object.apply({}, options);
     optionsClone.size ??= file.size;
     optionsClone.delimiter ??= deductDelimiter(file.name.split('.').pop());
 
-    return loadStream(file.stream(), optionsClone, update);
+    return loadStream(file.stream(), optionsClone, update, types);
 };
 
 export function loadUrl(
     url: string,
     options: CsvLoaderOptions,
-    update: UpdateCallback
+    update: UpdateCallback,
+    types: TypeDeductionCallback = TypeDeduction.KeepAll
 ): Promise<Column[]> {
     const cb = (response: Response): Promise<Column[]> => {
         const optionsClone = Object.apply({}, options);
@@ -37,7 +39,7 @@ export function loadUrl(
         }
         optionsClone.delimiter ??= deductDelimiter(url.split('.').pop());
 
-        return loadStream(response.body, optionsClone, update);
+        return loadStream(response.body, optionsClone, update, types);
     }
     return fetch(url).then(cb);
 };
@@ -45,9 +47,10 @@ export function loadUrl(
 export function loadStream(
     stream: ReadableStream,
     options: CsvLoaderOptions,
-    update: UpdateCallback
+    update: UpdateCallback,
+    types: TypeDeductionCallback = TypeDeduction.KeepAll
 ): Promise<Column[]> {
-    const loader = new Loader(stream, options, update);
+    const loader = new Loader(stream, options, update, types);
     return new Promise<Column[]>((resolve, reject) => {
         loader.resolve = resolve;
         loader.reject = reject;

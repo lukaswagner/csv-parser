@@ -1,6 +1,7 @@
 import {
     RejectCallback,
     ResolveCallback,
+    TypeDeductionCallback,
     UpdateCallback
 } from "./types/callbacks";
 
@@ -10,7 +11,7 @@ import {
 } from "./types/column/column";
 
 import { CsvLoaderOptions } from "./types/options";
-import { DataType } from "./types/dataType";
+import { DataType } from "./types/interface/dataType";
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -18,6 +19,7 @@ export class Loader {
     protected _stream: ReadableStream;
     protected _options: CsvLoaderOptions;
     protected _update?: UpdateCallback;
+    protected _types: TypeDeductionCallback;
     protected _resolve: ResolveCallback;
     protected _reject: RejectCallback;
 
@@ -28,11 +30,13 @@ export class Loader {
     public constructor(
         stream: ReadableStream,
         options: CsvLoaderOptions,
-        updateCb?: UpdateCallback
+        updateCb: UpdateCallback,
+        typesCb: TypeDeductionCallback
     ) {
         this._stream = stream;
         this._options = options;
         this._update = updateCb;
+        this._types = typesCb;
     }
 
     public set resolve(resolve: ResolveCallback) {
@@ -57,7 +61,9 @@ export class Loader {
         this._reader.read().then(this.readChunk.bind(this));
     }
 
-    protected readChunk(result: ReadableStreamReadResult<Uint8Array>): void {
+    protected readChunk(
+        result: ReadableStreamDefaultReadResult<Uint8Array>
+    ): void {
         if (this._columns === undefined) {
             if (result.value !== undefined) {
                 this.setupColumns(result.value.buffer);
@@ -75,6 +81,11 @@ export class Loader {
     }
 
     protected setupColumns(chunk: ArrayBuffer): void {
-        this._columns = [buildColumn('none', DataType.Number)];
+        const detectedTypes = [DataType.Number];
+        const types = this._types(detectedTypes)
+        this._columns = [
+            ...types.columns.map((t) => buildColumn('none', t)),
+            ...types.generatedColumns.map((t) => buildColumn('none', t.type))
+        ];
     }
 }

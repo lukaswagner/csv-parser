@@ -1,10 +1,11 @@
-import { BaseChunk } from "../chunk/baseChunk";
-import { DataType } from "../dataType";
+import { BaseChunk as BC } from "../chunk/baseChunk";
+import { DataType } from "../interface/dataType";
+import { Column } from "../interface/columm";
 
-export abstract class BaseColumn<T> {
+export abstract class BaseColumn<T, C extends BC<T>> implements Column<T, C>{
     protected _name: string;
-    protected _chunks: BaseChunk<T>[] = [];
     protected _type: DataType;
+    protected _chunks: C[] = [];
     protected _length = 0;
     protected _altered: boolean;
 
@@ -13,7 +14,7 @@ export abstract class BaseColumn<T> {
         this._type = type;
     }
 
-    public push(chunk: BaseChunk<T>): void {
+    public push(chunk: C): void {
         this._chunks.push(chunk);
         this._length += chunk.length;
         this._altered = true;
@@ -33,24 +34,37 @@ export abstract class BaseColumn<T> {
         return this._type;
     }
 
-    public get chunkCount(): number {
-        return this._chunks.length;
-    }
-
     public get length(): number {
         return this._length;
     }
 
-    public get chunks(): BaseChunk<T>[] {
+    public get(index: number): T {
+        const chunk = this._chunks.find(
+            (c) => c.offset < index && c.offset + c.length >= index);
+        if (!chunk) throw new Error("Invalid index.");
+        return chunk.get(index - chunk.offset);
+    }
+    public set(index: number, value: T): void {
+        const chunk = this._chunks.find(
+            (c) => c.offset < index && c.offset + c.length >= index);
+        if (!chunk) throw new Error("Invalid index.");
+        chunk.set(index - chunk.offset, value);
+    }
+
+    public get chunkCount(): number {
+        return this._chunks.length;
+    }
+
+    public get chunks(): C[] {
         return this._chunks;
     }
 
-    public getChunks(start = 0, end?: number): BaseChunk<T>[] {
-        return this._chunks.slice(start, end);
+    public getChunk(index: number): C {
+        return this._chunks[index];
     }
 
-    public getChunk(index: number): BaseChunk<T> {
-        return this._chunks[index];
+    public getChunks(start = 0, end?: number): C[] {
+        return this._chunks.slice(start, end);
     }
 
     public get altered(): boolean {

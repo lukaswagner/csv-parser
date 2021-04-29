@@ -1,12 +1,12 @@
-import { BaseChunk } from "./baseChunk";
-import { DataType } from "../dataType";
+import { DataType } from "../interface/dataType";
 import { vec4 } from "../tuples";
+import { BufferChunk } from "./bufferChunk";
 
-export class ColorChunk extends BaseChunk<vec4> {
+export class ColorChunk extends BufferChunk<vec4> {
     protected _view: Float32Array;
 
-    public constructor(length: number) {
-        super(DataType.Color, length);
+    public constructor(length: number, offset: number) {
+        super(DataType.Color, length, offset);
         this._data = new SharedArrayBuffer(length * 4 * 4);
         this._view = new Float32Array(this._data);
     }

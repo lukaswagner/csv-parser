@@ -1,5 +1,5 @@
 import { Chunk } from "../../types/chunk/chunk"
-import { DataType } from "../../types/dataType"
+import { DataType } from "../../types/interface/dataType"
 import { SubWorkerOptions } from "./options"
 
 export enum MessageType {

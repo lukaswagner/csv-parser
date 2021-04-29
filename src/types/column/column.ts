@@ -1,15 +1,42 @@
+import {
+    AnyNumberColumn,
+    Float32Column,
+    Float64Column,
+    Int16Column,
+    Int32Column,
+    Int8Column,
+    NumberColumn,
+    Uint16Column,
+    Uint32Column,
+    Uint8Column
+} from "./numberColumn";
 import { Chunk } from "../chunk/chunk";
-import { DataType } from "../dataType";
+import { DataType } from "../interface/dataType";
 import { ColorColumn } from "./colorColumn";
-import { NumberColumn } from "./numberColumn";
 import { StringColumn } from "./stringColumn";
 
 export type Column = NumberColumn | ColorColumn | StringColumn;
+export type AnyColumn = AnyNumberColumn & ColorColumn & StringColumn;
 
 export function buildColumn(name: string, type: DataType): Column {
     switch (type) {
         case DataType.Number:
-            return new NumberColumn(name);
+        case DataType.Float32:
+            return new Float32Column(name);
+        case DataType.Int8:
+            return new Int8Column(name);
+        case DataType.Uint8:
+            return new Uint8Column(name);
+        case DataType.Int16:
+            return new Int16Column(name);
+        case DataType.Uint16:
+            return new Uint16Column(name);
+        case DataType.Int32:
+            return new Int32Column(name);
+        case DataType.Uint32:
+            return new Uint32Column(name);
+        case DataType.Float64:
+            return new Float64Column(name);
         case DataType.Color:
             return new ColorColumn(name);
         case DataType.String:
