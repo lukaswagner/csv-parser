@@ -6,9 +6,11 @@
     "types": "lib/types/csv.d.ts",
     "scripts": {
         "build": "webpack build",
+        "watch": "webpack build -w",
         "test-webpack-js": "cd test/webpack-js && webpack serve",
         "test-webpack-ts": "cd test/webpack-ts && webpack serve",
-        "test-express": "cd test/express && node server.js"
+        "test-express": "cd test/express && node server.js",
+        "dev-watch": "concurrently npm:watch npm:test-webpack-ts"
     },
     "repository": {
         "type": "git",
@@ -26,6 +28,7 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^4.23.0",
         "@typescript-eslint/parser": "^4.23.0",
+        "concurrently": "^6.1.0",
         "eslint": "^7.26.0",
         "express": "^4.17.1",
         "html-webpack-plugin": "^5.0.0",
