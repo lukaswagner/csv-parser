@@ -14,6 +14,9 @@ module.exports = function () {
         },
         mode: 'production',
         devtool: 'source-map',
+        resolve: {
+            extensions: ['.ts']
+        },
         output: {
             filename: '[name].js',
             library: 'csv',
