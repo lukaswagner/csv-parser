@@ -3,15 +3,15 @@ import {
     ResolveCallback,
     TypeDeductionCallback,
     UpdateCallback
-} from "./types/callbacks";
+} from './types/callbacks';
 
 import {
     buildColumn,
     Column
-} from "./types/column/column";
+} from './types/column/column';
 
-import { CsvLoaderOptions } from "./types/options";
-import { DataType } from "./types/interface/dataType";
+import { CsvLoaderOptions } from './types/options';
+import { DataType } from './types/interface/dataType';
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -24,6 +24,7 @@ export class Loader {
     protected _reject: RejectCallback;
 
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
+    protected _readChunks: Uint8Array[];
     protected _chunks: ArrayBuffer[];
     protected _columns: Column[];
 
@@ -64,18 +65,24 @@ export class Loader {
     protected readChunk(
         result: ReadableStreamDefaultReadResult<Uint8Array>
     ): void {
-        if (this._columns === undefined) {
-            if (result.value !== undefined) {
-                this.setupColumns(result.value.buffer);
-                this._resolve(this._columns);
-            } else {
-                this._reject('No data');
-            }
-        }
-
         if (result.done) {
+            console.log('stream ended');
             return;
         }
+
+        if (!result.value) {
+            console.log('received no data');
+            this._reject('No data');
+            return;
+        }
+
+        const v = result.value;
+        if (this._columns === undefined) {
+            this.setupColumns(v.buffer);
+            this._resolve(this._columns);
+        }
+
+        console.log(`received ${v.length} bytes`);
 
         this._reader.read().then(this.readChunk.bind(this));
     }
