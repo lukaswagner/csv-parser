@@ -12,6 +12,9 @@ module.exports = function () {
                 { test: /\.ts$/, use: { loader: 'ts-loader' } },
             ],
         },
+        resolve: {
+            extensions: ['.ts', '.js', '.json'],
+        },
         plugins: [
             new HtmlWebpackPlugin({
                 filename: 'index.html',

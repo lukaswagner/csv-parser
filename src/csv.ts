@@ -38,10 +38,10 @@ export function loadUrl(
     types: TypeDeductionCallback = TypeDeduction.KeepAll
 ): Promise<Column[]> {
     const cb = (response: Response): Promise<Column[]> => {
-        const optionsClone = Object.apply({}, options);
+        const optionsClone = Object.assign({}, options);
         const size = 'Content-Length';
         if (response.headers.has(size)) {
-            optionsClone.size ??= response.headers.get(size);
+            optionsClone.size ??= Number.parseInt(response.headers.get(size));
         }
         optionsClone.delimiter ??= deductDelimiter(url.split('.').pop());
 
@@ -75,9 +75,6 @@ function deductDelimiter(format: string): string {
     }
 }
 
-export default {
-    test,
-    loadFile,
-    loadUrl,
-    loadStream
-};
+// re-export interface
+export * from './types/options';
+export * from './types/callbacks';
