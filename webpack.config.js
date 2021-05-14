@@ -27,7 +27,7 @@ module.exports = function () {
     };
 
     const standalone = {
-        name: "standalone",
+        name: 'standalone',
         output: {
             path: path.resolve(__dirname, 'lib/standalone'),
         },
@@ -40,7 +40,7 @@ module.exports = function () {
     };
 
     const webpack = {
-        name: "webpack",
+        name: 'webpack',
         output: {
             path: path.resolve(__dirname, 'lib/webpack'),
         },
@@ -56,4 +56,4 @@ module.exports = function () {
         merge(shared, standalone),
         merge(shared, webpack)
     ];
-}
+};

@@ -1,2 +1,2 @@
 const csv = require('../..');
-csv.test("js -> lib");
+csv.test('js -> lib');

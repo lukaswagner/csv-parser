@@ -1,14 +1,20 @@
-import { Column } from "./types/column/column";
-import { CsvLoaderOptions } from "./types/options";
-import { TypeDeduction, TypeDeductionCallback, UpdateCallback } from "./types/callbacks";
-import { Loader } from "./loader";
+import {
+    TypeDeduction,
+    TypeDeductionCallback,
+    UpdateCallback
+} from './types/callbacks';
+import { Column } from './types/column/column';
+import { CsvLoaderOptions } from './types/options';
+import { Loader } from './loader';
+import { MessageData } from './worker/main/interface';
 
-// @ts-ignore
+// @ts-expect-error The path to the worker source is only during build.
 const worker = new Worker(MAIN_WORKER_SOURCE);
 
 export function test(text: string): void {
     console.log('lib:', text);
-    worker.onmessage = (e: MessageEvent<any>) => console.log('lib:', e.data);
+    worker.onmessage =
+        (e: MessageEvent<MessageData>) => console.log('lib:', e.data);
     worker.postMessage('lib -> main');
 }
 
@@ -23,7 +29,7 @@ export function loadFile(
     optionsClone.delimiter ??= deductDelimiter(file.name.split('.').pop());
 
     return loadStream(file.stream(), optionsClone, update, types);
-};
+}
 
 export function loadUrl(
     url: string,
@@ -40,9 +46,9 @@ export function loadUrl(
         optionsClone.delimiter ??= deductDelimiter(url.split('.').pop());
 
         return loadStream(response.body, optionsClone, update, types);
-    }
+    };
     return fetch(url).then(cb);
-};
+}
 
 export function loadStream(
     stream: ReadableStream,
@@ -56,7 +62,7 @@ export function loadStream(
         loader.reject = reject;
         loader.load();
     });
-};
+}
 
 function deductDelimiter(format: string): string {
     switch (format?.toLowerCase()) {
@@ -74,4 +80,4 @@ export default {
     loadFile,
     loadUrl,
     loadStream
-}
+};

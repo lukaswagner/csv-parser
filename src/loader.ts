@@ -1,14 +1,14 @@
 import {
+    Column,
+    buildColumn
+} from './types/column/column';
+
+import {
     RejectCallback,
     ResolveCallback,
     TypeDeductionCallback,
     UpdateCallback
 } from './types/callbacks';
-
-import {
-    buildColumn,
-    Column
-} from './types/column/column';
 
 import { CsvLoaderOptions } from './types/options';
 import { DataType } from './types/interface/dataType';
@@ -38,23 +38,6 @@ export class Loader {
         this._options = options;
         this._update = updateCb;
         this._types = typesCb;
-    }
-
-    public set resolve(resolve: ResolveCallback) {
-        this._resolve = resolve;
-    }
-
-    public set reject(resolve: RejectCallback) {
-        this._reject = resolve;
-    }
-
-    public load(): void {
-        if (this._options.delimiter === undefined) {
-            this._reject(
-                'Delimiter not specified nor deductible from filename.');
-        }
-
-        this._resolve([buildColumn('none', DataType.Number)]);
     }
 
     protected read(): void {
@@ -89,10 +72,27 @@ export class Loader {
 
     protected setupColumns(chunk: ArrayBuffer): void {
         const detectedTypes = [DataType.Number];
-        const types = this._types(detectedTypes)
+        const types = this._types(detectedTypes);
         this._columns = [
             ...types.columns.map((t) => buildColumn('none', t)),
             ...types.generatedColumns.map((t) => buildColumn('none', t.type))
         ];
+    }
+
+    public set resolve(resolve: ResolveCallback) {
+        this._resolve = resolve;
+    }
+
+    public set reject(resolve: RejectCallback) {
+        this._reject = resolve;
+    }
+
+    public load(): void {
+        if (this._options.delimiter === undefined) {
+            this._reject(
+                'Delimiter not specified nor deductible from filename.');
+        }
+
+        this._resolve([buildColumn('none', DataType.Number)]);
     }
 }

@@ -1,0 +1,120 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module",
+        "project": [
+            "./tsconfig.eslint.json"
+        ]
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "default-case": "warn",
+        "default-case-last": "warn",
+        "indent": [
+            "error",
+            4
+        ],
+        "linebreak-style": "off",
+        "quotes": [
+            "warn",
+            "single"
+        ],
+        "semi": [
+            "warn",
+            "always"
+        ],
+        "max-len": [
+            "warn",
+            {
+                "code": 80
+            }
+        ],
+        "no-irregular-whitespace": "warn",
+        "no-multiple-empty-lines": "warn",
+        "one-var": [
+            "warn",
+            "never"
+        ],
+        "prefer-const": "warn",
+        "sort-imports": "warn"
+    },
+    "overrides": [
+        {
+            "files": [
+                "*.ts"
+            ],
+            "extends": [
+                "eslint:recommended",
+                "plugin:@typescript-eslint/recommended"
+            ],
+            "rules": {
+                "@typescript-eslint/ban-ts-comment": [
+                    "error",
+                    {
+                        "ts-expect-error": "allow-with-description"
+                    }
+                ],
+                "brace-style": "off",
+                "@typescript-eslint/brace-style": "warn",
+                "@typescript-eslint/explicit-function-return-type": [
+                    "warn",
+                    {
+                        "allowExpressions": true
+                    }
+                ],
+                "@typescript-eslint/explicit-member-accessibility": "warn",
+                "indent": "off",
+                "@typescript-eslint/indent": [
+                    "warn",
+                    4
+                ],
+                "@typescript-eslint/member-ordering": [
+                    "warn",
+                    {
+                        "default": [
+                            "private-static-field",
+                            "protected-static-field",
+                            "public-static-field",
+                            "private-instance-field",
+                            "protected-instance-field",
+                            "public-instance-field",
+                            "private-static-method",
+                            "protected-static-method",
+                            "public-static-method",
+                            "public-constructor",
+                            "protected-constructor",
+                            "private-constructor",
+                            "private-instance-method",
+                            "protected-instance-method",
+                            "public-instance-method"
+                        ]
+                    }
+                ],
+                "@typescript-eslint/no-var-requires": "off",
+                "no-unused-vars": "off",
+                "@typescript-eslint/no-unused-vars": "warn",
+                "@typescript-eslint/no-empty-function": "off",
+                "@typescript-eslint/no-explicit-any": "warn",
+                "@typescript-eslint/prefer-for-of": "warn",
+                "@typescript-eslint/prefer-nullish-coalescing": "warn",
+                "@typescript-eslint/prefer-optional-chain": "warn",
+                "@typescript-eslint/prefer-readonly": "warn",
+                "@typescript-eslint/prefer-ts-expect-error": "warn",
+                "@typescript-eslint/switch-exhaustiveness-check": "warn",
+                "@typescript-eslint/type-annotation-spacing": "warn",
+                "@typescript-eslint/unbound-method": "warn"
+            }
+        }
+    ]
+}

@@ -8,9 +8,9 @@ import {
     Uint16Chunk,
     Uint32Chunk,
     Uint8Chunk
-} from "../chunk/numberChunk";
-import { DataType } from "../interface/dataType";
-import { BaseColumn } from "./baseColumn";
+} from '../chunk/numberChunk';
+import { BaseColumn } from './baseColumn';
+import { DataType } from '../interface/dataType';
 
 class BaseNumberColumn<C extends NumberChunk> extends BaseColumn<number, C> {
     protected _min: number;
@@ -43,14 +43,14 @@ class BaseNumberColumn<C extends NumberChunk> extends BaseColumn<number, C> {
     }
 }
 
-export class Int8Column extends BaseNumberColumn<Int8Chunk> { };
-export class Uint8Column extends BaseNumberColumn<Uint8Chunk> { };
-export class Int16Column extends BaseNumberColumn<Int16Chunk> { };
-export class Uint16Column extends BaseNumberColumn<Uint16Chunk> { };
-export class Int32Column extends BaseNumberColumn<Int32Chunk> { };
-export class Uint32Column extends BaseNumberColumn<Uint32Chunk> { };
-export class Float32Column extends BaseNumberColumn<Float32Chunk> { };
-export class Float64Column extends BaseNumberColumn<Float64Chunk> { };
+export class Int8Column extends BaseNumberColumn<Int8Chunk> { }
+export class Uint8Column extends BaseNumberColumn<Uint8Chunk> { }
+export class Int16Column extends BaseNumberColumn<Int16Chunk> { }
+export class Uint16Column extends BaseNumberColumn<Uint16Chunk> { }
+export class Int32Column extends BaseNumberColumn<Int32Chunk> { }
+export class Uint32Column extends BaseNumberColumn<Uint32Chunk> { }
+export class Float32Column extends BaseNumberColumn<Float32Chunk> { }
+export class Float64Column extends BaseNumberColumn<Float64Chunk> { }
 
 export type NumberColumn =
     Int8Column | Uint8Column | Int16Column | Uint16Column |

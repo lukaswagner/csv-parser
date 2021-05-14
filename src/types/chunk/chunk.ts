@@ -10,10 +10,10 @@ import {
     Uint16Chunk,
     Uint32Chunk,
     Uint8Chunk
-} from "./numberChunk";
-import { ColorChunk } from "./colorChunk";
-import { DataType } from "../interface/dataType";
-import { StringChunk } from "./stringChunk";
+} from './numberChunk';
+import { ColorChunk } from './colorChunk';
+import { DataType } from '../interface/dataType';
+import { StringChunk } from './stringChunk';
 
 export type Chunk = NumberChunk | ColorChunk | StringChunk;
 export type AnyChunk = AnyNumberChunk & ColorChunk & StringChunk;

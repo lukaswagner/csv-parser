@@ -1,6 +1,5 @@
-import { BaseChunk } from "./baseChunk";
-import { DataType } from "../interface/dataType";
-import { BufferChunk } from "./bufferChunk";
+import { BufferChunk } from './bufferChunk';
+import { DataType } from '../interface/dataType';
 
 interface NumArray {
     readonly length: number;

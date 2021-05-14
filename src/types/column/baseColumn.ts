@@ -1,6 +1,6 @@
-import { BaseChunk as BC } from "../chunk/baseChunk";
-import { DataType } from "../interface/dataType";
-import { Column } from "../interface/columm";
+import { BaseChunk as BC } from '../chunk/baseChunk';
+import { Column } from '../interface/columm';
+import { DataType } from '../interface/dataType';
 
 export abstract class BaseColumn<T, C extends BC<T>> implements Column<T, C>{
     protected _name: string;
@@ -41,13 +41,13 @@ export abstract class BaseColumn<T, C extends BC<T>> implements Column<T, C>{
     public get(index: number): T {
         const chunk = this._chunks.find(
             (c) => c.offset < index && c.offset + c.length >= index);
-        if (!chunk) throw new Error("Invalid index.");
+        if (!chunk) throw new Error('Invalid index.');
         return chunk.get(index - chunk.offset);
     }
     public set(index: number, value: T): void {
         const chunk = this._chunks.find(
             (c) => c.offset < index && c.offset + c.length >= index);
-        if (!chunk) throw new Error("Invalid index.");
+        if (!chunk) throw new Error('Invalid index.');
         chunk.set(index - chunk.offset, value);
     }
 

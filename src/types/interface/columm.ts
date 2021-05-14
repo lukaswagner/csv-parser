@@ -1,5 +1,5 @@
-import { Chunk } from "./chunk";
-import { DataType } from "./dataType";
+import { Chunk } from './chunk';
+import { DataType } from './dataType';
 
 export interface Column<T, C extends Chunk<T>> {
     readonly type: DataType;

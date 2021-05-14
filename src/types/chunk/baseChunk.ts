@@ -1,5 +1,5 @@
-import { Chunk } from "../interface/chunk";
-import { DataType } from "../interface/dataType";
+import { Chunk } from '../interface/chunk';
+import { DataType } from '../interface/dataType';
 
 export abstract class BaseChunk<T> implements Chunk<T> {
     protected _type: DataType;

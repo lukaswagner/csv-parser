@@ -1,2 +1,2 @@
 import csv from '../..';
-csv.test("js -> lib");
+csv.test('js -> lib');

@@ -9,11 +9,11 @@ import {
     Uint16Column,
     Uint32Column,
     Uint8Column
-} from "./numberColumn";
-import { Chunk } from "../chunk/chunk";
-import { DataType } from "../interface/dataType";
-import { ColorColumn } from "./colorColumn";
-import { StringColumn } from "./stringColumn";
+} from './numberColumn';
+import { Chunk } from '../chunk/chunk';
+import { ColorColumn } from './colorColumn';
+import { DataType } from '../interface/dataType';
+import { StringColumn } from './stringColumn';
 
 export type Column = NumberColumn | ColorColumn | StringColumn;
 export type AnyColumn = AnyNumberColumn & ColorColumn & StringColumn;

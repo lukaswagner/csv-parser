@@ -1,6 +1,6 @@
-import { DataType } from "../interface/dataType";
-import { vec4 } from "../tuples";
-import { BufferChunk } from "./bufferChunk";
+import { BufferChunk } from './bufferChunk';
+import { DataType } from '../interface/dataType';
+import { vec4 } from '../tuples';
 
 export class ColorChunk extends BufferChunk<vec4> {
     protected _view: Float32Array;

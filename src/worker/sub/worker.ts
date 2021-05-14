@@ -1,8 +1,10 @@
-const subWorker: Worker = self as any;
+import { MessageData } from './interface';
 
-subWorker.onmessage = (e: MessageEvent<any>) => {
+const subWorker: Worker = self as unknown as Worker;
+
+subWorker.onmessage = (e: MessageEvent<MessageData>) => {
     console.log('sub:', e.data);
     postMessage('sub -> main');
 };
 
-export default subWorker as any;
+export default subWorker;

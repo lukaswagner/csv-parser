@@ -1,5 +1,5 @@
 export class CsvLoaderOptions {
     public delimiter?: string;
-    public includesHeader: boolean = true;
+    public includesHeader = true;
     public size?: number;
 }

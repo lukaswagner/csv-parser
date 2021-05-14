@@ -1,5 +1,5 @@
-import { BaseChunk } from "./baseChunk";
-import { DataType } from "../interface/dataType";
+import { BaseChunk } from './baseChunk';
+import { DataType } from '../interface/dataType';
 
 export class StringChunk extends BaseChunk<string> {
     protected _data: Array<string>;

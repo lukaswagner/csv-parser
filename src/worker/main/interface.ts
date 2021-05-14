@@ -1,6 +1,6 @@
-import { Column } from "../../types/column/column"
-import { DataType } from "../../types/interface/dataType"
-import { MainLoaderOptions } from "./options"
+import { Column } from '../../types/column/column';
+import { DataType } from '../../types/interface/dataType';
+import { MainLoaderOptions } from './options';
 
 export enum MessageType {
     Setup,
