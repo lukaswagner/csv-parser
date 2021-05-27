@@ -6,6 +6,7 @@ export type ResolveCallback = (data: Column[]) => void;
 export type RejectCallback = (reason?: string) => void;
 
 export type ColumnGenerator = {
+    name: string,
     type: DataType,
     func: (orig: string[], parsed: unknown[]) => unknown
 }

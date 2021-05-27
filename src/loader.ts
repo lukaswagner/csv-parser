@@ -10,8 +10,14 @@ import {
     UpdateCallback
 } from './types/callbacks';
 
+import {
+    inferType,
+    lowestType
+} from './helper/inferType';
+
 import { CsvLoaderOptions } from './types/options';
-import { DataType } from './types/interface/dataType';
+import { parse } from './helper/parse';
+import { splitLine } from './helper/splitLine';
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -70,12 +76,28 @@ export class Loader {
         this._reader.read().then(this.readChunk.bind(this));
     }
 
-    protected setupColumns(chunk: ArrayBuffer): void {
-        const detectedTypes = [DataType.Number];
+    protected setupColumns(chunk: ArrayBufferLike): void {
+        const lines = parse(
+            [chunk],
+            { chunk: 0, char: 0 },
+            { chunk: 0, char: chunk.byteLength });
+
+        const split = lines.map((l) => splitLine(l, this._options.delimiter));
+
+        const inferStart = +this._options.includesHeader;
+        const inferLines = split.slice(
+            inferStart,
+            Math.max(inferStart + this._options.typeInferLines, split.length));
+
+        const detectedTypes = inferLines
+            .map((l) => l.map((c) => inferType(c)))
+            .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
+
         const types = this._types(detectedTypes);
         this._columns = [
-            ...types.columns.map((t) => buildColumn('none', t)),
-            ...types.generatedColumns.map((t) => buildColumn('none', t.type))
+            ...types.columns.map((t, i) => buildColumn(
+                this._options.includesHeader ? split[0][i] : `Column ${i}`, t)),
+            ...types.generatedColumns.map((t) => buildColumn(t.name, t.type))
         ];
     }
 
@@ -93,6 +115,7 @@ export class Loader {
                 'Delimiter not specified nor deductible from filename.');
         }
 
-        this._resolve([buildColumn('none', DataType.Number)]);
+        this.read();
+        // this._resolve([buildColumn('none', DataType.Number)]);
     }
 }
