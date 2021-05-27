@@ -11,3 +11,14 @@ export enum DataType {
     Color,
     String,
 }
+
+export type ColumnGenerator = {
+    name: string,
+    type: DataType,
+    func: (orig: string[], parsed: unknown[]) => unknown
+}
+
+export type ColumnTypes = {
+    columns: DataType[],
+    generatedColumns: ColumnGenerator[]
+}

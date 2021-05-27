@@ -6,17 +6,6 @@ import {
 import { Column } from './types/column/column';
 import { CsvLoaderOptions } from './types/options';
 import { Loader } from './loader';
-import { MessageData } from './worker/main/interface';
-
-// @ts-expect-error The path to the worker source is only during build.
-const worker = new Worker(MAIN_WORKER_SOURCE);
-
-export function test(text: string): void {
-    console.log('lib:', text);
-    worker.onmessage =
-        (e: MessageEvent<MessageData>) => console.log('lib:', e.data);
-    worker.postMessage('lib -> main');
-}
 
 export function loadFile(
     file: File,

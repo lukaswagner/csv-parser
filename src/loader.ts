@@ -1,4 +1,13 @@
 import {
+    AddChunkData,
+    FinishedData,
+    MessageData,
+    MessageType,
+    ProcessedData,
+    SetupData
+} from './worker/main/interface';
+
+import {
     Column,
     buildColumn
 } from './types/column/column';
@@ -15,6 +24,7 @@ import {
     lowestType
 } from './helper/inferType';
 
+import { ColumnTypes } from './types/interface/dataType';
 import { CsvLoaderOptions } from './types/options';
 import { parse } from './helper/parse';
 import { splitLine } from './helper/splitLine';
@@ -24,15 +34,15 @@ export class Loader {
 
     protected _stream: ReadableStream;
     protected _options: CsvLoaderOptions;
-    protected _update?: UpdateCallback;
-    protected _types: TypeDeductionCallback;
-    protected _resolve: ResolveCallback;
-    protected _reject: RejectCallback;
+    protected _updateCb?: UpdateCallback;
+    protected _typesCb: TypeDeductionCallback;
+    protected _resolveCb: ResolveCallback;
+    protected _rejectCb: RejectCallback;
 
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
-    protected _readChunks: Uint8Array[];
-    protected _chunks: ArrayBuffer[];
+    protected _types: ColumnTypes;
     protected _columns: Column[];
+    protected _worker: Worker;
 
     public constructor(
         stream: ReadableStream,
@@ -42,8 +52,8 @@ export class Loader {
     ) {
         this._stream = stream;
         this._options = options;
-        this._update = updateCb;
-        this._types = typesCb;
+        this._updateCb = updateCb;
+        this._typesCb = typesCb;
     }
 
     protected read(): void {
@@ -61,15 +71,30 @@ export class Loader {
 
         if (!result.value) {
             console.log('received no data');
-            this._reject('No data');
+            this._rejectCb('No data');
             return;
         }
 
         const v = result.value;
         if (this._columns === undefined) {
             this.setupColumns(v.buffer);
-            this._resolve(this._columns);
+            this._resolveCb(this._columns);
         }
+
+        if (this._worker === undefined) {
+            this.setupWorker();
+        }
+
+        const acd: AddChunkData = {
+            chunk: v.buffer
+        };
+
+        const msg: MessageData = {
+            type: MessageType.AddChunk,
+            data: acd
+        };
+
+        this._worker.postMessage(msg);
 
         console.log(`received ${v.length} bytes`);
 
@@ -93,25 +118,70 @@ export class Loader {
             .map((l) => l.map((c) => inferType(c)))
             .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
 
-        const types = this._types(detectedTypes);
+        this._types = this._typesCb(detectedTypes);
         this._columns = [
-            ...types.columns.map((t, i) => buildColumn(
+            ...this._types.columns.map((t, i) => buildColumn(
                 this._options.includesHeader ? split[0][i] : `Column ${i}`, t)),
-            ...types.generatedColumns.map((t) => buildColumn(t.name, t.type))
+            ...this._types.generatedColumns.map((t) => buildColumn(
+                t.name, t.type))
         ];
     }
 
+    protected setupWorker(): void {
+        // @ts-expect-error The path to the worker source is only during build.
+        this._worker = new Worker(MAIN_WORKER_SOURCE);
+
+        this._worker.onmessage = (e: MessageEvent<MessageData>) => {
+            const msg = e.data;
+            switch (msg.type) {
+                case MessageType.Processed:
+                    this.onProcessed(msg.data as ProcessedData);
+                    break;
+                case MessageType.Finished:
+                    this.onFinished(msg.data as FinishedData);
+                    break;
+                default:
+                    console.log('received invalid msg from main worker:', msg);
+                    break;
+            }
+        };
+
+        const setup: SetupData = {
+            columns: this._types.columns,
+            generatedColumns: this._types.generatedColumns,
+            options: {
+                delimiter: this._options.delimiter,
+                includesHeader: this._options.includesHeader
+            }
+        };
+
+        const msg: MessageData = {
+            type: MessageType.Setup,
+            data: setup
+        };
+
+        this._worker.postMessage(msg);
+    }
+
+    protected onProcessed(data: ProcessedData): void {
+        console.log('main worker sent chunks', data.chunks[0].length);
+    }
+
+    protected onFinished(data: FinishedData): void {
+        console.log('main worker finished');
+    }
+
     public set resolve(resolve: ResolveCallback) {
-        this._resolve = resolve;
+        this._resolveCb = resolve;
     }
 
     public set reject(resolve: RejectCallback) {
-        this._reject = resolve;
+        this._rejectCb = resolve;
     }
 
     public load(): void {
         if (this._options.delimiter === undefined) {
-            this._reject(
+            this._rejectCb(
                 'Delimiter not specified nor deductible from filename.');
         }
 
