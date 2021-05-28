@@ -1,4 +1,5 @@
-export type MainLoaderOptions = {
+export type MainWorkerOptions = {
     delimiter: string,
-    includesHeader: boolean
+    includesHeader: boolean,
+    size?: number
 }

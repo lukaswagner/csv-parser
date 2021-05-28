@@ -3,6 +3,7 @@ import {
     FinishedData,
     MessageData,
     MessageType,
+    NoMoreChunksData,
     ProcessedData,
     SetupData
 } from './worker/main/interface';
@@ -66,6 +67,7 @@ export class Loader {
     ): void {
         if (result.done) {
             console.log('stream ended');
+            this.sendNoMoreChunks();
             return;
         }
 
@@ -96,9 +98,18 @@ export class Loader {
 
         this._worker.postMessage(msg);
 
-        console.log(`received ${v.length} bytes`);
-
         this._reader.read().then(this.readChunk.bind(this));
+    }
+
+    protected sendNoMoreChunks(): void {
+        const data: NoMoreChunksData = {};
+
+        const msg: MessageData = {
+            type: MessageType.NoMoreChunks,
+            data: data
+        };
+
+        this._worker.postMessage(msg);
     }
 
     protected setupColumns(chunk: ArrayBufferLike): void {
@@ -186,6 +197,5 @@ export class Loader {
         }
 
         this.read();
-        // this._resolve([buildColumn('none', DataType.Number)]);
     }
 }

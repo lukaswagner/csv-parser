@@ -1,15 +1,16 @@
+import { ColumnGenerator, DataType } from '../../types/interface/dataType';
 import { Chunk } from '../../types/chunk/chunk';
-import { DataType } from '../../types/interface/dataType';
 import { SubWorkerOptions } from './options';
 
 export enum MessageType {
-    Setup,
+    Start,
     Finished,
 }
 
 export type StartData = {
     chunks: ArrayBuffer[],
-    types: DataType[],
+    columns: DataType[],
+    generatedColumns: ColumnGenerator[],
     options: SubWorkerOptions
 }
 

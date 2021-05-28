@@ -21,5 +21,11 @@ module.exports = function () {
                 template: './index.pug'
             })
         ],
+        devServer: {
+            headers: {
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'require-corp'
+            }
+        }
     };
 };

@@ -1,10 +1,11 @@
 import { ColumnGenerator, DataType } from '../../types/interface/dataType';
 import { Chunk } from '../../types/chunk/chunk';
-import { MainLoaderOptions } from './options';
+import { MainWorkerOptions } from './options';
 
 export enum MessageType {
     Setup,
     AddChunk,
+    NoMoreChunks,
     Processed,
     Finished,
 }
@@ -12,11 +13,14 @@ export enum MessageType {
 export type SetupData = {
     columns: DataType[],
     generatedColumns: ColumnGenerator[],
-    options: MainLoaderOptions
+    options: MainWorkerOptions
 }
 
 export type AddChunkData = {
     chunk: ArrayBufferLike
+}
+
+export type NoMoreChunksData = {
 }
 
 export type ProcessedData = {
@@ -26,7 +30,14 @@ export type ProcessedData = {
 export type FinishedData = {
 }
 
+type AnyData =
+    SetupData |
+    AddChunkData |
+    NoMoreChunksData |
+    ProcessedData |
+    FinishedData;
+
 export type MessageData = {
     type: MessageType,
-    data: SetupData | AddChunkData | ProcessedData | FinishedData;
+    data: AnyData
 }

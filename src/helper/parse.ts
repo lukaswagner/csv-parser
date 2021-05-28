@@ -1,9 +1,5 @@
+import { Position } from './position';
 import { splitLines } from './splitLines';
-
-export type Position = {
-    chunk: number,
-    char: number
-};
 
 export function parse(
     chunks: ArrayBufferLike[], start: Position, end: Position
