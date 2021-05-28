@@ -101,15 +101,24 @@ function onSubWorkerFinished(
     console.log(`worker ${workerId} done`);
     runningWorkers.delete(workerId);
 
-    if (allChunksHandled && runningWorkers.size === 0) {
-        console.log('All workers finished. Stats:',
-            '\nchunks:', totalChunks,
-            '\nbytes:', totalBytes,
-            '\nworkers:', nextWorker,
-            '\nbytes/chunk:', totalBytes / totalChunks,
-            '\nchunks/worker:', totalChunks / nextWorker
-        );
-    }
+    if (allChunksHandled && runningWorkers.size === 0) done();
+}
+
+function done(): void {
+    console.log('All workers finished. Stats:',
+        '\nchunks:', totalChunks,
+        '\nbytes:', totalBytes,
+        '\nworkers:', nextWorker,
+        '\nbytes/chunk:', totalBytes / totalChunks,
+        '\nchunks/worker:', totalChunks / nextWorker
+    );
+
+    const data: MainInterface.FinishedData = {};
+    const msg: MainInterface.MessageData = {
+        type: MainInterface.MessageType.Finished,
+        data
+    };
+    postMessage(msg);
 }
 
 export default mainWorker;
