@@ -19,7 +19,7 @@ export type Chunk = NumberChunk | ColorChunk | StringChunk;
 export type AnyChunk = AnyNumberChunk & ColorChunk & StringChunk;
 
 export function buildChunk(
-    type: DataType, length: number, offset: number = 0
+    type: DataType, length: number, offset = 0
 ): Chunk {
     switch (type) {
         case DataType.Number:

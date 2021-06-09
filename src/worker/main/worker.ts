@@ -139,7 +139,7 @@ function finishChunk(): boolean {
 
     const buf = new Uint8Array(er.byteLength + (sr?.byteLength ?? 0));
     buf.set(new Uint8Array(er));
-    if(sr) buf.set(new Uint8Array(sr));
+    if(sr) buf.set(new Uint8Array(sr), er.byteLength);
 
     handleRemainder(buf, pc, gc);
     pc.forEach((c) => c.offset = chunkLengthSum);
@@ -159,6 +159,8 @@ function finishChunk(): boolean {
         data
     };
     postMessage(msg);
+
+    nextChunkToBeFinished++;
 
     return true;
 }

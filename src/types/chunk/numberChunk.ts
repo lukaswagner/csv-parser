@@ -53,42 +53,42 @@ export class Uint8Chunk extends BaseNumberChunk<Uint8Array> {
 
 export class Int16Chunk extends BaseNumberChunk<Int16Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, 2);
         this._view = new Int16Array(this._data);
     }
 }
 
 export class Uint16Chunk extends BaseNumberChunk<Uint16Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, 2);
         this._view = new Uint16Array(this._data);
     }
 }
 
 export class Int32Chunk extends BaseNumberChunk<Int32Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, 4);
         this._view = new Int32Array(this._data);
     }
 }
 
 export class Uint32Chunk extends BaseNumberChunk<Uint32Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, 4);
         this._view = new Uint32Array(this._data);
     }
 }
 
 export class Float32Chunk extends BaseNumberChunk<Float32Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, 4);
         this._view = new Float32Array(this._data);
     }
 }
 
 export class Float64Chunk extends BaseNumberChunk<Float64Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, 8);
         this._view = new Float64Array(this._data);
     }
 }

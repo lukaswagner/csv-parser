@@ -29,6 +29,7 @@ import { ColumnTypes } from './types/interface/dataType';
 import { CsvLoaderOptions } from './types/options';
 import { parse } from './helper/parseChunks';
 import { splitLine } from './helper/splitLine';
+import { rebuildChunk } from './types/chunk/chunk';
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -175,7 +176,9 @@ export class Loader {
     }
 
     protected onProcessed(data: ProcessedData): void {
-        console.log('main worker sent chunks', data.chunks[0].length);
+        console.log(
+            'main worker sent chunks',
+            rebuildChunk(data.chunks[0]).length);
     }
 
     protected onFinished(data: FinishedData): void {
