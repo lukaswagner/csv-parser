@@ -21,12 +21,13 @@ function onStart(data: Interface.StartData): void {
     const lines = parse(data.chunks, remainders.start, remainders.end)
         .map((l) => splitLine(l, data.options.delimiter));
 
-    const chunks = data.columns.map((c) => buildChunk(c, lines.length));
+    const numChunks = lines.length + 1; // +1 for inter-chunk remainder
+    const chunks = data.columns.map((c) => buildChunk(c, numChunks));
     const values = lines.map((l) => parseLine(l, data.columns));
     values.forEach((v, i) => storeValue(v, i, chunks[i]))
 
     const gen = data.generatedColumns;
-    const generatedChunks = gen.map((c) => buildChunk(c.type, lines.length));
+    const generatedChunks = gen.map((c) => buildChunk(c.type, numChunks));
 
     lines.forEach((l, i) => {
         const genValues = gen.map((g) => g.func(l, values[i]));
