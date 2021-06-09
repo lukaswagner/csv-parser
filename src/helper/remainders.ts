@@ -1,12 +1,12 @@
 import { findLastIndex } from './findLastIndex';
 import { Position } from './position';
 
-type RemainderInfo = {
+export type RemainderInfo = {
     startRemainder: Uint8Array, start: Position,
     endRemainder: Uint8Array, end: Position
 }
 
-function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
+export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
     const lf = 0x0A;
     const cr = 0x0D;
 

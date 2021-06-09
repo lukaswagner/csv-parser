@@ -27,7 +27,7 @@ import {
 
 import { ColumnTypes } from './types/interface/dataType';
 import { CsvLoaderOptions } from './types/options';
-import { parse } from './helper/parse';
+import { parse } from './helper/parseChunks';
 import { splitLine } from './helper/splitLine';
 
 export class Loader {

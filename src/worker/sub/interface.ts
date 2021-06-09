@@ -15,7 +15,8 @@ export type StartData = {
 }
 
 export type FinishedData = {
-    columns: Array<Chunk>,
+    chunks: Array<Chunk>,
+    generatedChunks: Array<Chunk>,
     startRemainder: ArrayBuffer,
     endRemainder: ArrayBuffer
 }
