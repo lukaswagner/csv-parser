@@ -146,6 +146,20 @@ function finishChunk(): boolean {
     gc.forEach((c) => c.offset = chunkLengthSum);
     chunkLengthSum += pc[0].length;
 
+    parsedChunks.delete(nextChunkToBeFinished);
+    generatedChunks.delete(nextChunkToBeFinished);
+    endRemainders.delete(nextChunkToBeFinished);
+    startRemainders.delete(nextChunkToBeFinished + 1);
+
+    const data: MainInterface.ProcessedData = {
+        chunks: [...pc, ...gc]
+    };
+    const msg: MainInterface.MessageData = {
+        type: MainInterface.MessageType.Processed,
+        data
+    };
+    postMessage(msg);
+
     return true;
 }
 
