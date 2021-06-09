@@ -8,7 +8,7 @@ export enum MessageType {
 }
 
 export type StartData = {
-    chunks: ArrayBuffer[],
+    chunks: ArrayBufferLike[],
     columns: DataType[],
     generatedColumns: ColumnGenerator[],
     options: SubWorkerOptions
@@ -17,8 +17,8 @@ export type StartData = {
 export type FinishedData = {
     chunks: Array<Chunk>,
     generatedChunks: Array<Chunk>,
-    startRemainder: ArrayBuffer,
-    endRemainder: ArrayBuffer
+    startRemainder: SharedArrayBuffer,
+    endRemainder: SharedArrayBuffer
 }
 
 export type MessageData = {

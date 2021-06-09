@@ -24,14 +24,17 @@ function onStart(data: Interface.StartData): void {
     const numChunks = lines.length + 1; // +1 for inter-chunk remainder
     const chunks = data.columns.map((c) => buildChunk(c, numChunks));
     const values = lines.map((l) => parseLine(l, data.columns));
-    values.forEach((v, i) => storeValue(v, i, chunks[i]))
+    values.forEach(
+        (line, li) => line.forEach(
+            (value, vi) => storeValue(value, li, chunks[vi])))
 
     const gen = data.generatedColumns;
     const generatedChunks = gen.map((c) => buildChunk(c.type, numChunks));
 
-    lines.forEach((l, i) => {
-        const genValues = gen.map((g) => g.func(l, values[i]));
-        genValues.forEach((v, i) => storeValue(v, i, generatedChunks[i]))
+    lines.forEach((line, li) => {
+        const genValues = gen.map((g) => g.func(line, values[li]));
+        genValues.forEach(
+            (value, vi) => storeValue(value, li, generatedChunks[vi]));
     });
 
     sendFinished(chunks, generatedChunks, remainders);

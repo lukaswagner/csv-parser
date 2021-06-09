@@ -24,6 +24,10 @@ export abstract class BaseChunk<T> implements Chunk<T> {
         return this._offset;
     }
 
+    public set offset(offset: number) {
+        this._offset = offset;
+    }
+
     public abstract get(index: number): T;
     public abstract set(index: number, value: T): void;
 }

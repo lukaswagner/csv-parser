@@ -2,8 +2,8 @@ import { findLastIndex } from './findLastIndex';
 import { Position } from './position';
 
 export type RemainderInfo = {
-    startRemainder: Uint8Array, start: Position,
-    endRemainder: Uint8Array, end: Position
+    startRemainder: SharedArrayBuffer, start: Position,
+    endRemainder: SharedArrayBuffer, end: Position
 }
 
 export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
@@ -13,8 +13,8 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
     const start: Position = { chunk: 0, char: 0 };
     const end: Position = { chunk: 0, char: 0 };
 
-    let startRemainder: Uint8Array;
-    let endRemainder: Uint8Array;
+    let startRemainder: SharedArrayBuffer;
+    let endRemainder: SharedArrayBuffer;
 
     let done = false;
     let remainderLength = 0;
@@ -41,19 +41,19 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
 
         // prepare buffer for start remainder
         const crFix = chunk[lfPos - 1] === cr ? -1 : 0;
-        startRemainder = new Uint8Array(remainderLength + lfPos + crFix);
+        startRemainder = new SharedArrayBuffer(remainderLength + lfPos + crFix);
         break;
     }
 
     let remainderIndex = 0;
-    remainderLength = startRemainder.length;
+    remainderLength = startRemainder.byteLength;
     // fill in start remainder from previous chunks
     for (let i = 0; i <= start.chunk; i++) {
         let chunk = new Uint8Array(chunks[i]);
         if (chunk.length > remainderLength - remainderIndex - 1) {
             chunk = chunk.subarray(0, remainderLength - remainderIndex);
         }
-        startRemainder.set(chunk, remainderIndex);
+        new Uint8Array(startRemainder).set(chunk, remainderIndex);
         remainderIndex += chunk.length;
     }
 
@@ -75,14 +75,14 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         end.char = lfPos;
 
         // prepare buffer for start remainder
-        startRemainder = new Uint8Array(
+        endRemainder = new SharedArrayBuffer(
             remainderLength + chunk.length - 1 - lfPos);
         break;
     }
 
     done = false;
-    remainderIndex = endRemainder.length - 1;
-    remainderLength = endRemainder.length;
+    remainderIndex = endRemainder.byteLength - 1;
+    remainderLength = endRemainder.byteLength;
     // fill in end remainder from following chunks
     for (let i = chunks.length - 1; i >= end.chunk; i--) {
 
@@ -90,7 +90,7 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         if (chunk.length > remainderIndex) {
             chunk = chunk.subarray(chunk.length - remainderIndex - 1);
         }
-        endRemainder.set(chunk, remainderIndex - chunk.length + 1);
+        new Uint8Array(endRemainder).set(chunk, remainderIndex - chunk.length + 1);
         remainderIndex -= chunk.length;
     }
 

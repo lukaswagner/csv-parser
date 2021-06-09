@@ -1,17 +1,30 @@
 import * as MainInterface from './interface';
 import * as SubInterface from '../sub/interface';
+import { Column } from '../../types/column/column';
+import { Chunk } from '../../types/chunk/chunk';
+import { splitLine } from '../../helper/splitLine';
+import { parseLine } from '../../helper/parseLine';
+import { storeValue } from '../../helper/storeValue';
 
 const mainWorker: Worker = self as unknown as Worker;
 
 let setup: MainInterface.SetupData;
+let columns: Column[];
 const chunks = new Array<ArrayBufferLike>();
 const targetNumWorkers = 25;
 let chunksPerWorker: number;
 let totalBytes = 0;
 let totalChunks = 0;
 let nextWorker = 0;
-const runningWorkers = new Set<number>();
 let allChunksHandled = false;
+
+const runningWorkers = new Set<number>();
+const parsedChunks = new Map<number, Chunk[]>();
+const generatedChunks = new Map<number, Chunk[]>();
+const startRemainders = new Map<number, SharedArrayBuffer>();
+const endRemainders = new Map<number, SharedArrayBuffer>();
+let nextChunkToBeFinished = 0;
+let chunkLengthSum = 0;
 
 mainWorker.onmessage = (e: MessageEvent<MainInterface.MessageData>) => {
     const msg = e.data;
@@ -92,7 +105,7 @@ function startSubWorker(): void {
 
     console.log(`starting worker ${workerId}`);
     runningWorkers.add(workerId);
-    subWorker.postMessage(msg);
+    subWorker.postMessage(msg, [...workerChunks]);
 }
 
 function onSubWorkerFinished(
@@ -101,7 +114,50 @@ function onSubWorkerFinished(
     console.log(`worker ${workerId} done`);
     runningWorkers.delete(workerId);
 
+    parsedChunks.set(workerId, data.chunks);
+    generatedChunks.set(workerId, data.generatedChunks);
+    startRemainders.set(workerId, data.startRemainder);
+    endRemainders.set(workerId, data.endRemainder);
+
+    let success = false;
+    do { success = finishChunk(); } while (success);
+
     if (allChunksHandled && runningWorkers.size === 0) done();
+}
+
+function finishChunk(): boolean {
+    const pc = parsedChunks.get(nextChunkToBeFinished);
+    const gc = generatedChunks.get(nextChunkToBeFinished);
+    const er = endRemainders.get(nextChunkToBeFinished);
+    const sr = startRemainders.get(nextChunkToBeFinished + 1);
+    const lastChunk =
+        allChunksHandled &&
+        (nextWorker === nextChunkToBeFinished + 1);
+
+    const ready = pc && gc && er && (sr || lastChunk);
+    if(!ready) return false;
+
+    const buf = new Uint8Array(er.byteLength + (sr?.byteLength ?? 0));
+    buf.set(new Uint8Array(er));
+    if(sr) buf.set(new Uint8Array(sr));
+
+    handleRemainder(buf, pc, gc);
+    pc.forEach((c) => c.offset = chunkLengthSum);
+    gc.forEach((c) => c.offset = chunkLengthSum);
+    chunkLengthSum += pc[0].length;
+
+    return true;
+}
+
+function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]) {
+    const text = new TextDecoder().decode(buf);
+    const valueTexts = splitLine(text, setup.options.delimiter);
+    const values = parseLine(valueTexts, setup.columns);
+    values.forEach((v, vi) => storeValue(v, pc[vi].length - 1, pc[vi]));
+
+    const gen = setup.generatedColumns;
+    const genValues = gen.map((g) => g.func(valueTexts, values));
+    genValues.forEach((v, vi) => storeValue(v, gc[vi].length - 1, gc[vi]));
 }
 
 function done(): void {

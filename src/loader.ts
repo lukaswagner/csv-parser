@@ -96,7 +96,7 @@ export class Loader {
             data: acd
         };
 
-        this._worker.postMessage(msg);
+        this._worker.postMessage(msg, [v.buffer]);
 
         this._reader.read().then(this.readChunk.bind(this));
     }
