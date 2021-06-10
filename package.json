@@ -10,7 +10,9 @@
         "test-webpack-js": "cd test/webpack-js && webpack serve",
         "test-webpack-ts": "cd test/webpack-ts && webpack serve",
         "test-express": "cd test/express && node server.js",
-        "dev-watch": "concurrently npm:watch npm:test-webpack-ts"
+        "dev-watch": "concurrently npm:watch npm:test-webpack-ts",
+        "lint": "eslint ./src",
+        "lint-fix": "eslint ./src --fix"
     },
     "repository": {
         "type": "git",
