@@ -3,8 +3,8 @@ name: ci
 on: [push, workflow_dispatch]
 
 jobs:
-  ci:
-    name: ci
+  build:
+    name: build
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
