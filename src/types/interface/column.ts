@@ -1,7 +1,7 @@
-import { Chunk } from './chunk';
+import { IChunk } from './chunk';
 import { DataType } from './dataType';
 
-export interface Column<T, C extends Chunk<T>> {
+export interface IColumn<T, C extends IChunk<T>> {
     readonly type: DataType;
     readonly length: number;
     get(index: number): T;
@@ -12,7 +12,7 @@ export interface Column<T, C extends Chunk<T>> {
     getChunks(start?: number, end?: number): C[];
 }
 
-export interface NumberColumn extends Column<number, Chunk<number>> {
+export interface INumberColumn extends IColumn<number, IChunk<number>> {
     readonly min: number;
     readonly max: number;
 }

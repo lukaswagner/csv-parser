@@ -1,8 +1,8 @@
 import { BaseChunk as BC } from '../chunk/baseChunk';
-import { Column } from '../interface/column';
+import { IColumn } from '../interface/column';
 import { DataType } from '../interface/dataType';
 
-export abstract class BaseColumn<T, C extends BC<T>> implements Column<T, C>{
+export abstract class BaseColumn<T, C extends BC<T>> implements IColumn<T, C>{
     protected _name: string;
     protected _type: DataType;
     protected _chunks: C[] = [];

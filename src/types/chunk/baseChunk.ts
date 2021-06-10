@@ -1,7 +1,7 @@
-import { Chunk } from '../interface/chunk';
+import { IChunk } from '../interface/chunk';
 import { DataType } from '../interface/dataType';
 
-export abstract class BaseChunk<T> implements Chunk<T> {
+export abstract class BaseChunk<T> implements IChunk<T> {
     protected _type: DataType;
     protected _length: number;
     protected _offset: number;

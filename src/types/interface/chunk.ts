@@ -1,6 +1,6 @@
 import { DataType } from './dataType';
 
-export interface Chunk<T> {
+export interface IChunk<T> {
     readonly type: DataType;
     readonly length: number;
     readonly offset: number;
@@ -8,7 +8,7 @@ export interface Chunk<T> {
     set(index: number, value: T): void;
 }
 
-export interface NumberChunk extends Chunk<number> {
+export interface INumberChunk extends IChunk<number> {
     readonly min: number;
     readonly max: number;
 }
