@@ -25,7 +25,7 @@ import {
     lowestType
 } from './helper/inferType';
 
-import { ColumnTypes } from './types/interface/dataType';
+import { ColumnTypes } from './types/dataType';
 import { CsvLoaderOptions } from './types/options';
 import { parse } from './helper/parseChunks';
 import { splitLine } from './helper/splitLine';

@@ -1,4 +1,4 @@
-import { ColumnTypes, DataType } from './interface/dataType';
+import { ColumnTypes, DataType } from './dataType';
 import { Column } from './column/column';
 
 export type UpdateCallback = (progress: number) => void;

@@ -1,4 +1,4 @@
-import { ColumnGenerator, DataType } from '../../types/interface/dataType';
+import { ColumnGenerator, DataType } from '../../types/dataType';
 import { Chunk } from '../../types/chunk/chunk';
 import { MainWorkerOptions } from './options';
 

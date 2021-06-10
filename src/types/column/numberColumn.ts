@@ -10,7 +10,7 @@ import {
     Uint8Chunk
 } from '../chunk/numberChunk';
 import { BaseColumn } from './baseColumn';
-import { DataType } from '../interface/dataType';
+import { DataType } from '../dataType';
 
 class BaseNumberColumn<C extends NumberChunk> extends BaseColumn<number, C> {
     protected _min: number;

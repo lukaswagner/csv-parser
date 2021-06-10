@@ -12,7 +12,7 @@ import {
 } from './numberColumn';
 import { Chunk } from '../chunk/chunk';
 import { ColorColumn } from './colorColumn';
-import { DataType } from '../interface/dataType';
+import { DataType } from '../dataType';
 import { StringColumn } from './stringColumn';
 
 export type Column = NumberColumn | ColorColumn | StringColumn;

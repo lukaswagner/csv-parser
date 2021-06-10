@@ -1,5 +1,5 @@
 import { BaseColumn } from './baseColumn';
-import { DataType } from '../interface/dataType';
+import { DataType } from '../dataType';
 import { StringChunk } from '../chunk/stringChunk';
 
 export class StringColumn extends BaseColumn<string, StringChunk> {

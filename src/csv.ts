@@ -67,6 +67,6 @@ function deductDelimiter(format: string): string {
 // re-export interface
 export * from './types/options';
 export * from './types/callbacks';
-export * from './types/interface/dataType';
+export * from './types/dataType';
 export * from './types/column/column';
 export * from './types/chunk/chunk';

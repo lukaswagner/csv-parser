@@ -1,4 +1,4 @@
-import { DataType } from '../types/interface/dataType';
+import { DataType } from '../types/dataType';
 import { hex2rgba } from './color';
 
 export function parseLine(

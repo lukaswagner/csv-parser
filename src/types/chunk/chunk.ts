@@ -12,7 +12,7 @@ import {
     Uint8Chunk
 } from './numberChunk';
 import { ColorChunk } from './colorChunk';
-import { DataType } from '../interface/dataType';
+import { DataType } from '../dataType';
 import { StringChunk } from './stringChunk';
 
 export type Chunk = NumberChunk | ColorChunk | StringChunk;

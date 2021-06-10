@@ -1,5 +1,5 @@
 import { BufferChunk } from './bufferChunk';
-import { DataType } from '../interface/dataType';
+import { DataType } from '../dataType';
 import { vec4 } from '../tuples';
 
 export class ColorChunk extends BufferChunk<vec4> {

@@ -1,5 +1,5 @@
 import { IChunk } from './chunk';
-import { DataType } from './dataType';
+import { DataType } from '../dataType';
 
 export interface IColumn<T, C extends IChunk<T>> {
     readonly type: DataType;
