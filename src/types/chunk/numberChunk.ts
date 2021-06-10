@@ -1,5 +1,5 @@
 import { BufferChunk } from './bufferChunk';
-import { DataType } from '../dataType';
+import { bytes, DataType } from '../dataType';
 
 interface NumArray {
     readonly length: number;
@@ -39,56 +39,56 @@ abstract class BaseNumberChunk<A extends NumArray> extends BufferChunk<number> {
 
 export class Int8Chunk extends BaseNumberChunk<Int8Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, bytes(DataType.Int8));
         this._view = new Int8Array(this._data);
     }
 }
 
 export class Uint8Chunk extends BaseNumberChunk<Uint8Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 1);
+        super(length, offset, bytes(DataType.Uint8));
         this._view = new Uint8Array(this._data);
     }
 }
 
 export class Int16Chunk extends BaseNumberChunk<Int16Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 2);
+        super(length, offset, bytes(DataType.Int16));
         this._view = new Int16Array(this._data);
     }
 }
 
 export class Uint16Chunk extends BaseNumberChunk<Uint16Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 2);
+        super(length, offset, bytes(DataType.Uint16));
         this._view = new Uint16Array(this._data);
     }
 }
 
 export class Int32Chunk extends BaseNumberChunk<Int32Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 4);
+        super(length, offset, bytes(DataType.Int32));
         this._view = new Int32Array(this._data);
     }
 }
 
 export class Uint32Chunk extends BaseNumberChunk<Uint32Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 4);
+        super(length, offset, bytes(DataType.Uint32));
         this._view = new Uint32Array(this._data);
     }
 }
 
 export class Float32Chunk extends BaseNumberChunk<Float32Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 4);
+        super(length, offset, bytes(DataType.Float32));
         this._view = new Float32Array(this._data);
     }
 }
 
 export class Float64Chunk extends BaseNumberChunk<Float64Array> {
     public constructor(length: number, offset: number) {
-        super(length, offset, 8);
+        super(length, offset, bytes(DataType.Float64));
         this._view = new Float64Array(this._data);
     }
 }

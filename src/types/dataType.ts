@@ -22,3 +22,26 @@ export type ColumnTypes = {
     columns: DataType[],
     generatedColumns: ColumnGenerator[]
 }
+
+export function bytes(type: DataType): number {
+    switch (type) {
+        case DataType.Int8:
+        case DataType.Uint8:
+            return 1;
+        case DataType.Int16:
+        case DataType.Uint16:
+            return 2;
+        case DataType.Int32:
+        case DataType.Uint32:
+        case DataType.Float32:
+        case DataType.Number:
+            return 4;
+        case DataType.Float64:
+            return 8;
+        case DataType.Color:
+            return 16;
+        case DataType.String:
+        default:
+            return 0;
+    }
+}
