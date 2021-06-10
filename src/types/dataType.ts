@@ -45,3 +45,28 @@ export function bytes(type: DataType): number {
             return 0;
     }
 }
+
+export function isFloat(type: DataType): boolean {
+    switch (type) {
+        case DataType.Number:
+        case DataType.Float32:
+        case DataType.Float64:
+            return true;
+        default:
+            return false;
+    }
+}
+
+export function isInt(type: DataType): boolean {
+    switch (type) {
+        case DataType.Int8:
+        case DataType.Uint8:
+        case DataType.Int16:
+        case DataType.Uint16:
+        case DataType.Int32:
+        case DataType.Uint32:
+            return true;
+        default:
+            return false;
+    }
+}
