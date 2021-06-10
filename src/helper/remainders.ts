@@ -1,5 +1,5 @@
-import { findLastIndex } from './findLastIndex';
 import { Position } from './position';
+import { findLastIndex } from './findLastIndex';
 
 export type RemainderInfo = {
     startRemainder: SharedArrayBuffer, start: Position,
@@ -16,7 +16,6 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
     let startRemainder: SharedArrayBuffer;
     let endRemainder: SharedArrayBuffer;
 
-    let done = false;
     let remainderLength = 0;
 
     // find first lf -> everything before is remainder
@@ -57,7 +56,6 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         remainderIndex += chunk.length;
     }
 
-    done = false;
     remainderLength = 0;
     // find last lf -> everything after is remainder
     for (let i = chunks.length - 1; i >= 0; i--) {
@@ -80,7 +78,6 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         break;
     }
 
-    done = false;
     remainderIndex = endRemainder.byteLength - 1;
     remainderLength = endRemainder.byteLength;
     // fill in end remainder from following chunks
@@ -90,7 +87,8 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         if (chunk.length > remainderIndex) {
             chunk = chunk.subarray(chunk.length - remainderIndex - 1);
         }
-        new Uint8Array(endRemainder).set(chunk, remainderIndex - chunk.length + 1);
+        new Uint8Array(endRemainder)
+            .set(chunk, remainderIndex - chunk.length + 1);
         remainderIndex -= chunk.length;
     }
 

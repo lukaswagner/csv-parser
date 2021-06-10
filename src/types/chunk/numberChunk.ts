@@ -1,5 +1,5 @@
+import { DataType, bytes } from '../dataType';
 import { BufferChunk } from './bufferChunk';
-import { bytes, DataType } from '../dataType';
 
 interface NumArray {
     readonly length: number;

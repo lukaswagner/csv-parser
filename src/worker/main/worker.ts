@@ -1,15 +1,13 @@
 import * as MainInterface from './interface';
 import * as SubInterface from '../sub/interface';
-import { Column } from '../../types/column/column';
 import { Chunk } from '../../types/chunk/chunk';
-import { splitLine } from '../../helper/splitLine';
 import { parseLine } from '../../helper/parseLine';
+import { splitLine } from '../../helper/splitLine';
 import { storeValue } from '../../helper/storeValue';
 
 const mainWorker: Worker = self as unknown as Worker;
 
 let setup: MainInterface.SetupData;
-let columns: Column[];
 const chunks = new Array<ArrayBufferLike>();
 const targetNumWorkers = 25;
 let chunksPerWorker: number;
@@ -120,7 +118,9 @@ function onSubWorkerFinished(
     endRemainders.set(workerId, data.endRemainder);
 
     let success = false;
-    do { success = finishChunk(); } while (success);
+    do {
+        success = finishChunk();
+    } while (success);
 
     if (allChunksHandled && runningWorkers.size === 0) done();
 }
@@ -135,11 +135,11 @@ function finishChunk(): boolean {
         (nextWorker === nextChunkToBeFinished + 1);
 
     const ready = pc && gc && er && (sr || lastChunk);
-    if(!ready) return false;
+    if (!ready) return false;
 
     const buf = new Uint8Array(er.byteLength + (sr?.byteLength ?? 0));
     buf.set(new Uint8Array(er));
-    if(sr) buf.set(new Uint8Array(sr), er.byteLength);
+    if (sr) buf.set(new Uint8Array(sr), er.byteLength);
 
     handleRemainder(buf, pc, gc);
     pc.forEach((c) => c.offset = chunkLengthSum);
@@ -165,7 +165,7 @@ function finishChunk(): boolean {
     return true;
 }
 
-function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]) {
+function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]): void {
     const text = new TextDecoder().decode(buf);
     const valueTexts = splitLine(text, setup.options.delimiter);
     const values = parseLine(valueTexts, setup.columns);

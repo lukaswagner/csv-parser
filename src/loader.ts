@@ -28,8 +28,8 @@ import {
 import { ColumnTypes } from './types/dataType';
 import { CsvLoaderOptions } from './types/options';
 import { parse } from './helper/parseChunks';
-import { splitLine } from './helper/splitLine';
 import { rebuildChunk } from './types/chunk/chunk';
+import { splitLine } from './helper/splitLine';
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -181,6 +181,7 @@ export class Loader {
             rebuildChunk(data.chunks[0]).length);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onFinished(data: FinishedData): void {
         console.log('main worker finished');
     }

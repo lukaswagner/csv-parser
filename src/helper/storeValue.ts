@@ -1,8 +1,8 @@
-import { Chunk } from "../types/chunk/chunk";
-import { ColorChunk } from "../types/chunk/colorChunk";
-import { NumberChunk } from "../types/chunk/numberChunk";
-import { DataType } from "../types/dataType";
-import { vec4 } from "../types/tuples";
+import { Chunk } from '../types/chunk/chunk';
+import { ColorChunk } from '../types/chunk/colorChunk';
+import { DataType } from '../types/dataType';
+import { NumberChunk } from '../types/chunk/numberChunk';
+import { vec4 } from '../types/tuples';
 
 export function storeValue(
     value: unknown, index: number, chunk: Chunk

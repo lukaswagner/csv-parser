@@ -1,10 +1,10 @@
-import { parse } from '../../helper/parseChunks';
-import { detectRemainders, RemainderInfo } from '../../helper/remainders';
-import { splitLine } from '../../helper/splitLine';
-import { parseLine } from '../../helper/parseLine';
-import { storeValue } from '../../helper/storeValue';
-import { buildChunk, Chunk } from '../../types/chunk/chunk';
 import * as Interface from './interface';
+import { Chunk, buildChunk } from '../../types/chunk/chunk';
+import { RemainderInfo, detectRemainders } from '../../helper/remainders';
+import { parse } from '../../helper/parseChunks';
+import { parseLine } from '../../helper/parseLine';
+import { splitLine } from '../../helper/splitLine';
+import { storeValue } from '../../helper/storeValue';
 
 const subWorker: Worker = self as unknown as Worker;
 
@@ -26,7 +26,7 @@ function onStart(data: Interface.StartData): void {
     const values = lines.map((l) => parseLine(l, data.columns));
     values.forEach(
         (line, li) => line.forEach(
-            (value, vi) => storeValue(value, li, chunks[vi])))
+            (value, vi) => storeValue(value, li, chunks[vi])));
 
     const gen = data.generatedColumns;
     const generatedChunks = gen.map((c) => buildChunk(c.type, numChunks));
