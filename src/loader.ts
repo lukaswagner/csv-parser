@@ -25,10 +25,10 @@ import {
     lowestType
 } from './helper/inferType';
 
+import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
 import { ColumnTypes } from './types/dataType';
 import { CsvLoaderOptions } from './types/options';
 import { parse } from './helper/parseChunks';
-import { rebuildChunk } from './types/chunk/chunk';
 import { splitLine } from './helper/splitLine';
 
 export class Loader {
@@ -66,7 +66,6 @@ export class Loader {
             this._reader = this._stream.getReader();
             this._reader.read().then(this.readChunk.bind(this));
         } else {
-            console.log('rb');
             this.readBuffer();
         }
     }
@@ -200,14 +199,15 @@ export class Loader {
     }
 
     protected onProcessed(data: ProcessedData): void {
-        console.log(
-            'main worker sent chunks',
-            rebuildChunk(data.chunks[0]).length);
+        const chunks = data.chunks.map((c) => rebuildChunk(c));
+        this._columns.forEach((c, i) => c.push(chunks[i] as AnyChunk));
+        this._updateCb(chunks[0].length);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onFinished(data: FinishedData): void {
         console.log('main worker finished');
+        this._updateCb(Number.POSITIVE_INFINITY);
     }
 
     public set resolve(resolve: ResolveCallback) {
