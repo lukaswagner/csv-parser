@@ -1,10 +1,12 @@
+import * as pako from 'pako';
+
 import {
     Column,
     CsvLoaderOptions,
     DataType,
     TypeDeduction,
-    UpdateCallback,
-    loadUrl,
+    loadBuffer,
+    loadUrl
 } from '../..';
 
 const conf = require('../conf');
@@ -14,19 +16,45 @@ const options = new CsvLoaderOptions({
     delimiter: ','
 });
 
-const update: UpdateCallback = (progress: number) => {
-    console.log('progress:', progress);
+const update = (testCase: string, progress: number): void => {
+    console.log(testCase + ' progress:', progress);
 };
 
-const success = (columns: Column[]): void => {
-    console.log('Columns:\n' + columns
+const success = (testCase: string, columns: Column[]): void => {
+    console.log(testCase + ' columns:\n' + columns
         .map((c) => `${c.name}: ${DataType[c.type]}`)
         .join('\n'));
 };
 
-const failure = (reason: unknown): void => {
-    console.log(reason);
+const failure = (testCase: string, reason: unknown): void => {
+    console.log(testCase + ' error:', reason);
 };
 
-loadUrl(conf.url, options, update, TypeDeduction.KeepAll)
-    .then(success, failure);
+function testUrl(testCase: string, url: string): void {
+    loadUrl(
+        url,
+        options,
+        update.bind(undefined, testCase),
+        TypeDeduction.KeepAll
+    )
+        .then(
+            success.bind(undefined, testCase),
+            failure.bind(undefined, testCase));
+}
+
+function testGzipped(testCase: string, url: string): void {
+    fetch(url)
+        .then((res) => res.arrayBuffer())
+        .then((buf) => loadBuffer(
+            pako.inflate(new Uint8Array(buf)).buffer,
+            options,
+            update.bind(undefined, testCase),
+            TypeDeduction.KeepAll)
+        )
+        .then(
+            success.bind(undefined, testCase),
+            failure.bind(undefined, testCase));
+}
+
+testUrl('[url stream]', conf.url);
+testGzipped('[1m gzip buffer]', '/data/1m.csv.gz');

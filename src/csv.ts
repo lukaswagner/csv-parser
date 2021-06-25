@@ -39,6 +39,20 @@ export function loadUrl(
     return fetch(url).then(cb);
 }
 
+export function loadBuffer(
+    buffer: ArrayBufferLike,
+    options: CsvLoaderOptions,
+    update: UpdateCallback,
+    types: TypeDeductionCallback = TypeDeduction.KeepAll
+): Promise<Column[]> {
+    const loader = new Loader(buffer, options, update, types);
+    return new Promise<Column[]>((resolve, reject) => {
+        loader.resolve = resolve;
+        loader.reject = reject;
+        loader.load();
+    });
+}
+
 export function loadStream(
     stream: ReadableStream,
     options: CsvLoaderOptions,

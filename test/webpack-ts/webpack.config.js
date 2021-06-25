@@ -1,6 +1,7 @@
 'use strict';
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = function () {
     return {
@@ -19,7 +20,12 @@ module.exports = function () {
             new HtmlWebpackPlugin({
                 filename: 'index.html',
                 template: './index.pug'
-            })
+            }),
+            new CopyWebpackPlugin({
+                patterns: [
+                    { from: '../data', to: 'data' },
+                ]
+            }),
         ],
         devServer: {
             headers: {

@@ -35,6 +35,7 @@ export class Loader {
     protected static readonly TargetNumWorkers = 25;
 
     protected _stream: ReadableStream;
+    protected _buffer: ArrayBufferLike;
     protected _options: CsvLoaderOptions;
     protected _updateCb?: UpdateCallback;
     protected _typesCb: TypeDeductionCallback;
@@ -47,20 +48,27 @@ export class Loader {
     protected _worker: Worker;
 
     public constructor(
-        stream: ReadableStream,
+        input: ReadableStream | ArrayBufferLike,
         options: CsvLoaderOptions,
         updateCb: UpdateCallback,
         typesCb: TypeDeductionCallback
     ) {
-        this._stream = stream;
+        if(input instanceof ReadableStream) this._stream = input;
+        else this._buffer = input;
+
         this._options = options;
         this._updateCb = updateCb;
         this._typesCb = typesCb;
     }
 
     protected read(): void {
-        this._reader = this._stream.getReader();
-        this._reader.read().then(this.readChunk.bind(this));
+        if(this._stream) {
+            this._reader = this._stream.getReader();
+            this._reader.read().then(this.readChunk.bind(this));
+        } else {
+            console.log('rb');
+            this.readBuffer();
+        }
     }
 
     protected readChunk(
@@ -100,6 +108,22 @@ export class Loader {
         this._worker.postMessage(msg, [v.buffer]);
 
         this._reader.read().then(this.readChunk.bind(this));
+    }
+
+    protected readBuffer(): void {
+        this.setupColumns(this._buffer);
+        this._resolveCb(this._columns);
+        this.setupWorker();
+
+        this._worker.postMessage({
+            type: MessageType.AddChunk,
+            data: { chunk: this._buffer }
+        }, [this._buffer]);
+
+        this._worker.postMessage({
+            type: MessageType.NoMoreChunks,
+            data: {}
+        });
     }
 
     protected sendNoMoreChunks(): void {
