@@ -9,15 +9,21 @@ import {
 } from './worker/main/interface';
 
 import {
+    AnyChunk,
+    rebuildChunk
+} from './types/chunk/chunk';
+
+import {
     Column,
     buildColumn
 } from './types/column/column';
 
 import {
-    RejectCallback,
-    ResolveCallback,
-    TypeDeductionCallback,
-    UpdateCallback
+    ColumnsHandler,
+    DataHandler,
+    DoneHandler,
+    ErrorHandler,
+    OpenedHandler
 } from './types/callbacks';
 
 import {
@@ -25,7 +31,6 @@ import {
     lowestType
 } from './helper/inferType';
 
-import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
 import { ColumnTypes } from './types/dataType';
 import { CsvLoaderOptions } from './types/options';
 import { parse } from './helper/parseChunks';
@@ -37,29 +42,17 @@ export class Loader {
     protected _stream: ReadableStream;
     protected _buffer: ArrayBufferLike;
     protected _options: CsvLoaderOptions;
-    protected _updateCb?: UpdateCallback;
-    protected _typesCb: TypeDeductionCallback;
-    protected _resolveCb: ResolveCallback;
-    protected _rejectCb: RejectCallback;
+
+    protected _onOpened: OpenedHandler;
+    protected _onColumns: ColumnsHandler;
+    protected _onData: DataHandler;
+    protected _onDone: DoneHandler;
+    protected _onError: ErrorHandler;
 
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
     protected _types: ColumnTypes;
     protected _columns: Column[];
     protected _worker: Worker;
-
-    public constructor(
-        input: ReadableStream | ArrayBufferLike,
-        options: CsvLoaderOptions,
-        updateCb: UpdateCallback,
-        typesCb: TypeDeductionCallback
-    ) {
-        if(input instanceof ReadableStream) this._stream = input;
-        else this._buffer = input;
-
-        this._options = options;
-        this._updateCb = updateCb;
-        this._typesCb = typesCb;
-    }
 
     protected read(): void {
         if(this._stream) {
@@ -81,14 +74,14 @@ export class Loader {
 
         if (!result.value) {
             console.log('received no data');
-            this._rejectCb('No data');
+            this._onError('No data');
             return;
         }
 
         const v = result.value;
         if (this._columns === undefined) {
             this.setupColumns(v.buffer);
-            this._resolveCb(this._columns);
+            this._onColumns(this._columns);
         }
 
         if (this._worker === undefined) {
@@ -111,7 +104,7 @@ export class Loader {
 
     protected readBuffer(): void {
         this.setupColumns(this._buffer);
-        this._resolveCb(this._columns);
+        this._onColumns(this._columns);
         this.setupWorker();
 
         this._worker.postMessage({
@@ -153,6 +146,7 @@ export class Loader {
             .map((l) => l.map((c) => inferType(c)))
             .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
 
+        // TODO: func has to be split up - up to here in open(), then load()
         this._types = this._typesCb(detectedTypes);
         this._columns = [
             ...this._types.columns.map((t, i) => buildColumn(
@@ -225,5 +219,41 @@ export class Loader {
         }
 
         this.read();
+    }
+
+    public set stream(stream: ReadableStream) {
+        this._stream = stream;
+    }
+
+    public set buffer(buffer: ArrayBufferLike) {
+        this._buffer = buffer;
+    }
+
+    public set options(options: CsvLoaderOptions) {
+        this._options = options;
+    }
+
+    public set types(columns: ColumnTypes) {
+        this._types = columns;
+    }
+
+    public set onOpened(handler: OpenedHandler) {
+        this._onOpened = handler;
+    }
+
+    public set onColumns(handler: ColumnsHandler) {
+        this._onColumns = handler;
+    }
+
+    public set onData(handler: DataHandler) {
+        this._onData = handler;
+    }
+
+    public set onDone(handler: DoneHandler) {
+        this._onDone = handler;
+    }
+
+    public set onError(handler: ErrorHandler) {
+        this._onError = handler;
     }
 }
