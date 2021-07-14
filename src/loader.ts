@@ -24,7 +24,7 @@ import {
     DoneHandler,
     ErrorHandler,
     OpenedHandler
-} from './types/callbacks';
+} from './types/handlers';
 
 import {
     inferType,
@@ -50,20 +50,45 @@ export class Loader {
     protected _onError: ErrorHandler;
 
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
+    protected _firstChunk: ArrayBuffer;
+    protected _firstChunkSplit: string[][];
     protected _types: ColumnTypes;
     protected _columns: Column[];
     protected _worker: Worker;
 
-    protected read(): void {
-        if(this._stream) {
-            this._reader = this._stream.getReader();
-            this._reader.read().then(this.readChunk.bind(this));
-        } else {
-            this.readBuffer();
+    protected openStream(
+        result: ReadableStreamDefaultReadResult<Uint8Array>
+    ): void {
+        if (!result.value) {
+            console.log('received no data');
+            this._onError('No data');
+            return;
         }
+
+        this._firstChunk = result.value.buffer;
+        this.detectTypes(result.value);
     }
 
-    protected readChunk(
+    protected readStreamFirstChunk(): void {
+        this.setupColumns();
+        this.setupWorker();
+
+        const acd: AddChunkData = {
+            chunk: this._firstChunk
+        };
+
+        const msg: MessageData = {
+            type: MessageType.AddChunk,
+            data: acd
+        };
+
+        this._worker.postMessage(msg, [this._firstChunk]);
+        this._firstChunk = undefined;
+
+        this._reader.read().then(this.readStream.bind(this));
+    }
+
+    protected readStream(
         result: ReadableStreamDefaultReadResult<Uint8Array>
     ): void {
         if (result.done) {
@@ -78,18 +103,8 @@ export class Loader {
             return;
         }
 
-        const v = result.value;
-        if (this._columns === undefined) {
-            this.setupColumns(v.buffer);
-            this._onColumns(this._columns);
-        }
-
-        if (this._worker === undefined) {
-            this.setupWorker();
-        }
-
         const acd: AddChunkData = {
-            chunk: v.buffer
+            chunk: result.value.buffer
         };
 
         const msg: MessageData = {
@@ -97,14 +112,17 @@ export class Loader {
             data: acd
         };
 
-        this._worker.postMessage(msg, [v.buffer]);
+        this._worker.postMessage(msg, [result.value.buffer]);
 
-        this._reader.read().then(this.readChunk.bind(this));
+        this._reader.read().then(this.readStream.bind(this));
+    }
+
+    protected openBuffer(): void {
+        this.detectTypes(this._buffer);
     }
 
     protected readBuffer(): void {
-        this.setupColumns(this._buffer);
-        this._onColumns(this._columns);
+        this.setupColumns();
         this.setupWorker();
 
         this._worker.postMessage({
@@ -129,31 +147,49 @@ export class Loader {
         this._worker.postMessage(msg);
     }
 
-    protected setupColumns(chunk: ArrayBufferLike): void {
+    protected detectTypes(chunk: ArrayBufferLike): void {
         const lines = parse(
             [chunk],
             { chunk: 0, char: 0 },
             { chunk: 0, char: chunk.byteLength });
 
-        const split = lines.map((l) => splitLine(l, this._options.delimiter));
+        this._firstChunkSplit = lines.map(
+            (l) => splitLine(l, this._options.delimiter));
 
         const inferStart = +this._options.includesHeader;
-        const inferLines = split.slice(
+        const inferLines = this._firstChunkSplit.slice(
             inferStart,
-            Math.max(inferStart + this._options.typeInferLines, split.length));
+            Math.max(
+                inferStart + this._options.typeInferLines,
+                this._firstChunkSplit.length));
 
         const detectedTypes = inferLines
             .map((l) => l.map((c) => inferType(c)))
             .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
 
-        // TODO: func has to be split up - up to here in open(), then load()
-        this._types = this._typesCb(detectedTypes);
+        const header = detectedTypes.map((t, i) => {
+            return {
+                name: this._options.includesHeader ?
+                    this._firstChunkSplit[0][i] :
+                    '',
+                type: t
+            };
+        });
+
+        this._onOpened(header);
+    }
+
+    protected setupColumns(): void {
         this._columns = [
             ...this._types.columns.map((t, i) => buildColumn(
-                this._options.includesHeader ? split[0][i] : `Column ${i}`, t)),
+                this._options.includesHeader ?
+                    this._firstChunkSplit[0][i] :
+                    `Column ${i}`, t)),
             ...this._types.generatedColumns.map((t) => buildColumn(
                 t.name, t.type))
         ];
+        this._firstChunkSplit = undefined;
+        this._onColumns(this._columns);
     }
 
     protected setupWorker(): void {
@@ -195,30 +231,35 @@ export class Loader {
     protected onProcessed(data: ProcessedData): void {
         const chunks = data.chunks.map((c) => rebuildChunk(c));
         this._columns.forEach((c, i) => c.push(chunks[i] as AnyChunk));
-        this._updateCb(chunks[0].length);
+        this._onData(chunks[0].length);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onFinished(data: FinishedData): void {
         console.log('main worker finished');
-        this._updateCb(Number.POSITIVE_INFINITY);
+        this._onDone();
     }
 
-    public set resolve(resolve: ResolveCallback) {
-        this._resolveCb = resolve;
-    }
-
-    public set reject(resolve: RejectCallback) {
-        this._rejectCb = resolve;
-    }
-
-    public load(): void {
+    public open(): void {
         if (this._options.delimiter === undefined) {
-            this._rejectCb(
+            this._onError(
                 'Delimiter not specified nor deductible from filename.');
         }
 
-        this.read();
+        if(this._stream) {
+            this._reader = this._stream.getReader();
+            this._reader.read().then(this.openStream.bind(this));
+        } else {
+            this.openBuffer();
+        }
+    }
+
+    public load(): void {
+        if(this._stream) {
+            this.readStreamFirstChunk();
+        } else {
+            this.readBuffer();
+        }
     }
 
     public set stream(stream: ReadableStream) {

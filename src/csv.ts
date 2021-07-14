@@ -1,8 +1,20 @@
+import {
+    ColumnTypes,
+    DataType
+} from './types/dataType';
+
+import {
+    ColumnsHandler,
+    DataHandler,
+    DoneHandler,
+    ErrorHandler,
+    EventHandler,
+    OpenedHandler
+} from './types/handlers';
+
 import { Column } from './types/column/column';
 import { CsvLoaderOptions } from './types/options';
-import { ColumnTypes, DataType } from './types/dataType';
 import { Loader } from './loader';
-import { ColumnsHandler, DataHandler, DoneHandler, ErrorHandler, EventHandler, OpenedHandler } from './types/callbacks';
 
 enum Event {
     Opened = 'opened',
@@ -11,6 +23,7 @@ enum Event {
     Done = 'done',
     Error = 'error'
 }
+type EventType = `${Event}`;
 
 type ColumnHeader = { name: string, type: DataType };
 
@@ -20,13 +33,20 @@ export class CSV {
     protected _handlers: Map<Event, Set<EventHandler>>;
 
     public constructor(options: CsvLoaderOptions) {
-        this._options = Object.apply({}, options);
+        this._options = Object.assign({}, options);
         this._loader = new Loader();
         this._loader.onOpened = this.dispatch.bind(this, Event.Opened);
         this._loader.onColumns = this.dispatch.bind(this, Event.Columns);
         this._loader.onData = this.dispatch.bind(this, Event.Data);
         this._loader.onDone = this.dispatch.bind(this, Event.Done);
         this._loader.onError = this.dispatch.bind(this, Event.Error);
+        this._handlers = new Map<Event, Set<EventHandler>>([
+            [Event.Opened, new Set<EventHandler>()],
+            [Event.Columns, new Set<EventHandler>()],
+            [Event.Data, new Set<EventHandler>()],
+            [Event.Done, new Set<EventHandler>()],
+            [Event.Error, new Set<EventHandler>()]
+        ]);
     }
 
     protected openFile(file: File): void {
@@ -72,7 +92,7 @@ export class CSV {
                 h.forEach((h) => (h as ColumnsHandler)(data as Column[]));
                 break;
             case Event.Data:
-                h.forEach((h) => (h as DataHandler)());
+                h.forEach((h) => (h as DataHandler)(data as number));
                 break;
             case Event.Done:
                 h.forEach((h) => (h as DoneHandler)());
@@ -106,12 +126,12 @@ export class CSV {
         this._loader.load();
     }
 
-    public on(event: Event, handler: EventHandler): void {
-        this._handlers.get(event).add(handler);
+    public on(event: EventType, handler: EventHandler): void {
+        this._handlers.get(event as Event).add(handler);
     }
 
-    public off(event: Event, handler: EventHandler): void {
-        this._handlers.get(event).delete(handler);
+    public off(event: EventType, handler: EventHandler): void {
+        this._handlers.get(event as Event).delete(handler);
     }
 }
 
@@ -128,7 +148,7 @@ function deductDelimiter(format: string): string {
 
 // re-export interface
 export * from './types/options';
-export * from './types/callbacks';
+export * from './types/handlers';
 export * from './types/dataType';
 export * from './types/column/column';
 export * from './types/chunk/chunk';
