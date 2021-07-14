@@ -37,7 +37,8 @@ mainWorker.onmessage = (e: MessageEvent<MainInterface.MessageData>) => {
             onNoMoreChunks();
             break;
         default:
-            console.log('received invalid msg from frontend thread:', msg);
+            if(setup.options.verbose)
+                console.log('received invalid msg from frontend thread:', msg);
             break;
     }
 };
@@ -80,7 +81,10 @@ function startSubWorker(): void {
 
     subWorker.onmessage = (e: MessageEvent<SubInterface.MessageData>) => {
         const msg = e.data;
-        if (e.data.type !== SubInterface.MessageType.Finished) {
+        if (
+            e.data.type !== SubInterface.MessageType.Finished &&
+            setup.options.verbose
+        ) {
             console.log('received invalid msg from sub worker:', msg);
         }
         onSubWorkerFinished(msg.data as SubInterface.FinishedData, workerId);
@@ -101,7 +105,7 @@ function startSubWorker(): void {
         data
     };
 
-    console.log(`starting worker ${workerId}`);
+    if(setup.options.verbose) console.log(`starting worker ${workerId}`);
     runningWorkers.add(workerId);
     subWorker.postMessage(msg, [...workerChunks]);
 }
@@ -109,7 +113,7 @@ function startSubWorker(): void {
 function onSubWorkerFinished(
     data: SubInterface.FinishedData, workerId: number
 ): void {
-    console.log(`worker ${workerId} done`);
+    if(setup.options.verbose) console.log(`worker ${workerId} done`);
     runningWorkers.delete(workerId);
 
     parsedChunks.set(workerId, data.chunks);
@@ -177,15 +181,11 @@ function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]): void {
 }
 
 function done(): void {
-    console.log('All workers finished. Stats:',
-        '\nchunks:', totalChunks,
-        '\nbytes:', totalBytes,
-        '\nworkers:', nextWorker,
-        '\nbytes/chunk:', totalBytes / totalChunks,
-        '\nchunks/worker:', totalChunks / nextWorker
-    );
-
-    const data: MainInterface.FinishedData = {};
+    const data: MainInterface.FinishedData = {
+        chunks: totalChunks,
+        bytes: totalBytes,
+        workers: nextWorker
+    };
     const msg: MainInterface.MessageData = {
         type: MainInterface.MessageType.Finished,
         data

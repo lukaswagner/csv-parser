@@ -5,8 +5,11 @@ import {
     Column,
     ColumnHeader,
     CsvLoaderOptions,
-    DataType
+    DataType,
+    LoadStatistics,
+    isNumber
 } from '../..';
+import { NumberColumn } from '../../lib/types/types/column/numberColumn';
 
 const conf = require('../conf');
 
@@ -21,9 +24,8 @@ function createLoader(tag: string, done: () => void): CSV {
     loader.on('opened', (columns: ColumnHeader[]) => {
         console.log(
             tag,
-            `opened source, detected ${columns.length} columns:`,
-            '\n' + columns.map(
-                (c) => `${c.name}: ${DataType[c.type]}`).join('\n'));
+            `opened source, detected ${columns.length} columns:\n` +
+            columns.map((c) => `${c.name}: ${DataType[c.type]}`).join('\n'));
         loader.load({
             columns: columns.map((c) => c.type),
             generatedColumns: []
@@ -34,13 +36,28 @@ function createLoader(tag: string, done: () => void): CSV {
         console.log(tag, 'received columns');
     });
     loader.on('data', (progress: number) => {
+        console.log(tag, `received new data. progress: ${progress}`);
+    });
+    loader.on('done', (stats: LoadStatistics) => {
+        const columnsStats =
+            '=== column stats: ===\n' +
+            storedColumns.map((c) => {
+                const base = `${c.name}: ${c.length} rows`;
+                const asNum = c as NumberColumn;
+                const num = isNumber(c.type) ?
+                    `, min ${asNum.min}, max ${asNum.max}` : '';
+                return base + num;
+            }).join('\n');
+        const loaderStats =
+            '=== loader stats: ===\n' +
+            `source bytes: ${stats.bytes}\n` +
+            `source chunks: ${stats.chunks}\n` +
+            `number of workers: ${stats.workers}\n` +
+            `bytes per worker: ${(stats.bytes / stats.workers).toFixed(2)}\n` +
+            `chunks per worker: ${(stats.chunks / stats.workers).toFixed(2)}\n`;
         console.log(
             tag,
-            'received new data.',
-            `rows: ${storedColumns[0].length}, progress: ${progress}`);
-    });
-    loader.on('done', () => {
-        console.log(tag, 'done');
+            `done.\n${columnsStats}\n${loaderStats}`);
         done();
     });
     loader.on('error', (msg: string) => {

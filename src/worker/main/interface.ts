@@ -1,5 +1,6 @@
 import { ColumnGenerator, DataType } from '../../types/dataType';
 import { Chunk } from '../../types/chunk/chunk';
+import { LoadStatistics } from '../../types/handlers';
 import { MainWorkerOptions } from './options';
 
 export enum MessageType {
@@ -27,8 +28,7 @@ export type ProcessedData = {
     chunks: Array<Chunk>
 }
 
-export type FinishedData = {
-}
+export type FinishedData = LoadStatistics;
 
 type AnyData =
     SetupData |

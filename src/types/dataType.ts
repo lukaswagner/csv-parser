@@ -70,3 +70,20 @@ export function isInt(type: DataType): boolean {
             return false;
     }
 }
+
+export function isNumber(type: DataType): boolean {
+    switch (type) {
+        case DataType.Number:
+        case DataType.Int8:
+        case DataType.Uint8:
+        case DataType.Int16:
+        case DataType.Uint16:
+        case DataType.Int32:
+        case DataType.Uint32:
+        case DataType.Float32:
+        case DataType.Float64:
+            return true;
+        default:
+            return false;
+    }
+}

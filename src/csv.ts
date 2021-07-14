@@ -9,6 +9,7 @@ import {
     DoneHandler,
     ErrorHandler,
     EventHandler,
+    LoadStatistics,
     OpenedHandler
 } from './types/handlers';
 
@@ -95,7 +96,7 @@ export class CSV {
                 h.forEach((h) => (h as DataHandler)(data as number));
                 break;
             case Event.Done:
-                h.forEach((h) => (h as DoneHandler)());
+                h.forEach((h) => (h as DoneHandler)(data as LoadStatistics));
                 break;
             case Event.Error:
                 h.forEach((h) => (h as ErrorHandler)(data as string));

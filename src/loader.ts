@@ -60,7 +60,7 @@ export class Loader {
         result: ReadableStreamDefaultReadResult<Uint8Array>
     ): void {
         if (!result.value) {
-            console.log('received no data');
+            if(this._options.verbose) console.log('received no data');
             this._onError('No data');
             return;
         }
@@ -92,13 +92,13 @@ export class Loader {
         result: ReadableStreamDefaultReadResult<Uint8Array>
     ): void {
         if (result.done) {
-            console.log('stream ended');
+            if(this._options.verbose) console.log('stream ended');
             this.sendNoMoreChunks();
             return;
         }
 
         if (!result.value) {
-            console.log('received no data');
+            if(this._options.verbose) console.log('received no data');
             this._onError('No data');
             return;
         }
@@ -206,7 +206,9 @@ export class Loader {
                     this.onFinished(msg.data as FinishedData);
                     break;
                 default:
-                    console.log('received invalid msg from main worker:', msg);
+                    if(this._options.verbose)
+                        console.log(
+                            'received invalid msg from main worker:', msg);
                     break;
             }
         };
@@ -216,7 +218,8 @@ export class Loader {
             generatedColumns: this._types.generatedColumns,
             options: {
                 delimiter: this._options.delimiter,
-                includesHeader: this._options.includesHeader
+                includesHeader: this._options.includesHeader,
+                verbose: this._options.verbose
             }
         };
 
@@ -231,13 +234,13 @@ export class Loader {
     protected onProcessed(data: ProcessedData): void {
         const chunks = data.chunks.map((c) => rebuildChunk(c));
         this._columns.forEach((c, i) => c.push(chunks[i] as AnyChunk));
-        this._onData(chunks[0].length);
+        this._onData(this._columns[0].length);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onFinished(data: FinishedData): void {
-        console.log('main worker finished');
-        this._onDone();
+        if(this._options.verbose) console.log('main worker finished');
+        this._onDone(data);
     }
 
     public open(): void {

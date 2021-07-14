@@ -1,5 +1,6 @@
 export type MainWorkerOptions = {
     delimiter: string,
     includesHeader: boolean,
-    size?: number
+    size?: number,
+    verbose?: boolean
 }
