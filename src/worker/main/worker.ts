@@ -1,6 +1,7 @@
 import * as MainInterface from './interface';
 import * as SubInterface from '../sub/interface';
 import { Chunk } from '../../types/chunk/chunk';
+import { PerfMon } from '../../helper/perfMon';
 import { parseLine } from '../../helper/parseLine';
 import { splitLine } from '../../helper/splitLine';
 import { storeValue } from '../../helper/storeValue';
@@ -15,6 +16,7 @@ let totalBytes = 0;
 let totalChunks = 0;
 let nextWorker = 0;
 let allChunksHandled = false;
+const perfMon = new PerfMon();
 
 const runningWorkers = new Set<number>();
 const parsedChunks = new Map<number, Chunk[]>();
@@ -105,14 +107,17 @@ function startSubWorker(): void {
         data
     };
 
-    if(setup.options.verbose) console.log(`starting worker ${workerId}`);
+    const label = `worker ${workerId}`;
+    if(setup.options.verbose) console.log('starting ' + label);
     runningWorkers.add(workerId);
+    perfMon.start(workerId, label);
     subWorker.postMessage(msg, [...workerChunks]);
 }
 
 function onSubWorkerFinished(
     data: SubInterface.FinishedData, workerId: number
 ): void {
+    perfMon.stop(workerId);
     if(setup.options.verbose) console.log(`worker ${workerId} done`);
     runningWorkers.delete(workerId);
 
@@ -184,7 +189,8 @@ function done(): void {
     const data: MainInterface.FinishedData = {
         chunks: totalChunks,
         bytes: totalBytes,
-        workers: nextWorker
+        workers: nextWorker,
+        performance: perfMon.samples
     };
     const msg: MainInterface.MessageData = {
         type: MainInterface.MessageType.Finished,

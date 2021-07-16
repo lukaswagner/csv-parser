@@ -58,6 +58,10 @@ function createLoader(tag: string, done: () => void): CSV {
         console.log(
             tag,
             `done.\n${columnsStats}\n${loaderStats}`);
+        console.groupCollapsed('=== performance stats: ===');
+        stats.performance.forEach(
+            (m) => console.log(`${m.label}: ${m.delta} ms`));
+        console.groupEnd();
         done();
     });
     loader.on('error', (msg: string) => {
