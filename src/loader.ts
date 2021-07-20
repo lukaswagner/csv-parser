@@ -33,6 +33,7 @@ import {
 
 import { ColumnTypes } from './types/dataType';
 import { CsvLoaderOptions } from './types/options';
+import { PerfMon } from './helper/perfMon';
 import { parse } from './helper/parseChunks';
 import { splitLine } from './helper/splitLine';
 
@@ -55,6 +56,7 @@ export class Loader {
     protected _types: ColumnTypes;
     protected _columns: Column[];
     protected _worker: Worker;
+    protected _perfMon = new PerfMon();
 
     protected openStream(
         result: ReadableStreamDefaultReadResult<Uint8Array>
@@ -176,6 +178,7 @@ export class Loader {
             };
         });
 
+        this._perfMon.stop('open');
         this._onOpened(header);
     }
 
@@ -240,6 +243,8 @@ export class Loader {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onFinished(data: FinishedData): void {
         if(this._options.verbose) console.log('main worker finished');
+        this._perfMon.stop('load');
+        data.performance = [...this._perfMon.samples, ...data.performance];
         this._onDone(data);
     }
 
@@ -248,6 +253,8 @@ export class Loader {
             this._onError(
                 'Delimiter not specified nor deductible from filename.');
         }
+
+        this._perfMon.start('open');
 
         if(this._stream) {
             this._reader = this._stream.getReader();
@@ -258,6 +265,7 @@ export class Loader {
     }
 
     public load(): void {
+        this._perfMon.start('load');
         if(this._stream) {
             this.readStreamFirstChunk();
         } else {

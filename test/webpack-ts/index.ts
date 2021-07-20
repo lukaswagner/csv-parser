@@ -48,13 +48,23 @@ function createLoader(tag: string, done: () => void): CSV {
                     `, min ${asNum.min}, max ${asNum.max}` : '';
                 return base + num;
             }).join('\n');
+        const timeMS =
+            stats.performance.find((s) => s.label === 'open').delta +
+            stats.performance.find((s) => s.label === 'load').delta;
+        const timeS = timeMS / 1000;
+        const kb = stats.bytes / 1000;
+        const kRows = storedColumns[0].length / 1000;
         const loaderStats =
             '=== loader stats: ===\n' +
             `source bytes: ${stats.bytes}\n` +
             `source chunks: ${stats.chunks}\n` +
             `number of workers: ${stats.workers}\n` +
-            `bytes per worker: ${(stats.bytes / stats.workers).toFixed(2)}\n` +
-            `chunks per worker: ${(stats.chunks / stats.workers).toFixed(2)}\n`;
+            `read rows: ${storedColumns[0].length}\n` +
+            `kB / worker: ${(kb / stats.workers).toFixed(3)}\n` +
+            `chunks / worker: ${(stats.chunks / stats.workers).toFixed(3)}\n` +
+            `total time in s: ${timeS.toFixed(3)}\n` +
+            `kB / s: ${(kb / timeS).toFixed(3)}\n` +
+            `kRows / s: ${(kRows / timeS).toFixed(3)}\n`;
         console.log(
             tag,
             `done.\n${columnsStats}\n${loaderStats}`);

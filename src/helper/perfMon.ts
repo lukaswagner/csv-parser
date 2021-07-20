@@ -1,3 +1,5 @@
+type ID = number | string;
+
 export type Measurement = {
     start: number,
     end: number,
@@ -6,9 +8,9 @@ export type Measurement = {
 }
 
 export class PerfMon {
-    protected _samples = new Map<number, Measurement>();
+    protected _samples = new Map<ID, Measurement>();
 
-    public start(id: number, label: string): void {
+    public start(id: ID, label: string = id.toString()): void {
         if(this._samples.has(id)) {
             console.warn('performance measurement already exists');
             return;
@@ -21,7 +23,7 @@ export class PerfMon {
         });
     }
 
-    public stop(id: number): void {
+    public stop(id: ID): void {
         if(!this._samples.has(id)) {
             console.warn('performance measurement doesn\'t exist');
             return;
