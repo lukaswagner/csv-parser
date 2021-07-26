@@ -18,7 +18,7 @@ let nextWorker = 0;
 let allChunksHandled = false;
 const perfMon = new PerfMon();
 
-const runningWorkers = new Set<number>();
+const runningWorkers = new Map<number, Worker>();
 const parsedChunks = new Map<number, Chunk[]>();
 const generatedChunks = new Map<number, Chunk[]>();
 const startRemainders = new Map<number, SharedArrayBuffer>();
@@ -109,7 +109,7 @@ function startSubWorker(): void {
 
     const label = `worker ${workerId}`;
     if(setup.options.verbose) console.log('starting ' + label);
-    runningWorkers.add(workerId);
+    runningWorkers.set(workerId, subWorker);
     perfMon.start(workerId, label);
     subWorker.postMessage(msg, [...workerChunks]);
 }
@@ -119,6 +119,7 @@ function onSubWorkerFinished(
 ): void {
     perfMon.stop(workerId);
     if(setup.options.verbose) console.log(`worker ${workerId} done`);
+    const subWorker = runningWorkers.get(workerId);
     runningWorkers.delete(workerId);
 
     parsedChunks.set(workerId, data.chunks);
@@ -132,6 +133,7 @@ function onSubWorkerFinished(
     } while (success);
 
     if (allChunksHandled && runningWorkers.size === 0) done();
+    subWorker.terminate();
 }
 
 function finishChunk(): boolean {

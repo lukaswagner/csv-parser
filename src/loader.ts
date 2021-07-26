@@ -207,6 +207,7 @@ export class Loader {
                     break;
                 case MessageType.Finished:
                     this.onFinished(msg.data as FinishedData);
+                    this._worker.terminate();
                     break;
                 default:
                     if(this._options.verbose)
