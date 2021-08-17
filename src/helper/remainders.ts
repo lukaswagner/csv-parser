@@ -24,7 +24,7 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         const lfPos = chunk.findIndex((c) => c === lf);
 
         // no lf -> whole chunk is remainder
-        if (!lfPos) {
+        if (lfPos < 0) {
             remainderLength += chunk.length;
             continue;
         }
@@ -63,7 +63,7 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         const lfPos = findLastIndex(chunk, (c) => c === lf);
 
         // no lf -> whole chunk is remainder
-        if (!lfPos) {
+        if (lfPos < 0) {
             remainderLength += chunk.length;
             continue;
         }
