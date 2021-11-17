@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "declaration": true,
+        "declarationDir": "lib/types",
+        "emitDeclarationOnly": true, // Vite handles transpiling, so tsc should emit declaration files only
         "outDir": "./lib/types",
         "noImplicitAny": true,
         "module": "ES2020",
@@ -9,6 +11,7 @@
             "WebWorker",
             "ES2020"
         ],
+        "types": ["vite/client"]
     },
     "files": [
         "src/csv.ts",

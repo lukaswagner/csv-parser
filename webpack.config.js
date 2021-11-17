@@ -36,8 +36,8 @@ module.exports = function () {
         },
         plugins: [
             new DefinePlugin({
-                MAIN_WORKER_SOURCE: '"main.js"',
-                SUB_WORKER_SOURCE: '"sub.js"'
+                __MAIN_WORKER_SOURCE: '"main.js"',
+                __SUB_WORKER_SOURCE: '"sub.js"'
             })
         ]
     };
@@ -49,8 +49,8 @@ module.exports = function () {
         },
         plugins: [
             new DefinePlugin({
-                MAIN_WORKER_SOURCE: 'new URL("main.js", import.meta.url)',
-                SUB_WORKER_SOURCE: 'new URL("sub.js", import.meta.url)'
+                __MAIN_WORKER_SOURCE: 'new URL("main.js", import.meta.url)',
+                __SUB_WORKER_SOURCE: 'new URL("sub.js", import.meta.url)'
             })
         ]
     };

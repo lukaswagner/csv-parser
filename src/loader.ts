@@ -197,7 +197,7 @@ export class Loader {
 
     protected setupWorker(): void {
         // @ts-expect-error The path to the worker source is only during build.
-        this._worker = new Worker(MAIN_WORKER_SOURCE);
+        this._worker = new Worker(__MAIN_WORKER_SOURCE);
 
         this._worker.onmessage = (e: MessageEvent<MessageData>) => {
             const msg = e.data;
