@@ -1,8 +1,6 @@
-import {
-    ColumnTypes,
-    DataType
-} from './types/dataType';
-
+import { Loader } from './loader';
+import { Column } from './types/column/column';
+import { ColumnTypes, DataType } from './types/dataType';
 import {
     ColumnsHandler,
     DataHandler,
@@ -10,23 +8,20 @@ import {
     ErrorHandler,
     EventHandler,
     LoadStatistics,
-    OpenedHandler
+    OpenedHandler,
 } from './types/handlers';
-
-import { Column } from './types/column/column';
 import { CsvLoaderOptions } from './types/options';
-import { Loader } from './loader';
 
 enum Event {
     Opened = 'opened',
     Columns = 'columns',
     Data = 'data',
     Done = 'done',
-    Error = 'error'
+    Error = 'error',
 }
 type EventType = `${Event}`;
 
-type ColumnHeader = { name: string, type: DataType };
+type ColumnHeader = { name: string; type: DataType };
 
 export class CSV {
     protected _options: CsvLoaderOptions;
@@ -46,7 +41,7 @@ export class CSV {
             [Event.Columns, new Set<EventHandler>()],
             [Event.Data, new Set<EventHandler>()],
             [Event.Done, new Set<EventHandler>()],
-            [Event.Error, new Set<EventHandler>()]
+            [Event.Error, new Set<EventHandler>()],
         ]);
     }
 
@@ -61,7 +56,7 @@ export class CSV {
     protected openUrl(url: string): void {
         this._options.delimiter ??= deductDelimiter(url.split('.').pop());
         const size = 'Content-Length';
-        fetch(url).then((res) => {
+        fetch(url).then(res => {
             if (res.headers.has(size)) {
                 this._options.size ??= Number.parseInt(res.headers.get(size));
             }
@@ -87,19 +82,19 @@ export class CSV {
         const h = this._handlers.get(event);
         switch (event) {
             case Event.Opened:
-                h.forEach((h) => (h as OpenedHandler)(data as ColumnHeader[]));
+                h.forEach(h => (h as OpenedHandler)(data as ColumnHeader[]));
                 break;
             case Event.Columns:
-                h.forEach((h) => (h as ColumnsHandler)(data as Column[]));
+                h.forEach(h => (h as ColumnsHandler)(data as Column[]));
                 break;
             case Event.Data:
-                h.forEach((h) => (h as DataHandler)(data as number));
+                h.forEach(h => (h as DataHandler)(data as number));
                 break;
             case Event.Done:
-                h.forEach((h) => (h as DoneHandler)(data as LoadStatistics));
+                h.forEach(h => (h as DoneHandler)(data as LoadStatistics));
                 break;
             case Event.Error:
-                h.forEach((h) => (h as ErrorHandler)(data as string));
+                h.forEach(h => (h as ErrorHandler)(data as string));
                 break;
             default:
                 break;
@@ -107,13 +102,13 @@ export class CSV {
     }
 
     public open(source: unknown): void {
-        if(source instanceof File) {
+        if (source instanceof File) {
             this.openFile(source);
-        } else if(typeof source === 'string') {
+        } else if (typeof source === 'string') {
             this.openUrl(source);
-        } else if(source instanceof ReadableStream) {
+        } else if (source instanceof ReadableStream) {
             this.openStream(source);
-        } else if(
+        } else if (
             source instanceof ArrayBuffer ||
             source instanceof SharedArrayBuffer ||
             source instanceof Uint8Array
@@ -148,8 +143,8 @@ function deductDelimiter(format: string): string {
 }
 
 // re-export interface
-export * from './types/options';
-export * from './types/handlers';
-export * from './types/dataType';
-export * from './types/column/column';
 export * from './types/chunk/chunk';
+export * from './types/column/column';
+export * from './types/dataType';
+export * from './types/handlers';
+export * from './types/options';

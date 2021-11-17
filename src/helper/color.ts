@@ -4,8 +4,7 @@ import { vec4 } from '../types/tuples';
 // https://github.com/cginternals/webgl-operate/blob/master/source/color.ts
 
 const DEFAULT_ALPHA: GLclampf = 1.0;
-const HEX_FORMAT_REGEX =
-    new RegExp(/^(#|0x)?(([0-9a-f]{3}){1,2}|([0-9a-f]{4}){1,2})$/i);
+const HEX_FORMAT_REGEX = new RegExp(/^(#|0x)?(([0-9a-f]{3}){1,2}|([0-9a-f]{4}){1,2})$/i);
 
 /**
  * Converts a color from HEX string to RGBA space. The hex string can start
@@ -22,7 +21,9 @@ export function hex2rgba(hex: string, failSilent = false): vec4 {
         if (!failSilent) {
             console.warn(
                 'hexadecimal RGBA color string must conform to either',
-                '#0000, or #00000000, given', hex);
+                '#0000, or #00000000, given',
+                hex
+            );
         }
         return rgba;
     }
@@ -31,27 +32,16 @@ export function hex2rgba(hex: string, failSilent = false): vec4 {
     const length = Math.floor((hex.length - offset) / 3);
     const stride = length - 1;
 
-    rgba[0] = parseInt(
-        hex[offset + 0 * length] +
-        hex[offset + 0 * length + stride], 16) / 255.0;
-    rgba[1] = parseInt(
-        hex[offset + 1 * length] +
-        hex[offset + 1 * length + stride], 16) / 255.0;
-    rgba[2] = parseInt(
-        hex[offset + 2 * length] +
-        hex[offset + 2 * length + stride], 16) / 255.0;
-    if ((hex.length - offset) === 4 || (hex.length - offset) === 8) {
-        rgba[3] = parseInt(
-            hex[offset + 3 * length] +
-            hex[offset + 3 * length + stride], 16) / 255.0;
+    rgba[0] = parseInt(hex[offset + 0 * length] + hex[offset + 0 * length + stride], 16) / 255.0;
+    rgba[1] = parseInt(hex[offset + 1 * length] + hex[offset + 1 * length + stride], 16) / 255.0;
+    rgba[2] = parseInt(hex[offset + 2 * length] + hex[offset + 2 * length + stride], 16) / 255.0;
+    if (hex.length - offset === 4 || hex.length - offset === 8) {
+        rgba[3] =
+            parseInt(hex[offset + 3 * length] + hex[offset + 3 * length + stride], 16) / 255.0;
     }
 
-    if (
-        !failSilent &&
-        (isNaN(rgba[0]) || isNaN(rgba[1]) || isNaN(rgba[2]) || isNaN(rgba[3]))
-    ) {
-        console.warn(
-            `expected well formatted hexadecimal RGBA string, given '${hex}'`);
+    if (!failSilent && (isNaN(rgba[0]) || isNaN(rgba[1]) || isNaN(rgba[2]) || isNaN(rgba[3]))) {
+        console.warn(`expected well formatted hexadecimal RGBA string, given '${hex}'`);
     }
     return rgba;
 }

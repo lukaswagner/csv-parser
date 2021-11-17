@@ -13,15 +13,15 @@ export enum DataType {
 }
 
 export type ColumnGenerator = {
-    name: string,
-    type: DataType,
-    func: (orig: string[], parsed: unknown[]) => unknown
-}
+    name: string;
+    type: DataType;
+    func: (orig: string[], parsed: unknown[]) => unknown;
+};
 
 export type ColumnTypes = {
-    columns: DataType[],
-    generatedColumns: ColumnGenerator[]
-}
+    columns: DataType[];
+    generatedColumns: ColumnGenerator[];
+};
 
 export function bytes(type: DataType): number {
     switch (type) {

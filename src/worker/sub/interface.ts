@@ -1,5 +1,5 @@
-import { ColumnGenerator, DataType } from '../../types/dataType';
 import { Chunk } from '../../types/chunk/chunk';
+import { ColumnGenerator, DataType } from '../../types/dataType';
 import { SubWorkerOptions } from './options';
 
 export enum MessageType {
@@ -8,20 +8,20 @@ export enum MessageType {
 }
 
 export type StartData = {
-    chunks: ArrayBufferLike[],
-    columns: DataType[],
-    generatedColumns: ColumnGenerator[],
-    options: SubWorkerOptions
-}
+    chunks: ArrayBufferLike[];
+    columns: DataType[];
+    generatedColumns: ColumnGenerator[];
+    options: SubWorkerOptions;
+};
 
 export type FinishedData = {
-    chunks: Array<Chunk>,
-    generatedChunks: Array<Chunk>,
-    startRemainder: SharedArrayBuffer,
-    endRemainder: SharedArrayBuffer
-}
+    chunks: Array<Chunk>;
+    generatedChunks: Array<Chunk>;
+    startRemainder: SharedArrayBuffer;
+    endRemainder: SharedArrayBuffer;
+};
 
 export type MessageData = {
-    type: MessageType,
+    type: MessageType;
     data: StartData | FinishedData;
-}
+};

@@ -1,9 +1,7 @@
 import { Position } from './position';
 import { splitLines } from './splitLines';
 
-export function parse(
-    chunks: ArrayBufferLike[], start: Position, end: Position
-): string[] {
+export function parse(chunks: ArrayBufferLike[], start: Position, end: Position): string[] {
     if (start.chunk === end.chunk) {
         return parseSingleChunk(chunks[start.chunk], start, end);
     }
@@ -11,9 +9,7 @@ export function parse(
     return parseMultipleChunks(chunks, start, end);
 }
 
-function parseSingleChunk(
-    chunk: ArrayBufferLike, start: Position, end: Position
-): string[] {
+function parseSingleChunk(chunk: ArrayBufferLike, start: Position, end: Position): string[] {
     const decoder = new TextDecoder();
     const lines = new Array<string>();
     const buffer = new Uint8Array(chunk, start.char, end.char - start.char);
@@ -21,9 +17,7 @@ function parseSingleChunk(
     return lines;
 }
 
-function parseMultipleChunks(
-    chunks: ArrayBufferLike[], start: Position, end: Position
-): string[] {
+function parseMultipleChunks(chunks: ArrayBufferLike[], start: Position, end: Position): string[] {
     const decoder = new TextDecoder();
     const expectMore = { stream: true };
     const lines = new Array<string>();
@@ -35,8 +29,7 @@ function parseMultipleChunks(
 
     // second to second-to-last chunks
     for (let i = start.chunk + 1; i < end.chunk; i++) {
-        remainder = splitLines(
-            decoder.decode(chunks[i], expectMore), lines, remainder);
+        remainder = splitLines(decoder.decode(chunks[i], expectMore), lines, remainder);
     }
 
     // last chunk

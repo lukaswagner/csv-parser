@@ -1,6 +1,4 @@
-export function splitLines(
-    chunk: string, lines: string[], remainder = ''
-): string {
+export function splitLines(chunk: string, lines: string[], remainder = ''): string {
     let start = 0;
     let newLine: number;
 

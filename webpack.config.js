@@ -5,8 +5,7 @@ const { DefinePlugin } = require('webpack');
 const { merge } = require('webpack-merge');
 
 module.exports = function () {
-    const shared =
-    {
+    const shared = {
         entry: {
             csv: './src/csv.ts',
             main: './src/worker/main/worker.ts',
@@ -15,7 +14,7 @@ module.exports = function () {
         mode: 'production',
         devtool: 'source-map',
         resolve: {
-            extensions: ['.ts']
+            extensions: ['.ts'],
         },
         output: {
             filename: '[name].js',
@@ -23,9 +22,7 @@ module.exports = function () {
             libraryTarget: 'umd',
         },
         module: {
-            rules: [
-                { test: /\.ts$/, use: { loader: 'ts-loader' } },
-            ],
+            rules: [{ test: /\.ts$/, use: { loader: 'ts-loader' } }],
         },
     };
 
@@ -37,9 +34,9 @@ module.exports = function () {
         plugins: [
             new DefinePlugin({
                 __MAIN_WORKER_SOURCE: '"main.js"',
-                __SUB_WORKER_SOURCE: '"sub.js"'
-            })
-        ]
+                __SUB_WORKER_SOURCE: '"sub.js"',
+            }),
+        ],
     };
 
     const webpack = {
@@ -50,13 +47,10 @@ module.exports = function () {
         plugins: [
             new DefinePlugin({
                 __MAIN_WORKER_SOURCE: 'new URL("main.js", import.meta.url)',
-                __SUB_WORKER_SOURCE: 'new URL("sub.js", import.meta.url)'
-            })
-        ]
+                __SUB_WORKER_SOURCE: 'new URL("sub.js", import.meta.url)',
+            }),
+        ],
     };
 
-    return [
-        merge(shared, standalone),
-        merge(shared, webpack)
-    ];
+    return [merge(shared, standalone), merge(shared, webpack)];
 };

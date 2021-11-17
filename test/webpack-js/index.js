@@ -1,16 +1,13 @@
-import {
-    TypeDeduction,
-    loadUrl
-} from '../..';
+import { TypeDeduction, loadUrl } from '../..';
 
 const conf = require('../conf');
 
 const options = {
     includesHeader: true,
-    delimiter: ','
+    delimiter: ',',
 };
 
-const update = (progress) => {
+const update = progress => {
     console.log('progress:', progress);
 };
 

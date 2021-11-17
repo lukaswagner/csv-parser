@@ -9,7 +9,7 @@ module.exports = function () {
         plugins: [
             new HtmlWebpackPlugin({
                 filename: 'index.html',
-            })
+            }),
         ],
     };
 };

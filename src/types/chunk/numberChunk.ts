@@ -1,4 +1,4 @@
-import { DataType, bytes } from '../dataType';
+import { bytes, DataType } from '../dataType';
 import { BufferChunk } from './bufferChunk';
 
 interface NumArray {
@@ -94,9 +94,20 @@ export class Float64Chunk extends BaseNumberChunk<Float64Array> {
 }
 
 export type NumberChunk =
-    Int8Chunk | Uint8Chunk | Int16Chunk | Uint16Chunk |
-    Int32Chunk | Uint32Chunk | Float32Chunk | Float64Chunk;
+    | Int8Chunk
+    | Uint8Chunk
+    | Int16Chunk
+    | Uint16Chunk
+    | Int32Chunk
+    | Uint32Chunk
+    | Float32Chunk
+    | Float64Chunk;
 
-export type AnyNumberChunk =
-    Int8Chunk & Uint8Chunk & Int16Chunk & Uint16Chunk &
-    Int32Chunk & Uint32Chunk & Float32Chunk & Float64Chunk;
+export type AnyNumberChunk = Int8Chunk &
+    Uint8Chunk &
+    Int16Chunk &
+    Uint16Chunk &
+    Int32Chunk &
+    Uint32Chunk &
+    Float32Chunk &
+    Float64Chunk;

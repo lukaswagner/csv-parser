@@ -1,10 +1,10 @@
-import * as MainInterface from './interface';
-import * as SubInterface from '../sub/interface';
-import { Chunk } from '../../types/chunk/chunk';
-import { PerfMon } from '../../helper/perfMon';
 import { parseLine } from '../../helper/parseLine';
+import { PerfMon } from '../../helper/perfMon';
 import { splitLine } from '../../helper/splitLine';
 import { storeValue } from '../../helper/storeValue';
+import { Chunk } from '../../types/chunk/chunk';
+import * as SubInterface from '../sub/interface';
+import * as MainInterface from './interface';
 
 const mainWorker: Worker = self as unknown as Worker;
 
@@ -39,7 +39,7 @@ mainWorker.onmessage = (e: MessageEvent<MainInterface.MessageData>) => {
             onNoMoreChunks();
             break;
         default:
-            if(setup.options.verbose)
+            if (setup.options.verbose)
                 console.log('received invalid msg from frontend thread:', msg);
             break;
     }
@@ -83,10 +83,7 @@ function startSubWorker(): void {
 
     subWorker.onmessage = (e: MessageEvent<SubInterface.MessageData>) => {
         const msg = e.data;
-        if (
-            e.data.type !== SubInterface.MessageType.Finished &&
-            setup.options.verbose
-        ) {
+        if (e.data.type !== SubInterface.MessageType.Finished && setup.options.verbose) {
             console.log('received invalid msg from sub worker:', msg);
         }
         onSubWorkerFinished(msg.data as SubInterface.FinishedData, workerId);
@@ -98,27 +95,25 @@ function startSubWorker(): void {
         generatedColumns: setup.generatedColumns,
         options: {
             delimiter: setup.options.delimiter,
-            includesHeader: setup.options.includesHeader && workerId === 0
-        }
+            includesHeader: setup.options.includesHeader && workerId === 0,
+        },
     };
 
     const msg: SubInterface.MessageData = {
         type: SubInterface.MessageType.Start,
-        data
+        data,
     };
 
     const label = `worker ${workerId}`;
-    if(setup.options.verbose) console.log('starting ' + label);
+    if (setup.options.verbose) console.log('starting ' + label);
     runningWorkers.set(workerId, subWorker);
     perfMon.start(workerId, label);
     subWorker.postMessage(msg, [...workerChunks]);
 }
 
-function onSubWorkerFinished(
-    data: SubInterface.FinishedData, workerId: number
-): void {
+function onSubWorkerFinished(data: SubInterface.FinishedData, workerId: number): void {
     perfMon.stop(workerId);
-    if(setup.options.verbose) console.log(`worker ${workerId} done`);
+    if (setup.options.verbose) console.log(`worker ${workerId} done`);
     const subWorker = runningWorkers.get(workerId);
     runningWorkers.delete(workerId);
 
@@ -141,9 +136,7 @@ function finishChunk(): boolean {
     const gc = generatedChunks.get(nextChunkToBeFinished);
     const er = endRemainders.get(nextChunkToBeFinished);
     const sr = startRemainders.get(nextChunkToBeFinished + 1);
-    const lastChunk =
-        allChunksHandled &&
-        (nextWorker === nextChunkToBeFinished + 1);
+    const lastChunk = allChunksHandled && nextWorker === nextChunkToBeFinished + 1;
 
     const ready = pc && gc && er && (sr || lastChunk);
     if (!ready) return false;
@@ -153,8 +146,8 @@ function finishChunk(): boolean {
     if (sr) buf.set(new Uint8Array(sr), er.byteLength);
 
     handleRemainder(buf, pc, gc);
-    pc.forEach((c) => c.offset = chunkLengthSum);
-    gc.forEach((c) => c.offset = chunkLengthSum);
+    pc.forEach(c => (c.offset = chunkLengthSum));
+    gc.forEach(c => (c.offset = chunkLengthSum));
     chunkLengthSum += pc[0].length;
 
     parsedChunks.delete(nextChunkToBeFinished);
@@ -163,11 +156,11 @@ function finishChunk(): boolean {
     startRemainders.delete(nextChunkToBeFinished + 1);
 
     const data: MainInterface.ProcessedData = {
-        chunks: [...pc, ...gc]
+        chunks: [...pc, ...gc],
     };
     const msg: MainInterface.MessageData = {
         type: MainInterface.MessageType.Processed,
-        data
+        data,
     };
     postMessage(msg);
 
@@ -183,7 +176,7 @@ function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]): void {
     values.forEach((v, vi) => storeValue(v, pc[vi].length - 1, pc[vi]));
 
     const gen = setup.generatedColumns;
-    const genValues = gen.map((g) => g.func(valueTexts, values));
+    const genValues = gen.map(g => g.func(valueTexts, values));
     genValues.forEach((v, vi) => storeValue(v, gc[vi].length - 1, gc[vi]));
 }
 
@@ -192,11 +185,11 @@ function done(): void {
         chunks: totalChunks,
         bytes: totalBytes,
         workers: nextWorker,
-        performance: perfMon.samples
+        performance: perfMon.samples,
     };
     const msg: MainInterface.MessageData = {
         type: MainInterface.MessageType.Finished,
-        data
+        data,
     };
     postMessage(msg);
 }

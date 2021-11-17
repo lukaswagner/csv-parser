@@ -1,5 +1,5 @@
-import { ColumnGenerator, DataType } from '../../types/dataType';
 import { Chunk } from '../../types/chunk/chunk';
+import { ColumnGenerator, DataType } from '../../types/dataType';
 import { LoadStatistics } from '../../types/handlers';
 import { MainWorkerOptions } from './options';
 
@@ -12,32 +12,26 @@ export enum MessageType {
 }
 
 export type SetupData = {
-    columns: DataType[],
-    generatedColumns: ColumnGenerator[],
-    options: MainWorkerOptions
-}
+    columns: DataType[];
+    generatedColumns: ColumnGenerator[];
+    options: MainWorkerOptions;
+};
 
 export type AddChunkData = {
-    chunk: ArrayBufferLike
-}
+    chunk: ArrayBufferLike;
+};
 
-export type NoMoreChunksData = {
-}
+export type NoMoreChunksData = Record<string, never>;
 
 export type ProcessedData = {
-    chunks: Array<Chunk>
-}
+    chunks: Array<Chunk>;
+};
 
 export type FinishedData = LoadStatistics;
 
-type AnyData =
-    SetupData |
-    AddChunkData |
-    NoMoreChunksData |
-    ProcessedData |
-    FinishedData;
+type AnyData = SetupData | AddChunkData | NoMoreChunksData | ProcessedData | FinishedData;
 
 export type MessageData = {
-    type: MessageType,
-    data: AnyData
-}
+    type: MessageType;
+    data: AnyData;
+};

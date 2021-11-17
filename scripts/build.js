@@ -45,11 +45,11 @@ const main = async () => {
                         values: {
                             __MAIN_WORKER_SOURCE: 'new URL("main.js", import.meta.url)',
                             __SUB_WORKER_SOURCE: 'new URL("sub.js", import.meta.url)',
-                        }
+                        },
                     }),
                     enforce: 'post',
-                }
-            ]
+                },
+            ],
         });
     }
 };
