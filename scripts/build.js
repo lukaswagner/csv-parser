@@ -25,8 +25,8 @@ const main = async () => {
                 lib: {
                     entry,
                     name: 'csv',
-                    formats: ['es'],
-                    fileName: () => `${name}.js`,
+                    formats: ['es', 'cjs'],
+                    fileName: format => `${format}/${name}.js`,
                 },
                 rollupOptions: {
                     // External dependencies that shouldn't be bundled go here

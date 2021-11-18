@@ -2,8 +2,14 @@
     "name": "csv-parser",
     "version": "1.0.0",
     "description": "Multi-threaded CSV parser using web workers.",
-    "main": "lib/csv.js",
-    "types": "lib/types/csv.d.ts",
+    "main": "./lib/cjs/csv.js",
+    "module": "./lib/es/csv.js",
+    "exports": {
+        "import": "./lib/es/csv.js",
+        "require": "./lib/cjs/csv.js"
+    },
+    "types": "./lib/types/csv.d.ts",
+    "files": ["lib"],
     "scripts": {
         "build": "node scripts/build.js && tsc",
         "watch": "webpack build -w",
