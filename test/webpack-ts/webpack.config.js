@@ -1,9 +1,11 @@
-'use strict';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import { resolveFile } from '../../scripts/helper.js';
 
-module.exports = function () {
+/**
+ * @returns {import("webpack").Configuration}
+ */
+export default function () {
     return {
         entry: './index.ts',
         mode: 'production',
@@ -18,15 +20,15 @@ module.exports = function () {
         resolve: {
             extensions: ['.ts', '.js', '.json'],
             alias: {
-                '1m.csv.gz': path.resolve(__dirname, '../data/1m.csv.gz'),
-                '10m.csv': path.resolve(__dirname, '../data/10m.csv'),
-                '50m.csv': path.resolve(__dirname, '../data/50m.csv'),
-                '100m.csv': path.resolve(__dirname, '../data/100m.csv'),
+                '1m.csv.gz': resolveFile('./test/data/1m.csv.gz'),
+                '10m.csv': resolveFile('./test/data/10m.csv'),
+                '50m.csv': resolveFile('./test/data/50m.csv'),
+                '100m.csv': resolveFile('./test/data/100m.csv'),
             },
             fallback: {
-                '10m.csv': path.resolve(__dirname, '../data/fallback.csv'),
-                '50m.csv': path.resolve(__dirname, '../data/fallback.csv'),
-                '100m.csv': path.resolve(__dirname, '../data/fallback.csv'),
+                '10m.csv': resolveFile('./test/data/fallback.csv'),
+                '50m.csv': resolveFile('./test/data/fallback.csv'),
+                '100m.csv': resolveFile('./test/data/fallback.csv'),
             },
         },
         plugins: [
@@ -38,8 +40,11 @@ module.exports = function () {
         devServer: {
             headers: {
                 'Cross-Origin-Opener-Policy': 'same-origin',
-                'Cross-Origin-Embedder-Policy': 'require-corp',
-            },
+                'Cross-Origin-Embedder-Policy': 'require-corp'
+            }
         },
+        performance: {
+            assetFilter: assetFilename => !assetFilename.endsWith('.gz')
+        }
     };
-};
+}
