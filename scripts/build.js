@@ -1,17 +1,12 @@
-const replace = require('@rollup/plugin-replace');
-const path = require('path');
-const { build } = require('vite');
+import replace from '@rollup/plugin-replace';
+import { build } from 'vite';
+
+import { resolveFile } from './helper.js';
 
 const artifacts = [
-    { name: 'csv', entry: path.resolve(__dirname, '../src/csv.ts') },
-    {
-        name: 'main',
-        entry: path.resolve(__dirname, '../src/worker/main/worker.ts'),
-    },
-    {
-        name: 'sub',
-        entry: path.resolve(__dirname, '../src/worker/sub/worker.ts'),
-    },
+    { name: 'csv', entry: resolveFile('./src/csv.ts') },
+    { name: 'main', entry: resolveFile('./src/worker/main/worker.ts') },
+    { name: 'sub', entry: resolveFile('./src/worker/sub/worker.ts') },
 ];
 
 const main = async () => {
@@ -25,8 +20,8 @@ const main = async () => {
                 lib: {
                     entry,
                     name: 'csv',
-                    formats: ['es', 'cjs'],
-                    fileName: format => `${format}/${name}.js`,
+                    formats: ['es'],
+                    fileName: () => `${name}.js`,
                 },
                 rollupOptions: {
                     // External dependencies that shouldn't be bundled go here
@@ -43,8 +38,8 @@ const main = async () => {
                     ...replace({
                         preventAssignment: true,
                         values: {
-                            __MAIN_WORKER_SOURCE: 'new URL("main.js", import.meta.url)',
-                            __SUB_WORKER_SOURCE: 'new URL("sub.js", import.meta.url)',
+                            __MAIN_WORKER_SOURCE: '"main.js"',
+                            __SUB_WORKER_SOURCE: '"sub.js"',
                         }
                     }),
                     enforce: 'post',

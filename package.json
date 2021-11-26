@@ -2,12 +2,9 @@
     "name": "csv-parser",
     "version": "1.0.0",
     "description": "Multi-threaded CSV parser using web workers.",
-    "main": "./lib/cjs/csv.js",
-    "module": "./lib/es/csv.js",
-    "exports": {
-        "import": "./lib/es/csv.js",
-        "require": "./lib/cjs/csv.js"
-    },
+    "type": "module",
+    "module": "./lib/csv.js",
+    "exports": "./lib/csv.js",
     "types": "./lib/types/csv.d.ts",
     "files": ["lib"],
     "scripts": {
@@ -33,6 +30,9 @@
         "url": "https://github.com/lukaswagner/csv-parser/issues"
     },
     "homepage": "https://github.com/lukaswagner/csv-parser#readme",
+    "engines": {
+        "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+    },
     "devDependencies": {
         "@rollup/plugin-replace": "^3.0.0",
         "@types/pako": "^1.0.2",

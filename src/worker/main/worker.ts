@@ -79,7 +79,7 @@ function startSubWorker(): void {
     const workerId = nextWorker++;
 
     // @ts-expect-error The path to the worker source is only during build.
-    const subWorker = new Worker(__SUB_WORKER_SOURCE);
+    const subWorker = new Worker(new URL(__SUB_WORKER_SOURCE, import.meta.url), { type: 'module' });
 
     subWorker.onmessage = (e: MessageEvent<SubInterface.MessageData>) => {
         const msg = e.data;
