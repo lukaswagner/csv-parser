@@ -1,6 +1,7 @@
 {
     "extends": "./tsconfig.json",
     "include": [
+        "scripts/*.js",
         "test/express/*.js",
         "test/webpack-js/*.js",
         "test/webpack-ts/*.ts",

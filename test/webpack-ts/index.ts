@@ -1,5 +1,3 @@
-import * as pako from 'pako';
-
 import {
     CSV,
     Column,
@@ -11,7 +9,8 @@ import {
 } from '../..';
 import { NumberColumn } from '../../lib/types/types/column/numberColumn';
 
-const conf = require('../conf');
+import conf from '../conf.json';
+import pako from 'pako';
 
 const options = new CsvLoaderOptions({
     includesHeader: true,
