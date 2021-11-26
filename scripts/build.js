@@ -1,5 +1,5 @@
-import { build } from 'vite';
 import replace from '@rollup/plugin-replace';
+import { build } from 'vite';
 
 import { resolveFile } from './helper.js';
 
@@ -24,9 +24,7 @@ const main = async () => {
                     fileName: () => `${name}.js`,
                 },
                 sourcemap: true,
-                watch: process.argv.includes('--watch') ? {
-                    include: 'src/**'
-                } : null
+                watch: process.argv.includes('--watch') ? { include: 'src/**' } : null,
             },
             plugins: [
                 {
@@ -35,11 +33,11 @@ const main = async () => {
                         values: {
                             __MAIN_WORKER_SOURCE: '"main.js"',
                             __SUB_WORKER_SOURCE: '"sub.js"',
-                        }
+                        },
                     }),
                     enforce: 'post',
-                }
-            ]
+                },
+            ],
         });
     }
 };
