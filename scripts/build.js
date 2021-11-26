@@ -1,5 +1,5 @@
-import replace from '@rollup/plugin-replace';
 import { build } from 'vite';
+import replace from '@rollup/plugin-replace';
 
 import { resolveFile } from './helper.js';
 
@@ -23,15 +23,10 @@ const main = async () => {
                     formats: ['es'],
                     fileName: () => `${name}.js`,
                 },
-                rollupOptions: {
-                    // External dependencies that shouldn't be bundled go here
-                    external: [],
-                    output: {
-                        // Global variables to use in the UMD build for externalized dependencies
-                        globals: {},
-                    },
-                },
                 sourcemap: true,
+                watch: process.argv.includes('--watch') ? {
+                    include: 'src/**'
+                } : null
             },
             plugins: [
                 {

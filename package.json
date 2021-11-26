@@ -9,7 +9,9 @@
     "files": ["lib"],
     "scripts": {
         "build": "node scripts/build.js && tsc",
-        "watch": "webpack build -w",
+        "vite-watch": "node scripts/build.js --watch",
+        "tsc-watch": "tsc --watch",
+        "watch": "concurrently npm:vite-watch npm:tsc-watch",
         "test-webpack-js": "cd test/webpack-js && webpack serve",
         "test-webpack-ts": "cd test/webpack-ts && webpack serve",
         "test-express": "cd test/express && node server.js",
