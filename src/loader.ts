@@ -137,7 +137,7 @@ export class Loader {
     protected detectTypes(chunk: ArrayBufferLike): void {
         const lines = parse([chunk], { chunk: 0, char: 0 }, { chunk: 0, char: chunk.byteLength });
 
-        this._firstChunkSplit = lines.map(l => splitLine(l, this._options.delimiter));
+        this._firstChunkSplit = lines.map((l) => splitLine(l, this._options.delimiter));
 
         const inferStart = +this._options.includesHeader;
         const inferLines = this._firstChunkSplit.slice(
@@ -146,7 +146,7 @@ export class Loader {
         );
 
         const detectedTypes = inferLines
-            .map(l => l.map(c => inferType(c)))
+            .map((l) => l.map((c) => inferType(c)))
             .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
 
         const header = detectedTypes.map((t, i) => {
@@ -168,7 +168,7 @@ export class Loader {
                     t
                 )
             ),
-            ...this._types.generatedColumns.map(t => buildColumn(t.name, t.type)),
+            ...this._types.generatedColumns.map((t) => buildColumn(t.name, t.type)),
         ];
         this._firstChunkSplit = undefined;
         this._onColumns(this._columns);
@@ -217,7 +217,7 @@ export class Loader {
     }
 
     protected onProcessed(data: ProcessedData): void {
-        const chunks = data.chunks.map(c => rebuildChunk(c));
+        const chunks = data.chunks.map((c) => rebuildChunk(c));
         this._columns.forEach((c, i) => c.push(chunks[i] as AnyChunk));
         this._onData(this._columns[0].length);
     }

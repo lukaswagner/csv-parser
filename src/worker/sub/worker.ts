@@ -18,20 +18,20 @@ subWorker.onmessage = (e: MessageEvent<Interface.MessageData>) => {
 
 function onStart(data: Interface.StartData): void {
     const remainders = detectRemainders(data.chunks);
-    const lines = parse(data.chunks, remainders.start, remainders.end).map(l =>
+    const lines = parse(data.chunks, remainders.start, remainders.end).map((l) =>
         splitLine(l, data.options.delimiter)
     );
 
     const numChunks = lines.length + 1; // +1 for inter-chunk remainder
-    const chunks = data.columns.map(c => buildChunk(c, numChunks));
-    const values = lines.map(l => parseLine(l, data.columns));
+    const chunks = data.columns.map((c) => buildChunk(c, numChunks));
+    const values = lines.map((l) => parseLine(l, data.columns));
     values.forEach((line, li) => line.forEach((value, vi) => storeValue(value, li, chunks[vi])));
 
     const gen = data.generatedColumns;
-    const generatedChunks = gen.map(c => buildChunk(c.type, numChunks));
+    const generatedChunks = gen.map((c) => buildChunk(c.type, numChunks));
 
     lines.forEach((line, li) => {
-        const genValues = gen.map(g => g.func(line, values[li]));
+        const genValues = gen.map((g) => g.func(line, values[li]));
         genValues.forEach((value, vi) => storeValue(value, li, generatedChunks[vi]));
     });
 

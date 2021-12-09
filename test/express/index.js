@@ -4,7 +4,7 @@ function load(url) {
         delimiter: ',',
     };
 
-    const update = progress => {
+    const update = (progress) => {
         console.log('progress:', progress);
     };
 
@@ -12,8 +12,8 @@ function load(url) {
     csv.loadUrl(url, options, update, csv.TypeDeduction.KeepAll);
 }
 
-fetch('/conf.json').then(c => {
-    c.text().then(t => {
+fetch('/conf.json').then((c) => {
+    c.text().then((t) => {
         const json = JSON.parse(t);
         load(json.url);
     });

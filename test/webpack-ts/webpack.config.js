@@ -44,7 +44,7 @@ export default function () {
             },
         },
         performance: {
-            assetFilter: assetFilename => !assetFilename.endsWith('.gz'),
+            assetFilter: (assetFilename) => !assetFilename.endsWith('.gz'),
         },
     };
 }
