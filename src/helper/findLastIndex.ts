@@ -7,7 +7,7 @@
  * in descending order, until it finds one where predicate returns true.
  * If such an element is found, findLastIndex immediately returns that element
  * index. Otherwise, findLastIndex returns -1.
-*/
+ */
 export function findLastIndex<T>(
     array: ArrayLike<T>,
     predicate: (value: T, index: number, obj: ArrayLike<T>) => boolean

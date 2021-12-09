@@ -1,4 +1,4 @@
 export type SubWorkerOptions = {
-    delimiter: string,
-    includesHeader: boolean,
-}
+    delimiter: string;
+    includesHeader: boolean;
+};

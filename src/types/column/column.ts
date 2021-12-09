@@ -1,3 +1,6 @@
+import { Chunk } from '../chunk/chunk';
+import { DataType } from '../dataType';
+import { ColorColumn } from './colorColumn';
 import {
     AnyNumberColumn,
     Float32Column,
@@ -8,11 +11,8 @@ import {
     NumberColumn,
     Uint16Column,
     Uint32Column,
-    Uint8Column
+    Uint8Column,
 } from './numberColumn';
-import { Chunk } from '../chunk/chunk';
-import { ColorColumn } from './colorColumn';
-import { DataType } from '../dataType';
 import { StringColumn } from './stringColumn';
 
 export type Column = NumberColumn | ColorColumn | StringColumn;
@@ -48,9 +48,9 @@ export function buildColumn(name: string, type: DataType): Column {
 
 export function rebuildColumn(column: unknown): Column {
     const oc = column as {
-        _type: DataType,
-        _chunks: Chunk[],
-        _name: string
+        _type: DataType;
+        _chunks: Chunk[];
+        _name: string;
     };
     const nc = buildColumn(oc._name, oc._type);
     return Object.assign(nc, column);

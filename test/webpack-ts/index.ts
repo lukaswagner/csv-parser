@@ -1,54 +1,60 @@
+import pako from 'pako';
+
 import {
-    CSV,
     Column,
     ColumnHeader,
+    CSV,
     CsvLoaderOptions,
     DataType,
-    LoadStatistics,
     isNumber,
+    LoadStatistics,
 } from '../..';
 import { NumberColumn } from '../../lib/types/types/column/numberColumn';
-
 import conf from '../conf.json';
-import pako from 'pako';
 
 const options = new CsvLoaderOptions({
     includesHeader: true,
-    delimiter: ','
+    delimiter: ',',
 });
 
 function onOpened(this: CSV, tag: string, columns: ColumnHeader[]): void {
     console.log(
         tag,
         `opened source, detected ${columns.length} columns:\n` +
-        columns.map((c) => `${c.name}: ${DataType[c.type]}`).join('\n'));
+            columns.map((c) => `${c.name}: ${DataType[c.type]}`).join('\n')
+    );
     this.load({
         columns: columns.map((c) => c.type),
-        generatedColumns: []
+        generatedColumns: [],
     });
 }
 
 type Stats = {
-    tag: string,
-    rows: number,
-    kB: number,
-    time: number,
-    rowsPerSecond: number,
-    kBPerSecond: number
-}
+    tag: string;
+    rows: number;
+    kB: number;
+    time: number;
+    rowsPerSecond: number;
+    kBPerSecond: number;
+};
 const statistics = new Array<Stats>();
 
 function onDone(
-    this: CSV, tag: string, done: () => void,
-    columns: Column[], stats: LoadStatistics
+    this: CSV,
+    tag: string,
+    done: () => void,
+    columns: Column[],
+    stats: LoadStatistics
 ): void {
     let columnsStats = '=== column stats: ===\n';
-    columnsStats += columns.map((c) => {
-        let text = `${c.name}: ${c.length} rows`;
-        const asNum = c as NumberColumn;
-        if(isNumber(c.type)) text += `, min ${asNum.min}, max ${asNum.max}`;
-        return text;
-    }).join('\n');
+    columnsStats += columns
+        .map((c) => {
+            let text = `${c.name}: ${c.length} rows`;
+            const asNum = c as NumberColumn;
+            if (isNumber(c.type)) text += `, min ${asNum.min}, max ${asNum.max}`;
+            return text;
+        })
+        .join('\n');
 
     const timeMS =
         stats.performance.find((s) => s.label === 'open').delta +
@@ -64,7 +70,7 @@ function onDone(
         kB,
         time: timeS,
         rowsPerSecond: rows / timeS,
-        kBPerSecond: kB /timeS
+        kBPerSecond: kB / timeS,
     });
 
     const loaderStats =
@@ -82,8 +88,7 @@ function onDone(
     console.log(tag, `done.\n${columnsStats}\n${loaderStats}`);
 
     console.groupCollapsed('=== performance stats: ===');
-    stats.performance.forEach(
-        (m) => console.log(`${m.label}: ${m.delta} ms`));
+    stats.performance.forEach((m) => console.log(`${m.label}: ${m.delta} ms`));
     console.groupEnd();
 
     done();
@@ -91,7 +96,7 @@ function onDone(
 
 function createLoader(tag: string, done: () => void): CSV {
     const loader = new CSV(options);
-    loader.on('opened',  onOpened.bind(loader, tag));
+    loader.on('opened', onOpened.bind(loader, tag));
     loader.on('columns', (columns: Column[]) => {
         console.log(tag, 'received columns');
         loader.on('done', onDone.bind(loader, tag, done, columns));
@@ -117,8 +122,8 @@ function testGzipped(testCase: string, url: string): Promise<void> {
     return new Promise<void>((resolve) => {
         fetch(url)
             .then((res) => res.arrayBuffer())
-            .then((buf) => createLoader(testCase, resolve).open(
-                pako.inflate(new Uint8Array(buf)).buffer)
+            .then((buf) =>
+                createLoader(testCase, resolve).open(pako.inflate(new Uint8Array(buf)).buffer)
             );
     });
 }

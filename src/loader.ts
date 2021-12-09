@@ -1,3 +1,18 @@
+import { inferType, lowestType } from './helper/inferType';
+import { parse } from './helper/parseChunks';
+import { PerfMon } from './helper/perfMon';
+import { splitLine } from './helper/splitLine';
+import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
+import { buildColumn, Column } from './types/column/column';
+import { ColumnTypes } from './types/dataType';
+import {
+    ColumnsHandler,
+    DataHandler,
+    DoneHandler,
+    ErrorHandler,
+    OpenedHandler,
+} from './types/handlers';
+import { CsvLoaderOptions } from './types/options';
 import {
     AddChunkData,
     FinishedData,
@@ -5,37 +20,8 @@ import {
     MessageType,
     NoMoreChunksData,
     ProcessedData,
-    SetupData
+    SetupData,
 } from './worker/main/interface';
-
-import {
-    AnyChunk,
-    rebuildChunk
-} from './types/chunk/chunk';
-
-import {
-    Column,
-    buildColumn
-} from './types/column/column';
-
-import {
-    ColumnsHandler,
-    DataHandler,
-    DoneHandler,
-    ErrorHandler,
-    OpenedHandler
-} from './types/handlers';
-
-import {
-    inferType,
-    lowestType
-} from './helper/inferType';
-
-import { ColumnTypes } from './types/dataType';
-import { CsvLoaderOptions } from './types/options';
-import { PerfMon } from './helper/perfMon';
-import { parse } from './helper/parseChunks';
-import { splitLine } from './helper/splitLine';
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -58,11 +44,9 @@ export class Loader {
     protected _worker: Worker;
     protected _perfMon = new PerfMon();
 
-    protected openStream(
-        result: ReadableStreamDefaultReadResult<Uint8Array>
-    ): void {
+    protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): void {
         if (!result.value) {
-            if(this._options.verbose) console.log('received no data');
+            if (this._options.verbose) console.log('received no data');
             this._onError('No data');
             return;
         }
@@ -76,12 +60,12 @@ export class Loader {
         this.setupWorker();
 
         const acd: AddChunkData = {
-            chunk: this._firstChunk
+            chunk: this._firstChunk,
         };
 
         const msg: MessageData = {
             type: MessageType.AddChunk,
-            data: acd
+            data: acd,
         };
 
         this._worker.postMessage(msg, [this._firstChunk]);
@@ -90,28 +74,26 @@ export class Loader {
         this._reader.read().then(this.readStream.bind(this));
     }
 
-    protected readStream(
-        result: ReadableStreamDefaultReadResult<Uint8Array>
-    ): void {
+    protected readStream(result: ReadableStreamDefaultReadResult<Uint8Array>): void {
         if (result.done) {
-            if(this._options.verbose) console.log('stream ended');
+            if (this._options.verbose) console.log('stream ended');
             this.sendNoMoreChunks();
             return;
         }
 
         if (!result.value) {
-            if(this._options.verbose) console.log('received no data');
+            if (this._options.verbose) console.log('received no data');
             this._onError('No data');
             return;
         }
 
         const acd: AddChunkData = {
-            chunk: result.value.buffer
+            chunk: result.value.buffer,
         };
 
         const msg: MessageData = {
             type: MessageType.AddChunk,
-            data: acd
+            data: acd,
         };
 
         this._worker.postMessage(msg, [result.value.buffer]);
@@ -127,14 +109,17 @@ export class Loader {
         this.setupColumns();
         this.setupWorker();
 
-        this._worker.postMessage({
-            type: MessageType.AddChunk,
-            data: { chunk: this._buffer }
-        }, [this._buffer]);
+        this._worker.postMessage(
+            {
+                type: MessageType.AddChunk,
+                data: { chunk: this._buffer },
+            },
+            [this._buffer]
+        );
 
         this._worker.postMessage({
             type: MessageType.NoMoreChunks,
-            data: {}
+            data: {},
         });
     }
 
@@ -143,27 +128,22 @@ export class Loader {
 
         const msg: MessageData = {
             type: MessageType.NoMoreChunks,
-            data: data
+            data: data,
         };
 
         this._worker.postMessage(msg);
     }
 
     protected detectTypes(chunk: ArrayBufferLike): void {
-        const lines = parse(
-            [chunk],
-            { chunk: 0, char: 0 },
-            { chunk: 0, char: chunk.byteLength });
+        const lines = parse([chunk], { chunk: 0, char: 0 }, { chunk: 0, char: chunk.byteLength });
 
-        this._firstChunkSplit = lines.map(
-            (l) => splitLine(l, this._options.delimiter));
+        this._firstChunkSplit = lines.map((l) => splitLine(l, this._options.delimiter));
 
         const inferStart = +this._options.includesHeader;
         const inferLines = this._firstChunkSplit.slice(
             inferStart,
-            Math.max(
-                inferStart + this._options.typeInferLines,
-                this._firstChunkSplit.length));
+            Math.max(inferStart + this._options.typeInferLines, this._firstChunkSplit.length)
+        );
 
         const detectedTypes = inferLines
             .map((l) => l.map((c) => inferType(c)))
@@ -171,10 +151,8 @@ export class Loader {
 
         const header = detectedTypes.map((t, i) => {
             return {
-                name: this._options.includesHeader ?
-                    this._firstChunkSplit[0][i] :
-                    '',
-                type: t
+                name: this._options.includesHeader ? this._firstChunkSplit[0][i] : '',
+                type: t,
             };
         });
 
@@ -184,12 +162,13 @@ export class Loader {
 
     protected setupColumns(): void {
         this._columns = [
-            ...this._types.columns.map((t, i) => buildColumn(
-                this._options.includesHeader ?
-                    this._firstChunkSplit[0][i] :
-                    `Column ${i}`, t)),
-            ...this._types.generatedColumns.map((t) => buildColumn(
-                t.name, t.type))
+            ...this._types.columns.map((t, i) =>
+                buildColumn(
+                    this._options.includesHeader ? this._firstChunkSplit[0][i] : `Column ${i}`,
+                    t
+                )
+            ),
+            ...this._types.generatedColumns.map((t) => buildColumn(t.name, t.type)),
         ];
         this._firstChunkSplit = undefined;
         this._onColumns(this._columns);
@@ -213,9 +192,8 @@ export class Loader {
                     this._worker.terminate();
                     break;
                 default:
-                    if(this._options.verbose)
-                        console.log(
-                            'received invalid msg from main worker:', msg);
+                    if (this._options.verbose)
+                        console.log('received invalid msg from main worker:', msg);
                     break;
             }
         };
@@ -226,13 +204,13 @@ export class Loader {
             options: {
                 delimiter: this._options.delimiter,
                 includesHeader: this._options.includesHeader,
-                verbose: this._options.verbose
-            }
+                verbose: this._options.verbose,
+            },
         };
 
         const msg: MessageData = {
             type: MessageType.Setup,
-            data: setup
+            data: setup,
         };
 
         this._worker.postMessage(msg);
@@ -246,7 +224,7 @@ export class Loader {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onFinished(data: FinishedData): void {
-        if(this._options.verbose) console.log('main worker finished');
+        if (this._options.verbose) console.log('main worker finished');
         this._perfMon.stop('load');
         data.performance = [...this._perfMon.samples, ...data.performance];
         this._onDone(data);
@@ -254,13 +232,12 @@ export class Loader {
 
     public open(): void {
         if (this._options.delimiter === undefined) {
-            this._onError(
-                'Delimiter not specified nor deductible from filename.');
+            this._onError('Delimiter not specified nor deductible from filename.');
         }
 
         this._perfMon.start('open');
 
-        if(this._stream) {
+        if (this._stream) {
             this._reader = this._stream.getReader();
             this._reader.read().then(this.openStream.bind(this));
         } else {
@@ -270,7 +247,7 @@ export class Loader {
 
     public load(): void {
         this._perfMon.start('load');
-        if(this._stream) {
+        if (this._stream) {
             this.readStreamFirstChunk();
         } else {
             this.readBuffer();

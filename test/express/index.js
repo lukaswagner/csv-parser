@@ -1,7 +1,7 @@
 function load(url) {
     const options = {
         includesHeader: true,
-        delimiter: ','
+        delimiter: ',',
     };
 
     const update = (progress) => {
@@ -18,4 +18,3 @@ fetch('/conf.json').then((c) => {
         load(json.url);
     });
 });
-

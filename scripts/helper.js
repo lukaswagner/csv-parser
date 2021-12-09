@@ -6,4 +6,5 @@ import { fileURLToPath } from 'node:url';
  * @param {string} filepath - Path to a file.
  * @returns Resolved file path.
  */
-export const resolveFile = filepath => resolve(dirname(fileURLToPath(import.meta.url)), '..', filepath);
+export const resolveFile = (filepath) =>
+    resolve(dirname(fileURLToPath(import.meta.url)), '..', filepath);

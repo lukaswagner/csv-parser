@@ -1,14 +1,16 @@
-import { Position } from './position';
 import { findLastIndex } from './findLastIndex';
+import { Position } from './position';
 
 export type RemainderInfo = {
-    startRemainder: SharedArrayBuffer, start: Position,
-    endRemainder: SharedArrayBuffer, end: Position
-}
+    startRemainder: SharedArrayBuffer;
+    start: Position;
+    endRemainder: SharedArrayBuffer;
+    end: Position;
+};
 
 export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
-    const lf = 0x0A;
-    const cr = 0x0D;
+    const lf = 0x0a;
+    const cr = 0x0d;
 
     const start: Position = { chunk: 0, char: 0 };
     const end: Position = { chunk: 0, char: 0 };
@@ -73,8 +75,7 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         end.char = lfPos;
 
         // prepare buffer for start remainder
-        endRemainder = new SharedArrayBuffer(
-            remainderLength + chunk.length - 1 - lfPos);
+        endRemainder = new SharedArrayBuffer(remainderLength + chunk.length - 1 - lfPos);
         break;
     }
 
@@ -82,13 +83,11 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
     remainderLength = endRemainder.byteLength;
     // fill in end remainder from following chunks
     for (let i = chunks.length - 1; i >= end.chunk; i--) {
-
         let chunk = new Uint8Array(chunks[i]);
         if (chunk.length > remainderIndex) {
             chunk = chunk.subarray(chunk.length - remainderIndex - 1);
         }
-        new Uint8Array(endRemainder)
-            .set(chunk, remainderIndex - chunk.length + 1);
+        new Uint8Array(endRemainder).set(chunk, remainderIndex - chunk.length + 1);
         remainderIndex -= chunk.length;
     }
 

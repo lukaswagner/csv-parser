@@ -1,4 +1,5 @@
-
+import { DataType } from '../dataType';
+import { ColorChunk } from './colorChunk';
 import {
     AnyNumberChunk,
     Float32Chunk,
@@ -9,18 +10,14 @@ import {
     NumberChunk,
     Uint16Chunk,
     Uint32Chunk,
-    Uint8Chunk
+    Uint8Chunk,
 } from './numberChunk';
-import { ColorChunk } from './colorChunk';
-import { DataType } from '../dataType';
 import { StringChunk } from './stringChunk';
 
 export type Chunk = NumberChunk | ColorChunk | StringChunk;
 export type AnyChunk = AnyNumberChunk & ColorChunk & StringChunk;
 
-export function buildChunk(
-    type: DataType, length: number, offset = 0
-): Chunk {
+export function buildChunk(type: DataType, length: number, offset = 0): Chunk {
     switch (type) {
         case DataType.Number:
         case DataType.Float32:

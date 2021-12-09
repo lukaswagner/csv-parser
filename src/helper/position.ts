@@ -1,4 +1,4 @@
 export type Position = {
-    chunk: number,
-    char: number
+    chunk: number;
+    char: number;
 };

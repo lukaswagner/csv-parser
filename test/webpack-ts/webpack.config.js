@@ -34,17 +34,17 @@ export default function () {
         plugins: [
             new HtmlWebpackPlugin({
                 filename: 'index.html',
-                template: './index.pug'
+                template: './index.pug',
             }),
         ],
         devServer: {
             headers: {
                 'Cross-Origin-Opener-Policy': 'same-origin',
-                'Cross-Origin-Embedder-Policy': 'require-corp'
-            }
+                'Cross-Origin-Embedder-Policy': 'require-corp',
+            },
         },
         performance: {
-            assetFilter: assetFilename => !assetFilename.endsWith('.gz')
-        }
+            assetFilter: (assetFilename) => !assetFilename.endsWith('.gz'),
+        },
     };
 }

@@ -1,6 +1,6 @@
-import { BufferChunk } from './bufferChunk';
 import { DataType } from '../dataType';
 import { vec4 } from '../tuples';
+import { BufferChunk } from './bufferChunk';
 
 export class ColorChunk extends BufferChunk<vec4> {
     protected _view: Float32Array;
@@ -12,9 +12,7 @@ export class ColorChunk extends BufferChunk<vec4> {
     }
 
     public get(index: number): vec4 {
-        return Array.from(
-            this._view.subarray(index * 4, (index + 1) * 4)
-        ) as vec4;
+        return Array.from(this._view.subarray(index * 4, (index + 1) * 4)) as vec4;
     }
 
     public set(index: number, value: vec4): void {

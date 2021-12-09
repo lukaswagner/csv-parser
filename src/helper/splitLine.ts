@@ -6,9 +6,7 @@ export function splitLine(line: string, delimiter: string): Array<string> {
     let quoteActive = false;
 
     const push = (end: number): void => {
-        cells.push(line.substring(
-            quote ? start + 1 : start,
-            quote ? end - 1 : end));
+        cells.push(line.substring(quote ? start + 1 : start, quote ? end - 1 : end));
     };
 
     for (let i = 0; i < line.length; i++) {
@@ -33,8 +31,13 @@ export function splitLine(line: string, delimiter: string): Array<string> {
     return cells;
 }
 
-function cellEnd(line: string, index: number, delimiter: string): {
-    end: boolean, skip: number
+function cellEnd(
+    line: string,
+    index: number,
+    delimiter: string
+): {
+    end: boolean;
+    skip: number;
 } {
     const char = line.charAt(index);
     switch (char) {
