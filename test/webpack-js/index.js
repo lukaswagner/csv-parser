@@ -7,7 +7,7 @@ const options = {
     delimiter: ',',
 };
 
-const update = progress => {
+const update = (progress) => {
     console.log('progress:', progress);
 };
 

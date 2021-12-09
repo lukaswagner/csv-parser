@@ -21,10 +21,10 @@ function onOpened(this: CSV, tag: string, columns: ColumnHeader[]): void {
     console.log(
         tag,
         `opened source, detected ${columns.length} columns:\n` +
-            columns.map(c => `${c.name}: ${DataType[c.type]}`).join('\n')
+            columns.map((c) => `${c.name}: ${DataType[c.type]}`).join('\n')
     );
     this.load({
-        columns: columns.map(c => c.type),
+        columns: columns.map((c) => c.type),
         generatedColumns: [],
     });
 }
@@ -48,7 +48,7 @@ function onDone(
 ): void {
     let columnsStats = '=== column stats: ===\n';
     columnsStats += columns
-        .map(c => {
+        .map((c) => {
             let text = `${c.name}: ${c.length} rows`;
             const asNum = c as NumberColumn;
             if (isNumber(c.type)) text += `, min ${asNum.min}, max ${asNum.max}`;
@@ -57,8 +57,8 @@ function onDone(
         .join('\n');
 
     const timeMS =
-        stats.performance.find(s => s.label === 'open').delta +
-        stats.performance.find(s => s.label === 'load').delta;
+        stats.performance.find((s) => s.label === 'open').delta +
+        stats.performance.find((s) => s.label === 'load').delta;
     const timeS = timeMS / 1000;
     const kB = stats.bytes / 1000;
     const rows = columns[0].length;
@@ -88,7 +88,7 @@ function onDone(
     console.log(tag, `done.\n${columnsStats}\n${loaderStats}`);
 
     console.groupCollapsed('=== performance stats: ===');
-    stats.performance.forEach(m => console.log(`${m.label}: ${m.delta} ms`));
+    stats.performance.forEach((m) => console.log(`${m.label}: ${m.delta} ms`));
     console.groupEnd();
 
     done();
@@ -113,16 +113,16 @@ function createLoader(tag: string, done: () => void): CSV {
 }
 
 function testUrl(tag: string, url: string): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
         createLoader(tag, resolve).open(url);
     });
 }
 
 function testGzipped(testCase: string, url: string): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
         fetch(url)
-            .then(res => res.arrayBuffer())
-            .then(buf =>
+            .then((res) => res.arrayBuffer())
+            .then((buf) =>
                 createLoader(testCase, resolve).open(pako.inflate(new Uint8Array(buf)).buffer)
             );
     });

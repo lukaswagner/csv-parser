@@ -149,8 +149,8 @@ function finishChunk(): boolean {
     if (sr) buf.set(new Uint8Array(sr), er.byteLength);
 
     handleRemainder(buf, pc, gc);
-    pc.forEach(c => (c.offset = chunkLengthSum));
-    gc.forEach(c => (c.offset = chunkLengthSum));
+    pc.forEach((c) => (c.offset = chunkLengthSum));
+    gc.forEach((c) => (c.offset = chunkLengthSum));
     chunkLengthSum += pc[0].length;
 
     parsedChunks.delete(nextChunkToBeFinished);
@@ -179,7 +179,7 @@ function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]): void {
     values.forEach((v, vi) => storeValue(v, pc[vi].length - 1, pc[vi]));
 
     const gen = setup.generatedColumns;
-    const genValues = gen.map(g => g.func(valueTexts, values));
+    const genValues = gen.map((g) => g.func(valueTexts, values));
     genValues.forEach((v, vi) => storeValue(v, gc[vi].length - 1, gc[vi]));
 }
 
