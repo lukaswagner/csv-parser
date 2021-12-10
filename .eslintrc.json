@@ -12,6 +12,7 @@
         "sourceType": "module",
         "project": ["./tsconfig.eslint.json"]
     },
+    "ignorePatterns": ["test/deno/*.ts"],
     "plugins": ["@typescript-eslint"],
     "rules": {
         "comma-dangle": "off",
