@@ -5,6 +5,7 @@
         "source.fixAll": true,
         "source.organizeImports": false
     },
+    "editor.rulers": [100],
     "eslint.enable": true,
     "eslint.validate": ["javascript", "typescript"],
     "importSorter.generalConfiguration.sortOnBeforeSave": true,
