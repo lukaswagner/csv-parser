@@ -56,7 +56,7 @@ export class CSV {
     protected openUrl(url: string): void {
         this._options.delimiter ??= deductDelimiter(url.split('.').pop());
         const size = 'Content-Length';
-        fetch(url).then(res => {
+        fetch(url).then((res) => {
             if (res.headers.has(size)) {
                 this._options.size ??= Number.parseInt(res.headers.get(size));
             }
@@ -82,19 +82,19 @@ export class CSV {
         const h = this._handlers.get(event);
         switch (event) {
             case Event.Opened:
-                h.forEach(h => (h as OpenedHandler)(data as ColumnHeader[]));
+                h.forEach((h) => (h as OpenedHandler)(data as ColumnHeader[]));
                 break;
             case Event.Columns:
-                h.forEach(h => (h as ColumnsHandler)(data as Column[]));
+                h.forEach((h) => (h as ColumnsHandler)(data as Column[]));
                 break;
             case Event.Data:
-                h.forEach(h => (h as DataHandler)(data as number));
+                h.forEach((h) => (h as DataHandler)(data as number));
                 break;
             case Event.Done:
-                h.forEach(h => (h as DoneHandler)(data as LoadStatistics));
+                h.forEach((h) => (h as DoneHandler)(data as LoadStatistics));
                 break;
             case Event.Error:
-                h.forEach(h => (h as ErrorHandler)(data as string));
+                h.forEach((h) => (h as ErrorHandler)(data as string));
                 break;
             default:
                 break;
