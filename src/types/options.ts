@@ -1,11 +1,11 @@
-export class CsvLoaderOptions {
-    public delimiter?: string;
-    public includesHeader = true;
-    public size?: number;
-    public typeInferLines = 20;
-    public verbose = false;
+import { DataSource } from '../csv';
 
-    public constructor(obj?: unknown) {
-        Object.assign(this, obj);
-    }
+export interface CsvLoaderOptions {
+    dataSources: Record<string, DataSource>;
+    includesHeader: boolean;
+    typeInferLines: number;
+    verbose: boolean;
+
+    delimiter?: string;
+    size?: number;
 }
