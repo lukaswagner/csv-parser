@@ -2,7 +2,6 @@ import { Loader } from './loader';
 import { Column } from './types/column/column';
 import { ColumnTypes, DataType } from './types/dataType';
 import {
-    ColumnsHandler,
     DataHandler,
     DoneHandler,
     ErrorHandler,
@@ -12,7 +11,6 @@ import {
 import { CsvLoaderOptions } from './types/options';
 
 enum Event {
-    Columns = 'columns',
     Data = 'data',
     Done = 'done',
     Error = 'error',
@@ -41,12 +39,10 @@ export class CSV<D extends string> {
             ...options,
         };
         this._loader = new Loader();
-        this._loader.onColumns = this.dispatch.bind(this, Event.Columns);
         this._loader.onData = this.dispatch.bind(this, Event.Data);
         this._loader.onDone = this.dispatch.bind(this, Event.Done);
         this._loader.onError = this.dispatch.bind(this, Event.Error);
         this._handlers = new Map<EventType, Map<D, Set<EventHandler>>>([
-            [Event.Columns, new Map()],
             [Event.Data, new Map()],
             [Event.Done, new Map()],
             [Event.Error, new Map()],
@@ -105,9 +101,6 @@ export class CSV<D extends string> {
         const h = this._handlers.get(event).get(id);
 
         switch (event) {
-            case Event.Columns:
-                h.forEach((h) => (h as ColumnsHandler)(id, data as Column[]));
-                break;
             case Event.Data:
                 h.forEach((h) => (h as DataHandler)(id, data as number));
                 break;
@@ -147,9 +140,10 @@ export class CSV<D extends string> {
         return this.#openInputData(data);
     }
 
-    public load(types: ColumnTypes): void {
+    public load(types: ColumnTypes): [Column[]] {
         this._loader.types = types;
-        this._loader.load();
+
+        return this._loader.load();
     }
 
     public on(event: EventType, id: D, handler: EventHandler): void {

@@ -16,13 +16,7 @@ import {
     SetupData,
 } from './worker/main/interface';
 
-import type {
-    ColumnHeader,
-    ColumnsHandler,
-    DataHandler,
-    DoneHandler,
-    ErrorHandler,
-} from './types/handlers';
+import type { ColumnHeader, DataHandler, DoneHandler, ErrorHandler } from './types/handlers';
 
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
@@ -31,7 +25,6 @@ export class Loader {
     protected _buffer: ArrayBufferLike;
     protected _options: CsvLoaderOptions;
 
-    protected _onColumns: ColumnsHandler;
     protected _onData: DataHandler;
     protected _onDone: DoneHandler;
     protected _onError: ErrorHandler;
@@ -58,9 +51,6 @@ export class Loader {
     }
 
     protected readStreamFirstChunk(): void {
-        this.setupColumns();
-        this.setupWorker();
-
         const acd: AddChunkData = {
             chunk: this._firstChunk,
         };
@@ -108,9 +98,6 @@ export class Loader {
     }
 
     protected readBuffer(): void {
-        this.setupColumns();
-        this.setupWorker();
-
         this._worker.postMessage(
             {
                 type: MessageType.AddChunk,
@@ -161,18 +148,21 @@ export class Loader {
         return headers;
     }
 
-    protected setupColumns(): void {
+    protected setupColumns(): Column[] {
         this._columns = [
-            ...this._types.columns.map((t, i) =>
+            ...this._types.columns.map((type, index) =>
                 buildColumn(
-                    this._options.includesHeader ? this._firstChunkSplit[0][i] : `Column ${i}`,
-                    t
+                    this._options.includesHeader
+                        ? this._firstChunkSplit[0][index]
+                        : `Column ${index}`,
+                    type
                 )
             ),
-            ...this._types.generatedColumns.map((t) => buildColumn(t.name, t.type)),
+            ...this._types.generatedColumns.map(({ name, type }) => buildColumn(name, type)),
         ];
         this._firstChunkSplit = undefined;
-        this._onColumns(this.#openedSourceId, this._columns);
+
+        return this._columns;
     }
 
     protected setupWorker(): void {
@@ -253,13 +243,19 @@ export class Loader {
         }
     }
 
-    public load(): void {
+    public load(): [Column[]] {
         this._perfMon.start(`${this.#openedSourceId}-load`);
+
+        const columns = this.setupColumns();
+        this.setupWorker();
+
         if (this._stream) {
             this.readStreamFirstChunk();
         } else {
             this.readBuffer();
         }
+
+        return [columns];
     }
 
     public set stream(stream: ReadableStream) {
@@ -276,10 +272,6 @@ export class Loader {
 
     public set types(columns: ColumnTypes) {
         this._types = columns;
-    }
-
-    public set onColumns(handler: ColumnsHandler) {
-        this._onColumns = handler;
     }
 
     public set onData(handler: DataHandler) {
