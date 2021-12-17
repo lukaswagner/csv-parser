@@ -5,13 +5,6 @@ import { splitLine } from './helper/splitLine';
 import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
 import { buildColumn, Column } from './types/column/column';
 import { ColumnTypes } from './types/dataType';
-import {
-    ColumnsHandler,
-    DataHandler,
-    DoneHandler,
-    ErrorHandler,
-    OpenedHandler,
-} from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 import {
     AddChunkData,
@@ -23,6 +16,14 @@ import {
     SetupData,
 } from './worker/main/interface';
 
+import type {
+    ColumnHeader,
+    ColumnsHandler,
+    DataHandler,
+    DoneHandler,
+    ErrorHandler,
+} from './types/handlers';
+
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
 
@@ -30,7 +31,6 @@ export class Loader {
     protected _buffer: ArrayBufferLike;
     protected _options: CsvLoaderOptions;
 
-    protected _onOpened: OpenedHandler;
     protected _onColumns: ColumnsHandler;
     protected _onData: DataHandler;
     protected _onDone: DoneHandler;
@@ -46,15 +46,15 @@ export class Loader {
 
     #openedSourceId: string;
 
-    protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): void {
+    protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): ColumnHeader[] {
         if (!result.value) {
             if (this._options.verbose) console.log('received no data');
-            this._onError(this.#openedSourceId, 'No data');
-            return;
+            throw new Error('No data');
         }
 
         this._firstChunk = result.value.buffer;
-        this.detectTypes(result.value);
+
+        return this.detectTypes(result.value);
     }
 
     protected readStreamFirstChunk(): void {
@@ -103,8 +103,8 @@ export class Loader {
         this._reader.read().then(this.readStream.bind(this));
     }
 
-    protected openBuffer(): void {
-        this.detectTypes(this._buffer);
+    protected openBuffer(): ColumnHeader[] {
+        return this.detectTypes(this._buffer);
     }
 
     protected readBuffer(): void {
@@ -136,7 +136,7 @@ export class Loader {
         this._worker.postMessage(msg);
     }
 
-    protected detectTypes(chunk: ArrayBufferLike): void {
+    protected detectTypes(chunk: ArrayBufferLike): ColumnHeader[] {
         const lines = parse([chunk], { chunk: 0, char: 0 }, { chunk: 0, char: chunk.byteLength });
 
         this._firstChunkSplit = lines.map((l) => splitLine(l, this._options.delimiter));
@@ -148,18 +148,17 @@ export class Loader {
         );
 
         const detectedTypes = inferLines
-            .map((l) => l.map((c) => inferType(c)))
-            .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
+            .map((lines) => lines.map((columns) => inferType(columns)))
+            .reduce((prev, cur) => prev.map((type, index) => lowestType(type, cur[index])));
 
-        const header = detectedTypes.map((t, i) => {
-            return {
-                name: this._options.includesHeader ? this._firstChunkSplit[0][i] : '',
-                type: t,
-            };
-        });
+        const headers = detectedTypes.map<ColumnHeader>((type, index) => ({
+            name: this._options.includesHeader ? this._firstChunkSplit[0][index] : '',
+            type,
+        }));
 
         this._perfMon.stop(`${this.#openedSourceId}-open`);
-        this._onOpened(this.#openedSourceId, header);
+
+        return headers;
     }
 
     protected setupColumns(): void {
@@ -236,9 +235,9 @@ export class Loader {
         this.#openedSourceId = null;
     }
 
-    public open(id: string): void {
+    public async open(id: string): Promise<ColumnHeader[]> {
         if (this._options.delimiter === undefined) {
-            this._onError(id, 'Delimiter not specified nor deductible from filename.');
+            throw new Error('Delimiter not specified nor deductible from filename.');
         }
 
         this.#openedSourceId = id;
@@ -246,9 +245,11 @@ export class Loader {
 
         if (this._stream) {
             this._reader = this._stream.getReader();
-            this._reader.read().then(this.openStream.bind(this));
+            const result = await this._reader.read();
+
+            return this.openStream(result);
         } else {
-            this.openBuffer();
+            return this.openBuffer();
         }
     }
 
@@ -275,10 +276,6 @@ export class Loader {
 
     public set types(columns: ColumnTypes) {
         this._types = columns;
-    }
-
-    public set onOpened(handler: OpenedHandler) {
-        this._onOpened = handler;
     }
 
     public set onColumns(handler: ColumnsHandler) {

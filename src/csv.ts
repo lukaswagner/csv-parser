@@ -8,12 +8,10 @@ import {
     ErrorHandler,
     EventHandler,
     LoadStatistics,
-    OpenedHandler,
 } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 
 enum Event {
-    Opened = 'opened',
     Columns = 'columns',
     Data = 'data',
     Done = 'done',
@@ -43,13 +41,11 @@ export class CSV<D extends string> {
             ...options,
         };
         this._loader = new Loader();
-        this._loader.onOpened = this.dispatch.bind(this, Event.Opened);
         this._loader.onColumns = this.dispatch.bind(this, Event.Columns);
         this._loader.onData = this.dispatch.bind(this, Event.Data);
         this._loader.onDone = this.dispatch.bind(this, Event.Done);
         this._loader.onError = this.dispatch.bind(this, Event.Error);
         this._handlers = new Map<EventType, Map<D, Set<EventHandler>>>([
-            [Event.Opened, new Map()],
             [Event.Columns, new Map()],
             [Event.Data, new Map()],
             [Event.Done, new Map()],
@@ -63,7 +59,7 @@ export class CSV<D extends string> {
         }
     }
 
-    protected openFile(file: Blob): void {
+    protected openFile(file: Blob): Promise<ColumnHeader[]> {
         this._options.size ??= file.size;
 
         if (file instanceof File) {
@@ -72,41 +68,43 @@ export class CSV<D extends string> {
 
         this._loader.options = this._options;
         this._loader.stream = file.stream();
-        this._loader.open(this.#openedDataSource);
+
+        return this._loader.open(this.#openedDataSource);
     }
 
-    protected openUrl(url: string): void {
+    protected async openUrl(url: string): Promise<ColumnHeader[]> {
         this._options.delimiter ??= deductDelimiter(url.split('.').pop());
         const size = 'Content-Length';
-        fetch(url).then((res) => {
-            if (res.headers.has(size)) {
-                this._options.size ??= Number.parseInt(res.headers.get(size));
-            }
-            this._loader.options = this._options;
-            this._loader.stream = res.body;
-            this._loader.open(this.#openedDataSource);
-        });
+        const response = await fetch(url);
+
+        if (response.headers.has(size)) {
+            this._options.size ??= Number.parseInt(response.headers.get(size));
+        }
+
+        this._loader.options = this._options;
+        this._loader.stream = response.body;
+
+        return this._loader.open(this.#openedDataSource);
     }
 
-    protected openStream(stream: ReadableStream): void {
+    protected openStream(stream: ReadableStream): Promise<ColumnHeader[]> {
         this._loader.options = this._options;
         this._loader.stream = stream;
-        this._loader.open(this.#openedDataSource);
+
+        return this._loader.open(this.#openedDataSource);
     }
 
-    protected openBuffer(buffer: ArrayBufferLike): void {
+    protected openBuffer(buffer: ArrayBufferLike): Promise<ColumnHeader[]> {
         this._loader.options = this._options;
         this._loader.buffer = buffer;
-        this._loader.open(this.#openedDataSource);
+
+        return this._loader.open(this.#openedDataSource);
     }
 
     protected dispatch(event: Event, id: D, data: unknown): void {
         const h = this._handlers.get(event).get(id);
 
         switch (event) {
-            case Event.Opened:
-                h.forEach((h) => (h as OpenedHandler)(id, data as ColumnHeader[]));
-                break;
             case Event.Columns:
                 h.forEach((h) => (h as ColumnsHandler)(id, data as Column[]));
                 break;
@@ -124,28 +122,29 @@ export class CSV<D extends string> {
         }
     }
 
-    #openInputData(source: InputData): void {
+    #openInputData(source: InputData): Promise<ColumnHeader[]> {
         if (source instanceof Blob) {
-            this.openFile(source);
+            return this.openFile(source);
         } else if (typeof source === 'string') {
-            this.openUrl(source);
+            return this.openUrl(source);
         } else if (source instanceof ReadableStream) {
-            this.openStream(source);
+            return this.openStream(source);
         } else if (
             source instanceof ArrayBuffer ||
             source instanceof SharedArrayBuffer ||
             source instanceof Uint8Array
         ) {
-            this.openBuffer(source);
+            return this.openBuffer(source);
         }
     }
 
-    public async open(id: D): Promise<void> {
+    public async open(id: D): Promise<ColumnHeader[]> {
         const dataSource: DataSource = this._options.dataSources[id];
         const data = await (typeof dataSource === 'function' ? dataSource() : dataSource);
 
         this.#openedDataSource = id;
-        this.#openInputData(data);
+
+        return this.#openInputData(data);
     }
 
     public load(types: ColumnTypes): void {
