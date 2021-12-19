@@ -1,3 +1,4 @@
+import DotenvPlugin from 'dotenv-webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 import { resolveFile } from '../../scripts/helper.js';
@@ -32,6 +33,7 @@ export default function () {
             },
         },
         plugins: [
+            new DotenvPlugin(),
             new HtmlWebpackPlugin({
                 filename: 'index.html',
                 template: './index.pug',
