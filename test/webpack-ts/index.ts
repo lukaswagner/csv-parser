@@ -1,10 +1,18 @@
 import pako from 'pako';
 
-import { Column, ColumnHeader, CSV, DataType, isNumber, LoadStatistics } from '../..';
+import {
+    Column,
+    ColumnHeader,
+    createDataSources,
+    CSV,
+    DataType,
+    isNumber,
+    LoadStatistics,
+} from '../..';
 import { NumberColumn } from '../../lib/types/types/column/numberColumn';
 import conf from '../conf.json';
 
-const dataSources = {
+const dataSources = createDataSources({
     '[remote url stream]': conf.url,
     '[1m gzip buffer]': fetch(require('1m.csv.gz'))
         .then((res) => res.arrayBuffer())
@@ -16,7 +24,7 @@ const dataSources = {
         apiKey: process.env.API_KEY,
         sheetId: process.env.SHEET_ID,
     },
-};
+});
 
 type DataSource = keyof typeof dataSources;
 

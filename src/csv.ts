@@ -13,6 +13,8 @@ import {
 } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 
+import type { DataSource, InputData, SheetInput } from './types/dataSource';
+
 enum Event {
     Opened = 'opened',
     Columns = 'columns',
@@ -24,18 +26,12 @@ type EventType = `${Event}`;
 
 type ColumnHeader = { name: string; type: DataType };
 
-type SheetInput = { apiKey: string; sheetId: string };
-
-type InputData = Blob | File | ArrayBufferLike | Uint8Array | ReadableStream | string | SheetInput;
-
-export type DataSource = InputData | Promise<InputData> | (() => Promise<InputData>);
-
 export class CSV<D extends string> {
     protected _options: CsvLoaderOptions;
     protected _loader: Loader;
     protected _handlers: Map<EventType, Map<D, Set<EventHandler>>>;
 
-    #openedDataSource: string;
+    #openedDataSource: D;
 
     public constructor(options: Partial<CsvLoaderOptions>) {
         this._options = {
@@ -184,10 +180,10 @@ export class CSV<D extends string> {
         this._handlers.get(event).get(id).delete(handler);
     }
 
-    public addDataSource(id: D, dataSource: DataSource): void {
+    public addDataSource(id: string, dataSource: DataSource): void {
         this._options.dataSources[id] = dataSource;
         this._handlers.forEach((handlerMap) => {
-            handlerMap.set(id, new Set());
+            handlerMap.set(id as D, new Set());
         });
     }
 
@@ -209,6 +205,9 @@ function deductDelimiter(format: string): string {
             return undefined;
     }
 }
+
+// re-export helpers
+export * from './helper/createDataSources';
 
 // re-export interface
 export * from './types/chunk/chunk';
