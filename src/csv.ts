@@ -1,3 +1,4 @@
+import { fetchSheetDataRange, fetchSheetValues } from './helper/spreadsheets';
 import { Loader } from './loader';
 import { Column } from './types/column/column';
 import { ColumnTypes, DataType } from './types/dataType';
@@ -23,7 +24,9 @@ type EventType = `${Event}`;
 
 type ColumnHeader = { name: string; type: DataType };
 
-type InputData = Blob | File | ArrayBufferLike | Uint8Array | ReadableStream | string;
+type SheetInput = { apiKey: string; sheetId: string };
+
+type InputData = Blob | File | ArrayBufferLike | Uint8Array | ReadableStream | string | SheetInput;
 
 export type DataSource = InputData | Promise<InputData> | (() => Promise<InputData>);
 
@@ -124,6 +127,24 @@ export class CSV<D extends string> {
         }
     }
 
+    async #openSheet(data: SheetInput): Promise<void> {
+        const { apiKey, sheetId } = data;
+
+        // Determine range specifier for sheet area that is filled with data
+        const range = await fetchSheetDataRange(sheetId, apiKey);
+
+        // Fetch sheet values as stream
+        const stream = await fetchSheetValues(sheetId, apiKey, range);
+
+        this._options.delimiter ??= deductDelimiter('csv');
+
+        // TODO: Determine data length ?
+
+        this._loader.options = this._options;
+        this._loader.stream = stream;
+        this._loader.open(this.#openedDataSource);
+    }
+
     #openInputData(source: InputData): void {
         if (source instanceof Blob) {
             this.openFile(source);
@@ -137,6 +158,8 @@ export class CSV<D extends string> {
             source instanceof Uint8Array
         ) {
             this.openBuffer(source);
+        } else if ('sheetId' in source && 'apiKey' in source) {
+            this.#openSheet(source);
         }
     }
 
