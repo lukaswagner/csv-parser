@@ -12,6 +12,8 @@ import {
 } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 
+import type { DataSource, InputData } from './types/dataSource';
+
 enum Event {
     Opened = 'opened',
     Columns = 'columns',
@@ -23,16 +25,12 @@ type EventType = `${Event}`;
 
 type ColumnHeader = { name: string; type: DataType };
 
-type InputData = Blob | File | ArrayBufferLike | Uint8Array | ReadableStream | string;
-
-export type DataSource = InputData | Promise<InputData> | (() => Promise<InputData>);
-
 export class CSV<D extends string> {
     protected _options: CsvLoaderOptions;
     protected _loader: Loader;
     protected _handlers: Map<EventType, Map<D, Set<EventHandler>>>;
 
-    #openedDataSource: string;
+    #openedDataSource: D;
 
     public constructor(options: Partial<CsvLoaderOptions>) {
         this._options = {
@@ -186,6 +184,9 @@ function deductDelimiter(format: string): string {
             return undefined;
     }
 }
+
+// re-export helpers
+export * from './helper/createDataSources';
 
 // re-export interface
 export * from './types/chunk/chunk';

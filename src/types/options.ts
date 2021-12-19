@@ -1,4 +1,4 @@
-import { DataSource } from '../csv';
+import type { DataSource } from './dataSource';
 
 export interface CsvLoaderOptions {
     dataSources: Record<string, DataSource>;
