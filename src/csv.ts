@@ -159,10 +159,10 @@ export class CSV<D extends string> {
         this._handlers.get(event).get(id).delete(handler);
     }
 
-    public addDataSource(id: D, dataSource: DataSource): void {
+    public addDataSource(id: string, dataSource: DataSource): void {
         this._options.dataSources[id] = dataSource;
         this._handlers.forEach((handlerMap) => {
-            handlerMap.set(id, new Set());
+            handlerMap.set(id as D, new Set());
         });
     }
 
