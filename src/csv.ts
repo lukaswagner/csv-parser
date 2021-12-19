@@ -1,18 +1,16 @@
 import { Loader } from './loader';
 import { Column } from './types/column/column';
 import { ColumnTypes } from './types/dataType';
-import { ColumnHeader, Dispatcher } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 
-type InputData = Blob | File | ArrayBufferLike | Uint8Array | ReadableStream | string;
-
-export type DataSource = InputData | Promise<InputData> | (() => Promise<InputData>);
+import type { ColumnHeader, Dispatcher } from './types/handlers';
+import type { DataSource, InputData } from './types/dataSource';
 
 export class CSV<D extends string> {
     protected _options: CsvLoaderOptions;
     protected _loader: Loader;
 
-    #openedDataSource: string;
+    #openedDataSource: D;
 
     public constructor(options: Partial<CsvLoaderOptions>) {
         this._options = {
@@ -98,7 +96,7 @@ export class CSV<D extends string> {
         return this._loader.load();
     }
 
-    public addDataSource(id: D, dataSource: DataSource): void {
+    public addDataSource(id: string, dataSource: DataSource): void {
         this._options.dataSources[id] = dataSource;
     }
 
@@ -117,6 +115,9 @@ function deductDelimiter(format: string): string {
             return undefined;
     }
 }
+
+// re-export helpers
+export * from './helper/createDataSources';
 
 // re-export interface
 export * from './types/chunk/chunk';

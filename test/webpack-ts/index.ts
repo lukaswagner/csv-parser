@@ -1,10 +1,10 @@
 import pako from 'pako';
 
-import { Column, CSV, DataType, isNumber, LoadStatistics } from '../..';
+import { Column, createDataSources, CSV, DataType, isNumber, LoadStatistics } from '../..';
 import { NumberColumn } from '../../lib/types/types/column/numberColumn';
 import conf from '../conf.json';
 
-const dataSources = {
+const dataSources = createDataSources({
     '[remote url stream]': conf.url,
     '[1m gzip buffer]': () =>
         fetch(require('1m.csv.gz'))
@@ -13,7 +13,7 @@ const dataSources = {
     '[10m url stream]': require('10m.csv'),
     '[50m url stream]': require('50m.csv'),
     '[100m url stream]': require('100m.csv'),
-};
+});
 
 type DataSource = keyof typeof dataSources;
 
