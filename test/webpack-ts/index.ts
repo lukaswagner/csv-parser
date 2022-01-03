@@ -3,8 +3,8 @@ import pako from 'pako';
 import {
     Column,
     ColumnHeader,
+    createDataSources,
     CSV,
-    CsvLoaderOptions,
     DataType,
     isNumber,
     LoadStatistics,
@@ -12,14 +12,44 @@ import {
 import { NumberColumn } from '../../lib/types/types/column/numberColumn';
 import conf from '../conf.json';
 
-const options = new CsvLoaderOptions({
+const dataSources = createDataSources({
+    '[remote url stream]': conf.url,
+    '[1m gzip buffer]': fetch(require('1m.csv.gz'))
+        .then((res) => res.arrayBuffer())
+        .then((buf) => pako.inflate(new Uint8Array(buf)).buffer),
+    '[10m url stream]': require('10m.csv'),
+    '[50m url stream]': require('50m.csv'),
+    '[100m url stream]': require('100m.csv'),
+});
+
+type DataSource = keyof typeof dataSources;
+
+const loader = new CSV<DataSource>({
+    dataSources,
     includesHeader: true,
     delimiter: ',',
 });
 
-function onOpened(this: CSV, tag: string, columns: ColumnHeader[]): void {
+// Register event handlers
+for (const sourceId of Object.keys(dataSources) as DataSource[]) {
+    loader.on('opened', sourceId, onOpened.bind(loader));
+    loader.on('columns', sourceId, (id: string, columns: Column[]) => {
+        console.log(id, 'received columns');
+        loader.on('done', sourceId, onDone.bind(loader, columns));
+    });
+    loader.on('data', sourceId, (id: string, progress: number) => {
+        console.log(id, `received new data. progress: ${progress}`);
+    });
+    loader.on('error', sourceId, (id: string, msg: string) => {
+        console.log(id, 'error:', msg);
+    });
+}
+
+console.log('loader created');
+
+function onOpened(this: typeof loader, id: string, columns: ColumnHeader[]): void {
     console.log(
-        tag,
+        id,
         `opened source, detected ${columns.length} columns:\n` +
             columns.map((c) => `${c.name}: ${DataType[c.type]}`).join('\n')
     );
@@ -30,7 +60,7 @@ function onOpened(this: CSV, tag: string, columns: ColumnHeader[]): void {
 }
 
 type Stats = {
-    tag: string;
+    id: string;
     rows: number;
     kB: number;
     time: number;
@@ -39,13 +69,7 @@ type Stats = {
 };
 const statistics = new Array<Stats>();
 
-function onDone(
-    this: CSV,
-    tag: string,
-    done: () => void,
-    columns: Column[],
-    stats: LoadStatistics
-): void {
+function onDone(this: typeof loader, columns: Column[], id: string, stats: LoadStatistics): void {
     let columnsStats = '=== column stats: ===\n';
     columnsStats += columns
         .map((c) => {
@@ -57,15 +81,15 @@ function onDone(
         .join('\n');
 
     const timeMS =
-        stats.performance.find((s) => s.label === 'open').delta +
-        stats.performance.find((s) => s.label === 'load').delta;
+        stats.performance.find((s) => s.label === `${id}-open`).delta +
+        stats.performance.find((s) => s.label === `${id}-load`).delta;
     const timeS = timeMS / 1000;
     const kB = stats.bytes / 1000;
     const rows = columns[0].length;
     const kRows = rows / 1000;
 
     statistics.push({
-        tag,
+        id,
         rows,
         kB,
         time: timeS,
@@ -85,52 +109,23 @@ function onDone(
         `kB / s: ${(kB / timeS).toFixed(3)}\n` +
         `kRows / s: ${(kRows / timeS).toFixed(3)}\n`;
 
-    console.log(tag, `done.\n${columnsStats}\n${loaderStats}`);
+    console.log(id, `done.\n${columnsStats}\n${loaderStats}`);
 
     console.groupCollapsed('=== performance stats: ===');
     stats.performance.forEach((m) => console.log(`${m.label}: ${m.delta} ms`));
     console.groupEnd();
-
-    done();
 }
 
-function createLoader(tag: string, done: () => void): CSV {
-    const loader = new CSV(options);
-    loader.on('opened', onOpened.bind(loader, tag));
-    loader.on('columns', (columns: Column[]) => {
-        console.log(tag, 'received columns');
-        loader.on('done', onDone.bind(loader, tag, done, columns));
-    });
-    loader.on('data', (progress: number) => {
-        console.log(tag, `received new data. progress: ${progress}`);
-    });
-    loader.on('error', (msg: string) => {
-        console.log(tag, 'error:', msg);
-        done();
-    });
-    console.log(tag, 'created');
-    return loader;
-}
-
-function testUrl(tag: string, url: string): Promise<void> {
+function testLoad(id: DataSource): Promise<void> {
     return new Promise<void>((resolve) => {
-        createLoader(tag, resolve).open(url);
+        loader.on('done', id, () => resolve());
+        loader.open(id);
     });
 }
 
-function testGzipped(testCase: string, url: string): Promise<void> {
-    return new Promise<void>((resolve) => {
-        fetch(url)
-            .then((res) => res.arrayBuffer())
-            .then((buf) =>
-                createLoader(testCase, resolve).open(pako.inflate(new Uint8Array(buf)).buffer)
-            );
-    });
-}
-
-testUrl('[remote url stream]', conf.url)
-    .then(() => testGzipped('[1m gzip buffer]', require('1m.csv.gz')))
-    .then(() => testUrl('[10m url stream]', require('10m.csv')))
-    .then(() => testUrl('[50m url stream]', require('50m.csv')))
-    .then(() => testUrl('[100m url stream]', require('100m.csv')))
+testLoad('[remote url stream]')
+    .then(() => testLoad('[1m gzip buffer]'))
+    .then(() => testLoad('[10m url stream]'))
+    .then(() => testLoad('[50m url stream]'))
+    .then(() => testLoad('[100m url stream]'))
     .then(() => console.table(statistics));
