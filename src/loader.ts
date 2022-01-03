@@ -28,6 +28,7 @@ export class Loader {
 
     protected _stream: ReadableStream;
     protected _buffer: ArrayBufferLike;
+    protected _openedSourceId: string;
     protected _options: CsvLoaderOptions;
 
     protected _onOpened: OpenedHandler;
@@ -44,12 +45,10 @@ export class Loader {
     protected _worker: Worker;
     protected _perfMon = new PerfMon();
 
-    #openedSourceId: string;
-
     protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): void {
         if (!result.value) {
             if (this._options.verbose) console.log('received no data');
-            this._onError(this.#openedSourceId, 'No data');
+            this._onError(this._openedSourceId, 'No data');
             return;
         }
 
@@ -85,7 +84,7 @@ export class Loader {
 
         if (!result.value) {
             if (this._options.verbose) console.log('received no data');
-            this._onError(this.#openedSourceId, 'No data');
+            this._onError(this._openedSourceId, 'No data');
             return;
         }
 
@@ -158,8 +157,8 @@ export class Loader {
             };
         });
 
-        this._perfMon.stop(`${this.#openedSourceId}-open`);
-        this._onOpened(this.#openedSourceId, header);
+        this._perfMon.stop(`${this._openedSourceId}-open`);
+        this._onOpened(this._openedSourceId, header);
     }
 
     protected setupColumns(): void {
@@ -173,7 +172,7 @@ export class Loader {
             ...this._types.generatedColumns.map((t) => buildColumn(t.name, t.type)),
         ];
         this._firstChunkSplit = undefined;
-        this._onColumns(this.#openedSourceId, this._columns);
+        this._onColumns(this._openedSourceId, this._columns);
     }
 
     protected setupWorker(): void {
@@ -221,19 +220,19 @@ export class Loader {
     protected onProcessed(data: ProcessedData): void {
         const chunks = data.chunks.map((c) => rebuildChunk(c));
         this._columns.forEach((c, i) => c.push(chunks[i] as AnyChunk));
-        this._onData(this.#openedSourceId, this._columns[0].length);
+        this._onData(this._openedSourceId, this._columns[0].length);
     }
 
     protected onFinished(data: FinishedData): void {
         if (this._options.verbose) console.log('main worker finished');
-        this._perfMon.stop(`${this.#openedSourceId}-load`);
+        this._perfMon.stop(`${this._openedSourceId}-load`);
         data.performance = [...this._perfMon.samples, ...data.performance];
-        this._onDone(this.#openedSourceId, data);
+        this._onDone(this._openedSourceId, data);
 
         // Clear data for next data source
         this._buffer = null;
         this._stream = null;
-        this.#openedSourceId = null;
+        this._openedSourceId = null;
     }
 
     public open(id: string): void {
@@ -241,7 +240,7 @@ export class Loader {
             this._onError(id, 'Delimiter not specified nor deductible from filename.');
         }
 
-        this.#openedSourceId = id;
+        this._openedSourceId = id;
         this._perfMon.start(`${id}-open`);
 
         if (this._stream) {
@@ -253,7 +252,7 @@ export class Loader {
     }
 
     public load(): void {
-        this._perfMon.start(`${this.#openedSourceId}-load`);
+        this._perfMon.start(`${this._openedSourceId}-load`);
         if (this._stream) {
             this.readStreamFirstChunk();
         } else {

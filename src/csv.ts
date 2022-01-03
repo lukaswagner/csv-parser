@@ -1,5 +1,6 @@
 import { Loader } from './loader';
 import { Column } from './types/column/column';
+import type { DataSource, InputData } from './types/dataSource';
 import { ColumnTypes, DataType } from './types/dataType';
 import {
     ColumnsHandler,
@@ -11,8 +12,6 @@ import {
     OpenedHandler,
 } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
-
-import type { DataSource, InputData } from './types/dataSource';
 
 enum Event {
     Opened = 'opened',
@@ -26,11 +25,10 @@ type EventType = `${Event}`;
 type ColumnHeader = { name: string; type: DataType };
 
 export class CSV<D extends string> {
+    protected _openedDataSource: D;
     protected _options: CsvLoaderOptions;
     protected _loader: Loader;
     protected _handlers: Map<EventType, Map<D, Set<EventHandler>>>;
-
-    #openedDataSource: D;
 
     public constructor(options: Partial<CsvLoaderOptions>) {
         this._options = {
@@ -70,7 +68,7 @@ export class CSV<D extends string> {
 
         this._loader.options = this._options;
         this._loader.stream = file.stream();
-        this._loader.open(this.#openedDataSource);
+        this._loader.open(this._openedDataSource);
     }
 
     protected openUrl(url: string): void {
@@ -82,20 +80,20 @@ export class CSV<D extends string> {
             }
             this._loader.options = this._options;
             this._loader.stream = res.body;
-            this._loader.open(this.#openedDataSource);
+            this._loader.open(this._openedDataSource);
         });
     }
 
     protected openStream(stream: ReadableStream): void {
         this._loader.options = this._options;
         this._loader.stream = stream;
-        this._loader.open(this.#openedDataSource);
+        this._loader.open(this._openedDataSource);
     }
 
     protected openBuffer(buffer: ArrayBufferLike): void {
         this._loader.options = this._options;
         this._loader.buffer = buffer;
-        this._loader.open(this.#openedDataSource);
+        this._loader.open(this._openedDataSource);
     }
 
     protected dispatch(event: Event, id: D, data: unknown): void {
@@ -122,7 +120,7 @@ export class CSV<D extends string> {
         }
     }
 
-    #openInputData(source: InputData): void {
+    protected openInputData(source: InputData): void {
         if (source instanceof Blob) {
             this.openFile(source);
         } else if (typeof source === 'string') {
@@ -142,8 +140,8 @@ export class CSV<D extends string> {
         const dataSource: DataSource = this._options.dataSources[id];
         const data = await (typeof dataSource === 'function' ? dataSource() : dataSource);
 
-        this.#openedDataSource = id;
-        this.#openInputData(data);
+        this._openedDataSource = id;
+        this.openInputData(data);
     }
 
     public load(types: ColumnTypes): void {
