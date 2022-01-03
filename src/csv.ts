@@ -1,16 +1,14 @@
 import { Loader } from './loader';
-import { Column } from './types/column/column';
-import { ColumnTypes } from './types/dataType';
-import { CsvLoaderOptions } from './types/options';
-
-import type { ColumnHeader, Dispatcher } from './types/handlers';
+import type { Column } from './types/column/column';
 import type { DataSource, InputData } from './types/dataSource';
+import type { ColumnTypes } from './types/dataType';
+import type { ColumnHeader, Dispatcher } from './types/handlers';
+import type { CsvLoaderOptions } from './types/options';
 
 export class CSV<D extends string> {
+    protected _openedDataSource: D;
     protected _options: CsvLoaderOptions;
     protected _loader: Loader;
-
-    #openedDataSource: D;
 
     public constructor(options: Partial<CsvLoaderOptions>) {
         this._options = {
@@ -33,7 +31,7 @@ export class CSV<D extends string> {
         this._loader.options = this._options;
         this._loader.stream = file.stream();
 
-        return this._loader.open(this.#openedDataSource);
+        return this._loader.open(this._openedDataSource);
     }
 
     protected async openUrl(url: string): Promise<ColumnHeader[]> {
@@ -48,24 +46,24 @@ export class CSV<D extends string> {
         this._loader.options = this._options;
         this._loader.stream = response.body;
 
-        return this._loader.open(this.#openedDataSource);
+        return this._loader.open(this._openedDataSource);
     }
 
     protected openStream(stream: ReadableStream): Promise<ColumnHeader[]> {
         this._loader.options = this._options;
         this._loader.stream = stream;
 
-        return this._loader.open(this.#openedDataSource);
+        return this._loader.open(this._openedDataSource);
     }
 
     protected openBuffer(buffer: ArrayBufferLike): Promise<ColumnHeader[]> {
         this._loader.options = this._options;
         this._loader.buffer = buffer;
 
-        return this._loader.open(this.#openedDataSource);
+        return this._loader.open(this._openedDataSource);
     }
 
-    #openInputData(source: InputData): Promise<ColumnHeader[]> {
+    protected openInputData(source: InputData): Promise<ColumnHeader[]> {
         if (source instanceof Blob) {
             return this.openFile(source);
         } else if (typeof source === 'string') {
@@ -85,9 +83,9 @@ export class CSV<D extends string> {
         const dataSource: DataSource = this._options.dataSources[id];
         const data = await (typeof dataSource === 'function' ? dataSource() : dataSource);
 
-        this.#openedDataSource = id;
+        this._openedDataSource = id;
 
-        return this.#openInputData(data);
+        return this.openInputData(data);
     }
 
     public load(types: ColumnTypes): [Column[], Dispatcher] {

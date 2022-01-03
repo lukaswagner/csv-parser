@@ -5,6 +5,7 @@ import { splitLine } from './helper/splitLine';
 import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
 import { buildColumn, Column } from './types/column/column';
 import { ColumnTypes } from './types/dataType';
+import type { ColumnHeader, Dispatcher, DispatchValue, LoadStatistics } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 import {
     AddChunkData,
@@ -16,13 +17,12 @@ import {
     SetupData,
 } from './worker/main/interface';
 
-import type { ColumnHeader, Dispatcher, DispatchValue, LoadStatistics } from './types/handlers';
-
 export class Loader {
     protected static readonly TargetNumWorkers = 25;
 
     protected _stream: ReadableStream;
     protected _buffer: ArrayBufferLike;
+    protected _openedSourceId: string;
     protected _options: CsvLoaderOptions;
 
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
@@ -32,8 +32,6 @@ export class Loader {
     protected _columns: Column[];
     protected _worker: Worker;
     protected _perfMon = new PerfMon();
-
-    #openedSourceId: string;
 
     protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): ColumnHeader[] {
         if (!result.value) {
@@ -142,7 +140,7 @@ export class Loader {
             type,
         }));
 
-        this._perfMon.stop(`${this.#openedSourceId}-open`);
+        this._perfMon.stop(`${this._openedSourceId}-open`);
 
         return headers;
     }
@@ -232,13 +230,13 @@ export class Loader {
     protected onFinished(data: FinishedData): LoadStatistics {
         if (this._options.verbose) console.log('main worker finished');
 
-        this._perfMon.stop(`${this.#openedSourceId}-load`);
+        this._perfMon.stop(`${this._openedSourceId}-load`);
         data.performance = [...this._perfMon.samples, ...data.performance];
 
         // Clear data for next data source
         this._buffer = null;
         this._stream = null;
-        this.#openedSourceId = null;
+        this._openedSourceId = null;
 
         return data;
     }
@@ -248,7 +246,7 @@ export class Loader {
             throw new Error('Delimiter not specified nor deductible from filename.');
         }
 
-        this.#openedSourceId = id;
+        this._openedSourceId = id;
         this._perfMon.start(`${id}-open`);
 
         if (this._stream) {
@@ -262,7 +260,7 @@ export class Loader {
     }
 
     public load(): [Column[], Dispatcher] {
-        this._perfMon.start(`${this.#openedSourceId}-load`);
+        this._perfMon.start(`${this._openedSourceId}-load`);
 
         const columns = this.setupColumns();
         const resultStream = this.setupWorker();
