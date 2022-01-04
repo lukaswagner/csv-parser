@@ -64,7 +64,7 @@ export class CSV<D extends string> {
         return this._loader.open(this._openedDataSource);
     }
 
-    protected async openSheet(data: SheetInput): Promise<void> {
+    protected async openSheet(data: SheetInput): Promise<ColumnHeader[]> {
         const { apiKey, sheetId } = data;
 
         // Determine range specifier for sheet area that is filled with data
@@ -79,7 +79,8 @@ export class CSV<D extends string> {
 
         this._loader.options = this._options;
         this._loader.stream = stream;
-        this._loader.open(this._openedDataSource);
+
+        return this._loader.open(this._openedDataSource);
     }
 
     protected openInputData(source: InputData): Promise<ColumnHeader[]> {
@@ -94,9 +95,9 @@ export class CSV<D extends string> {
             source instanceof SharedArrayBuffer ||
             source instanceof Uint8Array
         ) {
-            this.openBuffer(source);
+            return this.openBuffer(source);
         } else if ('sheetId' in source && 'apiKey' in source) {
-            this.openSheet(source);
+            return this.openSheet(source);
         }
     }
 
