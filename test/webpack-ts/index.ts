@@ -1,22 +1,15 @@
 import pako from 'pako';
 
-import {
-    Column,
-    ColumnHeader,
-    createDataSources,
-    CSV,
-    DataType,
-    isNumber,
-    LoadStatistics,
-} from '../..';
+import { Column, createDataSources, CSV, DataType, isNumber, LoadStatistics } from '../..';
 import { NumberColumn } from '../../lib/types/types/column/numberColumn';
 import conf from '../conf.json';
 
 const dataSources = createDataSources({
     '[remote url stream]': conf.url,
-    '[1m gzip buffer]': fetch(require('1m.csv.gz'))
-        .then((res) => res.arrayBuffer())
-        .then((buf) => pako.inflate(new Uint8Array(buf)).buffer),
+    '[1m gzip buffer]': () =>
+        fetch(require('1m.csv.gz'))
+            .then((res) => res.arrayBuffer())
+            .then((buf) => pako.inflate(new Uint8Array(buf)).buffer),
     '[10m url stream]': require('10m.csv'),
     '[50m url stream]': require('50m.csv'),
     '[100m url stream]': require('100m.csv'),
@@ -34,34 +27,7 @@ const loader = new CSV<DataSource>({
     delimiter: ',',
 });
 
-// Register event handlers
-for (const sourceId of Object.keys(dataSources) as DataSource[]) {
-    loader.on('opened', sourceId, onOpened.bind(loader));
-    loader.on('columns', sourceId, (id: string, columns: Column[]) => {
-        console.log(id, 'received columns');
-        loader.on('done', sourceId, onDone.bind(loader, columns));
-    });
-    loader.on('data', sourceId, (id: string, progress: number) => {
-        console.log(id, `received new data. progress: ${progress}`);
-    });
-    loader.on('error', sourceId, (id: string, msg: string) => {
-        console.log(id, 'error:', msg);
-    });
-}
-
 console.log('loader created');
-
-function onOpened(this: typeof loader, id: string, columns: ColumnHeader[]): void {
-    console.log(
-        id,
-        `opened source, detected ${columns.length} columns:\n` +
-            columns.map((c) => `${c.name}: ${DataType[c.type]}`).join('\n')
-    );
-    this.load({
-        columns: columns.map((c) => c.type),
-        generatedColumns: [],
-    });
-}
 
 type Stats = {
     id: string;
@@ -73,7 +39,7 @@ type Stats = {
 };
 const statistics = new Array<Stats>();
 
-function onDone(this: typeof loader, columns: Column[], id: string, stats: LoadStatistics): void {
+function logResult(columns: Column[], id: string, stats: LoadStatistics): void {
     let columnsStats = '=== column stats: ===\n';
     columnsStats += columns
         .map((c) => {
@@ -120,11 +86,38 @@ function onDone(this: typeof loader, columns: Column[], id: string, stats: LoadS
     console.groupEnd();
 }
 
-function testLoad(id: DataSource): Promise<void> {
-    return new Promise<void>((resolve) => {
-        loader.on('done', id, () => resolve());
-        loader.open(id);
-    });
+async function testLoad(id: DataSource): Promise<void> {
+    try {
+        const detectedColumns = await loader.open(id);
+
+        // onOpened
+        console.log(
+            id,
+            `opened source, detected ${detectedColumns.length} columns:\n` +
+                detectedColumns.map(({ name, type }) => `${name}: ${DataType[type]}`).join('\n')
+        );
+
+        const [columns, dispatch] = loader.load({
+            columns: detectedColumns.map(({ type }) => type),
+            generatedColumns: [],
+        });
+
+        // onColumns
+        console.log(id, 'received columns');
+
+        for await (const value of dispatch()) {
+            if (value.type === 'data') {
+                // onData
+                console.log(id, `received new data. progress: ${value.progress}`);
+            } else {
+                // onDone
+                logResult(columns, id, value.statistics);
+            }
+        }
+    } catch (error) {
+        // onError
+        console.log(id, 'error:', error);
+    }
 }
 
 testLoad('[remote url stream]')
