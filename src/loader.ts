@@ -5,13 +5,7 @@ import { splitLine } from './helper/splitLine';
 import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
 import { buildColumn, Column } from './types/column/column';
 import { ColumnTypes } from './types/dataType';
-import {
-    ColumnsHandler,
-    DataHandler,
-    DoneHandler,
-    ErrorHandler,
-    OpenedHandler,
-} from './types/handlers';
+import type { ColumnHeader, Dispatcher, DispatchValue, LoadStatistics } from './types/handlers';
 import { CsvLoaderOptions } from './types/options';
 import {
     AddChunkData,
@@ -31,12 +25,6 @@ export class Loader {
     protected _openedSourceId: string;
     protected _options: CsvLoaderOptions;
 
-    protected _onOpened: OpenedHandler;
-    protected _onColumns: ColumnsHandler;
-    protected _onData: DataHandler;
-    protected _onDone: DoneHandler;
-    protected _onError: ErrorHandler;
-
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
     protected _firstChunk: ArrayBuffer;
     protected _firstChunkSplit: string[][];
@@ -45,21 +33,18 @@ export class Loader {
     protected _worker: Worker;
     protected _perfMon = new PerfMon();
 
-    protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): void {
+    protected openStream(result: ReadableStreamDefaultReadResult<Uint8Array>): ColumnHeader[] {
         if (!result.value) {
             if (this._options.verbose) console.log('received no data');
-            this._onError(this._openedSourceId, 'No data');
-            return;
+            throw new Error('No data');
         }
 
         this._firstChunk = result.value.buffer;
-        this.detectTypes(result.value);
+
+        return this.detectTypes(result.value);
     }
 
-    protected readStreamFirstChunk(): void {
-        this.setupColumns();
-        this.setupWorker();
-
+    protected async readStreamFirstChunk(): Promise<void> {
         const acd: AddChunkData = {
             chunk: this._firstChunk,
         };
@@ -72,10 +57,12 @@ export class Loader {
         this._worker.postMessage(msg, [this._firstChunk]);
         this._firstChunk = undefined;
 
-        this._reader.read().then(this.readStream.bind(this));
+        const result = await this._reader.read();
+
+        await this.readStream(result);
     }
 
-    protected readStream(result: ReadableStreamDefaultReadResult<Uint8Array>): void {
+    protected async readStream(result: ReadableStreamDefaultReadResult<Uint8Array>): Promise<void> {
         if (result.done) {
             if (this._options.verbose) console.log('stream ended');
             this.sendNoMoreChunks();
@@ -84,8 +71,7 @@ export class Loader {
 
         if (!result.value) {
             if (this._options.verbose) console.log('received no data');
-            this._onError(this._openedSourceId, 'No data');
-            return;
+            throw new Error('No data');
         }
 
         const acd: AddChunkData = {
@@ -99,17 +85,16 @@ export class Loader {
 
         this._worker.postMessage(msg, [result.value.buffer]);
 
-        this._reader.read().then(this.readStream.bind(this));
+        const nextResult = await this._reader.read();
+
+        await this.readStream(nextResult);
     }
 
-    protected openBuffer(): void {
-        this.detectTypes(this._buffer);
+    protected openBuffer(): ColumnHeader[] {
+        return this.detectTypes(this._buffer);
     }
 
     protected readBuffer(): void {
-        this.setupColumns();
-        this.setupWorker();
-
         this._worker.postMessage(
             {
                 type: MessageType.AddChunk,
@@ -135,7 +120,7 @@ export class Loader {
         this._worker.postMessage(msg);
     }
 
-    protected detectTypes(chunk: ArrayBufferLike): void {
+    protected detectTypes(chunk: ArrayBufferLike): ColumnHeader[] {
         const lines = parse([chunk], { chunk: 0, char: 0 }, { chunk: 0, char: chunk.byteLength });
 
         this._firstChunkSplit = lines.map((l) => splitLine(l, this._options.delimiter));
@@ -147,97 +132,118 @@ export class Loader {
         );
 
         const detectedTypes = inferLines
-            .map((l) => l.map((c) => inferType(c)))
-            .reduce((prev, cur) => prev.map((p, i) => lowestType(p, cur[i])));
+            .map((lines) => lines.map((columns) => inferType(columns)))
+            .reduce((prev, cur) => prev.map((type, index) => lowestType(type, cur[index])));
 
-        const header = detectedTypes.map((t, i) => {
-            return {
-                name: this._options.includesHeader ? this._firstChunkSplit[0][i] : '',
-                type: t,
-            };
-        });
+        const headers = detectedTypes.map<ColumnHeader>((type, index) => ({
+            name: this._options.includesHeader ? this._firstChunkSplit[0][index] : '',
+            type,
+        }));
 
         this._perfMon.stop(`${this._openedSourceId}-open`);
-        this._onOpened(this._openedSourceId, header);
+
+        return headers;
     }
 
-    protected setupColumns(): void {
+    protected setupColumns(): Column[] {
         this._columns = [
-            ...this._types.columns.map((t, i) =>
+            ...this._types.columns.map((type, index) =>
                 buildColumn(
-                    this._options.includesHeader ? this._firstChunkSplit[0][i] : `Column ${i}`,
-                    t
+                    this._options.includesHeader
+                        ? this._firstChunkSplit[0][index]
+                        : `Column ${index}`,
+                    type
                 )
             ),
-            ...this._types.generatedColumns.map((t) => buildColumn(t.name, t.type)),
+            ...this._types.generatedColumns.map(({ name, type }) => buildColumn(name, type)),
         ];
         this._firstChunkSplit = undefined;
-        this._onColumns(this._openedSourceId, this._columns);
+
+        return this._columns;
     }
 
-    protected setupWorker(): void {
-        this._worker = new Worker(
-            // @ts-expect-error The path to the worker source is only during build.
-            new URL(__MAIN_WORKER_SOURCE, import.meta.url),
-            { type: 'module' }
-        );
+    protected setupWorker(): ReadableStream<DispatchValue> {
+        class WorkerSource {
+            public constructor(private readonly loader: Loader) {}
 
-        this._worker.onmessage = (e: MessageEvent<MessageData>) => {
-            const msg = e.data;
-            switch (msg.type) {
-                case MessageType.Processed:
-                    this.onProcessed(msg.data as ProcessedData);
-                    break;
-                case MessageType.Finished:
-                    this.onFinished(msg.data as FinishedData);
-                    this._worker.terminate();
-                    break;
-                default:
-                    if (this._options.verbose)
-                        console.log('received invalid msg from main worker:', msg);
-                    break;
+            public start(controller: ReadableStreamController<DispatchValue>): void {
+                this.loader._worker = new Worker(
+                    // @ts-expect-error The path to the worker source is only during build.
+                    new URL(__MAIN_WORKER_SOURCE, import.meta.url),
+                    { type: 'module' }
+                );
+
+                this.loader._worker.onmessage = (event: MessageEvent<MessageData>) => {
+                    const message = event.data;
+                    switch (message.type) {
+                        case MessageType.Processed:
+                            controller.enqueue({
+                                type: 'data',
+                                progress: this.loader.onProcessed(message.data as ProcessedData),
+                            });
+                            break;
+                        case MessageType.Finished:
+                            controller.enqueue({
+                                type: 'done',
+                                statistics: this.loader.onFinished(message.data as FinishedData),
+                            });
+                            this.loader._worker.terminate();
+                            controller.close();
+                            break;
+                        default:
+                            if (this.loader._options.verbose)
+                                console.log('received invalid msg from main worker:', message);
+
+                            controller.error(['received invalid msg from main worker:', message]);
+                            break;
+                    }
+                };
+
+                const setup: SetupData = {
+                    columns: this.loader._types.columns,
+                    generatedColumns: this.loader._types.generatedColumns,
+                    options: {
+                        delimiter: this.loader._options.delimiter,
+                        includesHeader: this.loader._options.includesHeader,
+                        verbose: this.loader._options.verbose,
+                    },
+                };
+                const message: MessageData = {
+                    type: MessageType.Setup,
+                    data: setup,
+                };
+
+                this.loader._worker.postMessage(message);
             }
-        };
+        }
 
-        const setup: SetupData = {
-            columns: this._types.columns,
-            generatedColumns: this._types.generatedColumns,
-            options: {
-                delimiter: this._options.delimiter,
-                includesHeader: this._options.includesHeader,
-                verbose: this._options.verbose,
-            },
-        };
-
-        const msg: MessageData = {
-            type: MessageType.Setup,
-            data: setup,
-        };
-
-        this._worker.postMessage(msg);
+        return new ReadableStream(new WorkerSource(this));
     }
 
-    protected onProcessed(data: ProcessedData): void {
-        const chunks = data.chunks.map((c) => rebuildChunk(c));
-        this._columns.forEach((c, i) => c.push(chunks[i] as AnyChunk));
-        this._onData(this._openedSourceId, this._columns[0].length);
+    protected onProcessed(data: ProcessedData): number {
+        const chunks = data.chunks.map((chunk) => rebuildChunk(chunk));
+        this._columns.forEach((column, index) => column.push(chunks[index] as AnyChunk));
+
+        return this._columns[0].length;
     }
 
-    protected onFinished(data: FinishedData): void {
+    protected onFinished(data: FinishedData): LoadStatistics {
         if (this._options.verbose) console.log('main worker finished');
+
         this._perfMon.stop(`${this._openedSourceId}-load`);
         data.performance = [...this._perfMon.samples, ...data.performance];
-        this._onDone(this._openedSourceId, data);
 
         // Clear data for next data source
         this._buffer = null;
         this._stream = null;
         this._openedSourceId = null;
+
+        return data;
     }
 
-    public open(id: string): void {
+    public async open(id: string): Promise<ColumnHeader[]> {
         if (this._options.delimiter === undefined) {
-            this._onError(id, 'Delimiter not specified nor deductible from filename.');
+            throw new Error('Delimiter not specified nor deductible from filename.');
         }
 
         this._openedSourceId = id;
@@ -245,19 +251,38 @@ export class Loader {
 
         if (this._stream) {
             this._reader = this._stream.getReader();
-            this._reader.read().then(this.openStream.bind(this));
+            const result = await this._reader.read();
+
+            return this.openStream(result);
         } else {
-            this.openBuffer();
+            return this.openBuffer();
         }
     }
 
-    public load(): void {
+    public load(): [Column[], Dispatcher] {
         this._perfMon.start(`${this._openedSourceId}-load`);
+
+        const columns = this.setupColumns();
+        const resultStream = this.setupWorker();
+        const dispatch = async function* (): AsyncGenerator<DispatchValue, void> {
+            const reader = resultStream.getReader();
+
+            while (true) {
+                const { done, value } = await reader.read();
+
+                if (done) return;
+
+                yield value;
+            }
+        };
+
         if (this._stream) {
             this.readStreamFirstChunk();
         } else {
             this.readBuffer();
         }
+
+        return [columns, dispatch];
     }
 
     public set stream(stream: ReadableStream) {
@@ -274,25 +299,5 @@ export class Loader {
 
     public set types(columns: ColumnTypes) {
         this._types = columns;
-    }
-
-    public set onOpened(handler: OpenedHandler) {
-        this._onOpened = handler;
-    }
-
-    public set onColumns(handler: ColumnsHandler) {
-        this._onColumns = handler;
-    }
-
-    public set onData(handler: DataHandler) {
-        this._onData = handler;
-    }
-
-    public set onDone(handler: DoneHandler) {
-        this._onDone = handler;
-    }
-
-    public set onError(handler: ErrorHandler) {
-        this._onError = handler;
     }
 }

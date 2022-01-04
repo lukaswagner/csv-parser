@@ -1,34 +1,14 @@
 import { Loader } from './loader';
-import { Column } from './types/column/column';
+import type { Column } from './types/column/column';
 import type { DataSource, InputData } from './types/dataSource';
-import { ColumnTypes, DataType } from './types/dataType';
-import {
-    ColumnsHandler,
-    DataHandler,
-    DoneHandler,
-    ErrorHandler,
-    EventHandler,
-    LoadStatistics,
-    OpenedHandler,
-} from './types/handlers';
-import { CsvLoaderOptions } from './types/options';
-
-enum Event {
-    Opened = 'opened',
-    Columns = 'columns',
-    Data = 'data',
-    Done = 'done',
-    Error = 'error',
-}
-type EventType = `${Event}`;
-
-type ColumnHeader = { name: string; type: DataType };
+import type { ColumnTypes } from './types/dataType';
+import type { ColumnHeader, Dispatcher } from './types/handlers';
+import type { CsvLoaderOptions } from './types/options';
 
 export class CSV<D extends string> {
     protected _openedDataSource: D;
     protected _options: CsvLoaderOptions;
     protected _loader: Loader;
-    protected _handlers: Map<EventType, Map<D, Set<EventHandler>>>;
 
     public constructor(options: Partial<CsvLoaderOptions>) {
         this._options = {
@@ -39,27 +19,9 @@ export class CSV<D extends string> {
             ...options,
         };
         this._loader = new Loader();
-        this._loader.onOpened = this.dispatch.bind(this, Event.Opened);
-        this._loader.onColumns = this.dispatch.bind(this, Event.Columns);
-        this._loader.onData = this.dispatch.bind(this, Event.Data);
-        this._loader.onDone = this.dispatch.bind(this, Event.Done);
-        this._loader.onError = this.dispatch.bind(this, Event.Error);
-        this._handlers = new Map<EventType, Map<D, Set<EventHandler>>>([
-            [Event.Opened, new Map()],
-            [Event.Columns, new Map()],
-            [Event.Data, new Map()],
-            [Event.Done, new Map()],
-            [Event.Error, new Map()],
-        ]);
-
-        for (const id of Object.keys(this._options.dataSources)) {
-            this._handlers.forEach((handlerMap) => {
-                handlerMap.set(id as D, new Set());
-            });
-        }
     }
 
-    protected openFile(file: Blob): void {
+    protected openFile(file: Blob): Promise<ColumnHeader[]> {
         this._options.size ??= file.size;
 
         if (file instanceof File) {
@@ -68,107 +30,76 @@ export class CSV<D extends string> {
 
         this._loader.options = this._options;
         this._loader.stream = file.stream();
-        this._loader.open(this._openedDataSource);
+
+        return this._loader.open(this._openedDataSource);
     }
 
-    protected openUrl(url: string): void {
+    protected async openUrl(url: string): Promise<ColumnHeader[]> {
         this._options.delimiter ??= deductDelimiter(url.split('.').pop());
         const size = 'Content-Length';
-        fetch(url).then((res) => {
-            if (res.headers.has(size)) {
-                this._options.size ??= Number.parseInt(res.headers.get(size));
-            }
-            this._loader.options = this._options;
-            this._loader.stream = res.body;
-            this._loader.open(this._openedDataSource);
-        });
+        const response = await fetch(url);
+
+        if (response.headers.has(size)) {
+            this._options.size ??= Number.parseInt(response.headers.get(size));
+        }
+
+        this._loader.options = this._options;
+        this._loader.stream = response.body;
+
+        return this._loader.open(this._openedDataSource);
     }
 
-    protected openStream(stream: ReadableStream): void {
+    protected openStream(stream: ReadableStream): Promise<ColumnHeader[]> {
         this._loader.options = this._options;
         this._loader.stream = stream;
-        this._loader.open(this._openedDataSource);
+
+        return this._loader.open(this._openedDataSource);
     }
 
-    protected openBuffer(buffer: ArrayBufferLike): void {
+    protected openBuffer(buffer: ArrayBufferLike): Promise<ColumnHeader[]> {
         this._loader.options = this._options;
         this._loader.buffer = buffer;
-        this._loader.open(this._openedDataSource);
+
+        return this._loader.open(this._openedDataSource);
     }
 
-    protected dispatch(event: Event, id: D, data: unknown): void {
-        const h = this._handlers.get(event).get(id);
-
-        switch (event) {
-            case Event.Opened:
-                h.forEach((h) => (h as OpenedHandler)(id, data as ColumnHeader[]));
-                break;
-            case Event.Columns:
-                h.forEach((h) => (h as ColumnsHandler)(id, data as Column[]));
-                break;
-            case Event.Data:
-                h.forEach((h) => (h as DataHandler)(id, data as number));
-                break;
-            case Event.Done:
-                h.forEach((h) => (h as DoneHandler)(id, data as LoadStatistics));
-                break;
-            case Event.Error:
-                h.forEach((h) => (h as ErrorHandler)(id, data as string));
-                break;
-            default:
-                break;
-        }
-    }
-
-    protected openInputData(source: InputData): void {
+    protected openInputData(source: InputData): Promise<ColumnHeader[]> {
         if (source instanceof Blob) {
-            this.openFile(source);
+            return this.openFile(source);
         } else if (typeof source === 'string') {
-            this.openUrl(source);
+            return this.openUrl(source);
         } else if (source instanceof ReadableStream) {
-            this.openStream(source);
+            return this.openStream(source);
         } else if (
             source instanceof ArrayBuffer ||
             source instanceof SharedArrayBuffer ||
             source instanceof Uint8Array
         ) {
-            this.openBuffer(source);
+            return this.openBuffer(source);
         }
     }
 
-    public async open(id: D): Promise<void> {
+    public async open(id: D): Promise<ColumnHeader[]> {
         const dataSource: DataSource = this._options.dataSources[id];
         const data = await (typeof dataSource === 'function' ? dataSource() : dataSource);
 
         this._openedDataSource = id;
-        this.openInputData(data);
+
+        return this.openInputData(data);
     }
 
-    public load(types: ColumnTypes): void {
+    public load(types: ColumnTypes): [Column[], Dispatcher] {
         this._loader.types = types;
-        this._loader.load();
-    }
 
-    public on(event: EventType, id: D, handler: EventHandler): void {
-        this._handlers.get(event).get(id).add(handler);
-    }
-
-    public off(event: EventType, id: D, handler: EventHandler): void {
-        this._handlers.get(event).get(id).delete(handler);
+        return this._loader.load();
     }
 
     public addDataSource(id: string, dataSource: DataSource): void {
         this._options.dataSources[id] = dataSource;
-        this._handlers.forEach((handlerMap) => {
-            handlerMap.set(id as D, new Set());
-        });
     }
 
     public removeDataSource(id: D): void {
         delete this._options.dataSources[id];
-        this._handlers.forEach((handlerMap) => {
-            handlerMap.delete(id);
-        });
     }
 }
 
