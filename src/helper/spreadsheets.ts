@@ -1,7 +1,7 @@
 class CsvTransformer {
-    #isInValues = false;
-    #isInRow = false;
-    #resultChunk = '';
+    protected _isInValues = false;
+    protected _isInRow = false;
+    protected _resultChunk = '';
 
     public start(): void {}
     public flush(): void {}
@@ -11,9 +11,9 @@ class CsvTransformer {
         const rows = chunk.split('\n');
         let start = 0;
 
-        if (!this.#isInValues) {
+        if (!this._isInValues) {
             if (chunk.includes(searchString)) {
-                this.#isInValues = true;
+                this._isInValues = true;
                 start = rows.findIndex((row) => row.trim() === searchString) + 1;
             } else {
                 return;
@@ -25,29 +25,29 @@ class CsvTransformer {
 
             switch (value) {
                 case '[':
-                    this.#isInRow = true;
+                    this._isInRow = true;
                     break;
 
                 case '],':
                 case ']':
-                    if (!this.#isInRow) {
-                        controller.enqueue(this.#resultChunk);
+                    if (!this._isInRow) {
+                        controller.enqueue(this._resultChunk);
                         controller.terminate();
                         return;
                     }
 
-                    this.#resultChunk += '\n';
-                    this.#isInRow = false;
+                    this._resultChunk += '\n';
+                    this._isInRow = false;
                     break;
 
                 default:
-                    this.#resultChunk += value.replace(/"/g, '');
+                    this._resultChunk += value.replace(/"/g, '');
                     break;
             }
         }
 
-        controller.enqueue(this.#resultChunk);
-        this.#resultChunk = '';
+        controller.enqueue(this._resultChunk);
+        this._resultChunk = '';
     };
 }
 
