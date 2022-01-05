@@ -13,6 +13,10 @@ const dataSources = createDataSources({
     '[10m url stream]': require('10m.csv'),
     '[50m url stream]': require('50m.csv'),
     '[100m url stream]': require('100m.csv'),
+    '[google sheet]': {
+        apiKey: process.env.API_KEY,
+        sheetId: process.env.SHEET_ID,
+    },
 });
 
 type DataSource = keyof typeof dataSources;
@@ -121,4 +125,5 @@ testLoad('[remote url stream]')
     .then(() => testLoad('[10m url stream]'))
     .then(() => testLoad('[50m url stream]'))
     .then(() => testLoad('[100m url stream]'))
+    .then(() => testLoad('[google sheet]'))
     .then(() => console.table(statistics));
