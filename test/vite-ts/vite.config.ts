@@ -7,6 +7,10 @@ export default defineConfig({
         fs: {
             allow: ['.', '../../lib'],
         },
+        headers: {
+            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Embedder-Policy': 'require-corp',
+        },
     },
     plugins: [react()],
 });
