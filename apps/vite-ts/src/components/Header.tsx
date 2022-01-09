@@ -1,8 +1,8 @@
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Button, Flex, Spacer, Text } from '@chakra-ui/react';
+import conf from '@csv-parser/data/conf.json';
 import { useResetRecoilState, useSetRecoilState } from 'recoil';
 
-import conf from '../../../conf.json';
 import {
     columnHeadersState,
     columnsState,
@@ -61,8 +61,11 @@ export const Header = (): JSX.Element => {
             <Text fontSize="lg" fontWeight={500}>
                 Test Cases:
             </Text>
-            <Button onClick={handleRemoteUrlClick}>Remote URL</Button>
-            <Button onClick={handleGoogleSheetClick}>Google Sheet</Button>
+            {conf.url ? <Button onClick={handleRemoteUrlClick}>Remote URL</Button> : null}
+
+            {import.meta.env.VITE_API_KEY && import.meta.env.VITE_SHEET_ID ? (
+                <Button onClick={handleGoogleSheetClick}>Google Sheet</Button>
+            ) : null}
             <Spacer />
             <Button colorScheme="gray" leftIcon={<DeleteIcon />} onClick={handleResetClick}>
                 Reset

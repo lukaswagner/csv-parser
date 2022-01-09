@@ -1,0 +1,12 @@
+{
+    "name": "@csv-parser/data",
+    "version": "1.0.0",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/lukaswagner/csv-parser.git",
+        "directory": "apps/data"
+    },
+    "author": "Lukas Wagner",
+    "license": "MIT"
+}

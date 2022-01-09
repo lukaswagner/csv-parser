@@ -12,6 +12,7 @@
         "sourceType": "module",
         "project": ["./tsconfig.eslint.json"]
     },
+    "ignorePatterns": "packages/csv-parser/lib/**/*",
     "plugins": ["@typescript-eslint"],
     "rules": {
         "comma-dangle": "off",

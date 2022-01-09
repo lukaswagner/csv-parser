@@ -1,7 +1,7 @@
 import replace from '@rollup/plugin-replace';
 import { build } from 'vite';
 
-import { resolveFile } from './helper.js';
+import { resolveFile } from '../../../scripts/helper.js';
 
 const artifacts = [
     { name: 'csv', entry: resolveFile('./src/csv.ts') },

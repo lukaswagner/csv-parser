@@ -1,26 +1,17 @@
 {
     "name": "csv-parser",
     "version": "1.0.0",
+    "private": true,
     "description": "Multi-threaded CSV parser using web workers.",
-    "type": "module",
-    "module": "./lib/csv.js",
-    "exports": "./lib/csv.js",
-    "types": "./lib/types/csv.d.ts",
-    "files": [
-        "lib"
+    "workspaces": [
+        "apps/*",
+        "packages/*"
     ],
+    "type": "module",
     "scripts": {
-        "build": "node scripts/build.js && tsc",
-        "vite-watch": "node scripts/build.js --watch",
-        "tsc-watch": "tsc --watch",
-        "watch": "concurrently npm:vite-watch npm:tsc-watch",
-        "test-webpack-js": "cd test/webpack-js && webpack serve",
-        "test-webpack-ts": "cd test/webpack-ts && webpack serve",
-        "test-express": "cd test/express && node server.js",
-        "dev-watch": "concurrently npm:watch npm:test-webpack-ts",
-        "format": "prettier --write \"{src,test,scripts}/**/*.{ts,json,js}\"",
-        "lint": "eslint ./src",
-        "lint-fix": "eslint ./src --fix"
+        "format": "prettier --write \"{apps,packages,scripts}/**/*.{ts,tsx,json,js}\"",
+        "lint": "eslint ./apps ./packages",
+        "lint-fix": "eslint ./apps ./packages --fix"
     },
     "repository": {
         "type": "git",
@@ -39,27 +30,13 @@
         "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
     },
     "devDependencies": {
-        "@rollup/plugin-replace": "^3.0.0",
-        "@types/pako": "^1.0.2",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
         "concurrently": "^6.4.0",
-        "dotenv-webpack": "^7.0.3",
         "eslint": "^8.3.0",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^4.0.0",
-        "express": "^4.17.1",
-        "html-webpack-plugin": "^5.5.0",
-        "pako": "^2.0.4",
         "prettier": "~2.5.0",
-        "pug": "^3.0.2",
-        "pug-loader": "^2.4.0",
-        "ts-loader": "^9.2.6",
-        "typescript": "^4.5.2",
-        "vite": "^2.6.14",
-        "webpack": "^5.64.4",
-        "webpack-cli": "^4.9.1",
-        "webpack-dev-server": "^4.6.0",
-        "webpack-merge": "^5.8.0"
+        "typescript": "^4.5.2"
     }
 }
