@@ -4,9 +4,9 @@ import { build } from 'vite';
 import { resolveFile } from '../../../scripts/helper.js';
 
 const artifacts = [
-    { name: 'csv', entry: resolveFile('./src/csv.ts') },
-    { name: 'main', entry: resolveFile('./src/worker/main/worker.ts') },
-    { name: 'sub', entry: resolveFile('./src/worker/sub/worker.ts') },
+    { name: 'csv', entry: resolveFile('./packages/csv-parser/src/csv.ts') },
+    { name: 'main', entry: resolveFile('./packages/csv-parser/src/worker/main/worker.ts') },
+    { name: 'sub', entry: resolveFile('./packages/csv-parser/src/worker/sub/worker.ts') },
 ];
 
 const main = async () => {
