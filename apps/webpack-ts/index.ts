@@ -1,8 +1,14 @@
+import conf from '@csv-parser/data/conf.json';
+import {
+    Column,
+    createDataSources,
+    CSV,
+    DataType,
+    isNumber,
+    LoadStatistics,
+} from '@lukaswasgner/csv-parser';
+import { NumberColumn } from '@lukaswasgner/csv-parser/lib/types/types/column/numberColumn';
 import pako from 'pako';
-
-import { Column, createDataSources, CSV, DataType, isNumber, LoadStatistics } from '../..';
-import { NumberColumn } from '../../lib/types/types/column/numberColumn';
-import conf from '../conf.json';
 
 const dataSources = createDataSources({
     '[remote url stream]': conf.url,

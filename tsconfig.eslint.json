@@ -1,14 +1,12 @@
 {
-    "extends": "./tsconfig.json",
+    "extends": "./packages/csv-parser/tsconfig.json",
     "include": [
-        "scripts/*.js",
-        "test/express/*.js",
-        "test/webpack-js/*.js",
-        "test/webpack-ts/*.ts",
-        "test/webpack-ts/*.js",
-        "test/vite-ts/**/*.js",
-        "test/vite-ts/**/*.ts",
-        "test/vite-ts/**/*.tsx",
-        "webpack.config.js"
+        "apps/**/*.js",
+        "apps/**/*.ts",
+        "apps/**/*.tsx",
+        "packages/**/*.js",
+        "packages/**/*.ts",
+        "packages/**/*.tsx",
+        "scripts/**/*.js"
     ]
 }

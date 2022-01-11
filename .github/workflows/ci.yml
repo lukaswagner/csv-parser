@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node_version: [12, 14, 16]
+        node_version: [16]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Initialize Node.js environment
@@ -18,9 +18,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
       - name: Set up dependencies
-        run: npm install
+        run: npm ci
       - name: Build website
-        run: npm run build
+        run: npm run build -w packages/csv-parser
   eslint:
     name: eslint
     runs-on: ubuntu-latest
@@ -28,10 +28,10 @@ jobs:
       - name: Initialize Node.js environment
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
       - name: Check out code
         uses: actions/checkout@v2
       - name: Set up dependencies
-        run: npm install
+        run: npm ci
       - name: Run ESLint
         run: npm run lint
