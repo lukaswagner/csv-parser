@@ -1,0 +1,15 @@
+{
+    "fmt": {
+        "options": {
+            "indentWidth": 4,
+            "lineWidth": 100,
+            "singleQuote": true
+        }
+    },
+    "compilerOptions": {
+        "lib": [
+            "deno.ns",
+            "dom"
+        ]
+    }
+}
