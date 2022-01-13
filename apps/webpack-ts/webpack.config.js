@@ -22,14 +22,14 @@ export default function () {
             extensions: ['.ts', '.js', '.json'],
             alias: {
                 '1m.csv.gz': resolveFile('./apps/data/1m.csv.gz'),
+                '1m.csv': resolveFile('./apps/data/1m.csv'),
+                '5m.csv': resolveFile('./apps/data/5m.csv'),
                 '10m.csv': resolveFile('./apps/data/10m.csv'),
-                '50m.csv': resolveFile('./apps/data/50m.csv'),
-                '100m.csv': resolveFile('./apps/data/100m.csv'),
             },
             fallback: {
+                '1m.csv': resolveFile('./apps/data/fallback.csv'),
+                '5m.csv': resolveFile('./apps/data/fallback.csv'),
                 '10m.csv': resolveFile('./apps/data/fallback.csv'),
-                '50m.csv': resolveFile('./apps/data/fallback.csv'),
-                '100m.csv': resolveFile('./apps/data/fallback.csv'),
             },
         },
         plugins: [
