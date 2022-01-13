@@ -1,5 +1,5 @@
-import seedrandom from 'seedrandom';
 import fs from 'node:fs';
+import seedrandom from 'seedrandom';
 
 // note: watch out for big file sizes and long generation times.
 // the 100m file measures ca. 4gb and takes multiple minutes (~10) to generate.
