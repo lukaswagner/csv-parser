@@ -50,3 +50,7 @@ export function rebuildChunk(chunk: unknown): Chunk {
     const nc = buildChunk(oc._type, 0, 0);
     return Object.assign(nc, chunk);
 }
+
+export * from './colorChunk';
+export * from './numberChunk';
+export * from './stringChunk';
