@@ -1,5 +1,5 @@
 {
-    "name": "@lukaswasgner/csv-parser",
+    "name": "@lukaswagner/csv-parser",
     "version": "0.1.0",
     "description": "Multi-threaded CSV parser using web workers.",
     "type": "module",

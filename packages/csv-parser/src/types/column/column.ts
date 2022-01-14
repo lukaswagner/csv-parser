@@ -55,3 +55,7 @@ export function rebuildColumn(column: unknown): Column {
     const nc = buildColumn(oc._name, oc._type);
     return Object.assign(nc, column);
 }
+
+export * from './colorColumn';
+export * from './numberColumn';
+export * from './stringColumn';
