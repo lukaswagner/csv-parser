@@ -2,7 +2,7 @@
     "name": "@csv-parser/express",
     "version": "1.0.0",
     "private": true,
-    "type": "commonjs",
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/lukaswagner/csv-parser.git",
