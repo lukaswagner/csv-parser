@@ -1,14 +1,28 @@
-import { TypeDeduction, loadUrl } from '../..';
+const { CSV } = require('@lukaswasgner/csv-parser');
 
-const conf = require('../conf');
-
-const options = {
+const loader = new CSV({
     includesHeader: true,
     delimiter: ',',
-};
+});
 
-const update = (progress) => {
-    console.log('progress:', progress);
-};
+async function load() {
+    loader.addDataSource('data', require('1m.csv'));
 
-loadUrl(conf.url, options, update, TypeDeduction.KeepAll);
+    const detectedColumns = await loader.open('data');
+    console.log('opened');
+
+    const [, dispatch] = loader.load({
+        columns: detectedColumns.map(({ type }) => type),
+        generatedColumns: [],
+    });
+
+    for await (const value of dispatch()) {
+        if (value.type === 'data') {
+            console.log(`received new data. progress: ${value.progress}`);
+        } else {
+            console.log('done');
+        }
+    }
+}
+
+load();

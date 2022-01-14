@@ -2,7 +2,7 @@
     "name": "@csv-parser/webpack-js",
     "version": "1.0.0",
     "private": true,
-    "type": "module",
+    "type": "commonjs",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/lukaswagner/csv-parser.git",
