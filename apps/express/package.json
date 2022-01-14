@@ -2,7 +2,7 @@
     "name": "@csv-parser/express",
     "version": "1.0.0",
     "private": true,
-    "type": "module",
+    "type": "commonjs",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/lukaswagner/csv-parser.git",
@@ -14,5 +14,8 @@
         "@csv-parser/data": "1.0.0",
         "@lukaswasgner/csv-parser": "^0.1.0",
         "express": "^4.17.2"
+    },
+    "scripts": {
+        "dev": "node server.js"
     }
 }
