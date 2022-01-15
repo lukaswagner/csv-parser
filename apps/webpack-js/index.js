@@ -1,4 +1,5 @@
-const { CSV } = require('@lukaswasgner/csv-parser');
+import { CSV } from '@lukaswasgner/csv-parser';
+import data from '1m.csv';
 
 const loader = new CSV({
     includesHeader: true,
@@ -6,7 +7,8 @@ const loader = new CSV({
 });
 
 async function load() {
-    loader.addDataSource('data', require('1m.csv'));
+    console.log('adding data source', data);
+    loader.addDataSource('data', data);
 
     const detectedColumns = await loader.open('data');
     console.log('opened');

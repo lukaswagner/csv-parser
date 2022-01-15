@@ -1,21 +1,24 @@
 'use strict';
 
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-module.exports = function () {
+import { resolveFile } from '../../scripts/helper.js';
+
+export default function () {
     return {
         entry: './index.js',
         mode: 'production',
+        target: 'web',
         module: {
             rules: [{ test: /\.csv$/, type: 'asset/resource' }],
         },
         resolve: {
-            extensions: ['.ts', '.js', '.json'],
+            extensions: ['.ts', '.js', '.json', '.csv'],
             alias: {
-                '1m.csv': '../data/1m.csv',
+                '1m.csv': resolveFile('./apps/data/1m.csv'),
             },
             fallback: {
-                '1m.csv': '../data/fallback.csv',
+                '1m.csv': resolveFile('./apps/data/fallback.csv'),
             },
         },
         plugins: [
@@ -30,4 +33,4 @@ module.exports = function () {
             },
         },
     };
-};
+}
