@@ -12,6 +12,7 @@ export type StartData = {
     columns: DataType[];
     generatedColumns: ColumnGenerator[];
     options: SubWorkerOptions;
+    lastChunk: boolean;
 };
 
 export type FinishedData = {
