@@ -9,15 +9,17 @@ import {
 } from '@lukaswagner/csv-parser';
 import pako from 'pako';
 
+const sheetAvailable = process.env.API_KEY !== undefined && process.env.SHEET_ID !== undefined;
+
 const dataSources = createDataSources({
     '[remote url stream]': conf.url,
     '[1m gzip buffer]': () =>
         fetch(require('1m.csv.gz'))
             .then((res) => res.arrayBuffer())
             .then((buf) => pako.inflate(new Uint8Array(buf)).buffer),
+    '[1m url stream]': require('1m.csv'),
+    '[5m url stream]': require('5m.csv'),
     '[10m url stream]': require('10m.csv'),
-    '[50m url stream]': require('50m.csv'),
-    '[100m url stream]': require('100m.csv'),
     '[google sheet]': {
         apiKey: process.env.API_KEY,
         sheetId: process.env.SHEET_ID,
@@ -127,8 +129,7 @@ async function testLoad(id: DataSource): Promise<void> {
 
 testLoad('[remote url stream]')
     .then(() => testLoad('[1m gzip buffer]'))
+    .then(() => testLoad('[5m url stream]'))
     .then(() => testLoad('[10m url stream]'))
-    .then(() => testLoad('[50m url stream]'))
-    .then(() => testLoad('[100m url stream]'))
-    .then(() => testLoad('[google sheet]'))
+    .then(() => (sheetAvailable ? testLoad('[google sheet]') : Promise.resolve()))
     .then(() => console.table(statistics));

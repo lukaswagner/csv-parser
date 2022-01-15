@@ -11,5 +11,6 @@
     "tsImportSorter.configuration.groupRules": [
         ["^react(-dom)?$", "^@angular/", "^vue$", "^node:", "^[@]", {}],
         "^[.]"
-    ]
+    ],
+    "editor.wordWrapColumn": 100
 }

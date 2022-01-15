@@ -14,5 +14,8 @@
         "@csv-parser/data": "1.0.0",
         "@lukaswagner/csv-parser": "^0.1.0",
         "express": "^4.17.2"
+    },
+    "scripts": {
+        "dev": "node server.js"
     }
 }

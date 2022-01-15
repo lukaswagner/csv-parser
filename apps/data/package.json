@@ -2,11 +2,18 @@
     "name": "@csv-parser/data",
     "version": "1.0.0",
     "private": true,
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/lukaswagner/csv-parser.git",
         "directory": "apps/data"
     },
     "author": "Lukas Wagner",
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "seedrandom": "^3.0.5"
+    },
+    "scripts": {
+        "generate": "node generate.js"
+    }
 }
