@@ -1,4 +1,4 @@
-import { CSV } from '@lukaswasgner/csv-parser';
+import { CSV } from '@lukaswagner/csv-parser';
 import data from '1m.csv';
 
 const loader = new CSV({

@@ -3,11 +3,10 @@ import {
     Column,
     createDataSources,
     CSV,
-    DataType,
     isNumber,
     LoadStatistics,
-} from '@lukaswasgner/csv-parser';
-import { NumberColumn } from '@lukaswasgner/csv-parser/lib/types/types/column/numberColumn';
+    NumberColumn,
+} from '@lukaswagner/csv-parser';
 import pako from 'pako';
 
 const sheetAvailable = process.env.API_KEY !== undefined && process.env.SHEET_ID !== undefined;
@@ -102,7 +101,7 @@ async function testLoad(id: DataSource): Promise<void> {
         console.log(
             id,
             `opened source, detected ${detectedColumns.length} columns:\n` +
-                detectedColumns.map(({ name, type }) => `${name}: ${DataType[type]}`).join('\n')
+                detectedColumns.map(({ name, type }) => `${name}: ${type}`).join('\n')
         );
 
         const [columns, dispatch] = loader.load({

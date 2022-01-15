@@ -1,15 +1,15 @@
 export enum DataType {
-    Number,
-    Int8,
-    Uint8,
-    Int16,
-    Uint16,
-    Int32,
-    Uint32,
-    Float32,
-    Float64,
-    Color,
-    String,
+    Number = 'number',
+    Int8 = 'int8',
+    Uint8 = 'uint8',
+    Int16 = 'int16',
+    Uint16 = 'uint16',
+    Int32 = 'int32',
+    Uint32 = 'uint32',
+    Float32 = 'float32',
+    Float64 = 'float64',
+    Color = 'color',
+    String = 'string',
 }
 
 export type ColumnGenerator = {

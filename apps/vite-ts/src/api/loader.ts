@@ -1,4 +1,4 @@
-import { CSV } from '@lukaswasgner/csv-parser';
+import { CSV } from '@lukaswagner/csv-parser';
 
 export const loader = new CSV({
     delimiter: ',',
