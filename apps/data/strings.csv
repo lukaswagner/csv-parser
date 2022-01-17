@@ -1,0 +1,9 @@
+number,string,color
+0,black,#000
+1,blue,#00f
+2,green,#0f0
+3,cyan,#0ff
+4,red,#f00
+5,magenta,#f0f
+6,yellow,#ff0
+7,white,#fff

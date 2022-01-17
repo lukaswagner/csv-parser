@@ -6,7 +6,7 @@ export function parseLine(line: string[], types: DataType[]): unknown[] {
         if (isFloat(types[i])) return Number.parseFloat(cell);
         if (isInt(types[i])) return Number.parseInt(cell);
         if (types[i] === DataType.Color) return hex2rgba(cell);
-        if (types[i] === DataType.String) return undefined;
+        if (types[i] === DataType.String) return cell;
         return undefined;
     });
 }
