@@ -13,7 +13,9 @@ function parseSingleChunk(chunk: ArrayBufferLike, start: Position, end: Position
     const decoder = new TextDecoder();
     const lines = new Array<string>();
     const buffer = new Uint8Array(chunk, start.char, end.char - start.char);
-    splitLines(decoder.decode(buffer), lines);
+    const remainder = splitLines(decoder.decode(buffer), lines);
+    // last chunk does not end with newline
+    lines.push(remainder);
     return lines;
 }
 

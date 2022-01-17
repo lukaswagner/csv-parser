@@ -22,7 +22,7 @@ function onStart(data: Interface.StartData): void {
         splitLine(l, data.options.delimiter)
     );
 
-    const numChunks = lines.length + 1; // +1 for inter-chunk remainder
+    const numChunks = lines.length + +!data.lastChunk; // +1 for inter-chunk remainder
     const chunks = data.columns.map((c) => buildChunk(c, numChunks));
     const values = lines.map((l) => parseLine(l, data.columns));
     values.forEach((line, li) => line.forEach((value, vi) => storeValue(value, li, chunks[vi])));

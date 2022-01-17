@@ -2,7 +2,7 @@ import { parseLine } from '../../helper/parseLine';
 import { PerfMon } from '../../helper/perfMon';
 import { splitLine } from '../../helper/splitLine';
 import { storeValue } from '../../helper/storeValue';
-import { Chunk } from '../../types/chunk/chunk';
+import { Chunk, rebuildChunk } from '../../types/chunk/chunk';
 import * as SubInterface from '../sub/interface';
 import * as MainInterface from './interface';
 
@@ -59,8 +59,8 @@ function onAddChunk(data: MainInterface.AddChunkData): void {
 }
 
 function onNoMoreChunks(): void {
-    startSubWorker();
     allChunksHandled = true;
+    startSubWorker();
 }
 
 function deductChunksPerWorker(chunk: ArrayBufferLike): void {
@@ -100,6 +100,7 @@ function startSubWorker(): void {
             delimiter: setup.options.delimiter,
             includesHeader: setup.options.includesHeader && workerId === 0,
         },
+        lastChunk: allChunksHandled,
     };
 
     const msg: SubInterface.MessageData = {
@@ -120,8 +121,8 @@ function onSubWorkerFinished(data: SubInterface.FinishedData, workerId: number):
     const subWorker = runningWorkers.get(workerId);
     runningWorkers.delete(workerId);
 
-    parsedChunks.set(workerId, data.chunks);
-    generatedChunks.set(workerId, data.generatedChunks);
+    parsedChunks.set(workerId, data.chunks.map(rebuildChunk));
+    generatedChunks.set(workerId, data.generatedChunks.map(rebuildChunk));
     startRemainders.set(workerId, data.startRemainder);
     endRemainders.set(workerId, data.endRemainder);
 
@@ -135,23 +136,26 @@ function onSubWorkerFinished(data: SubInterface.FinishedData, workerId: number):
 }
 
 function finishChunk(): boolean {
-    const pc = parsedChunks.get(nextChunkToBeFinished);
-    const gc = generatedChunks.get(nextChunkToBeFinished);
-    const er = endRemainders.get(nextChunkToBeFinished);
-    const sr = startRemainders.get(nextChunkToBeFinished + 1);
+    const parsed = parsedChunks.get(nextChunkToBeFinished);
+    const generated = generatedChunks.get(nextChunkToBeFinished);
+    const end = endRemainders.get(nextChunkToBeFinished);
+    const start = startRemainders.get(nextChunkToBeFinished + 1);
     const lastChunk = allChunksHandled && nextWorker === nextChunkToBeFinished + 1;
 
-    const ready = pc && gc && er && (sr || lastChunk);
+    // all data mus be present except for the last chunk, where no next chunk can provide a start
+    const ready = parsed && generated && end && (start || lastChunk);
     if (!ready) return false;
 
-    const buf = new Uint8Array(er.byteLength + (sr?.byteLength ?? 0));
-    buf.set(new Uint8Array(er));
-    if (sr) buf.set(new Uint8Array(sr), er.byteLength);
+    if (!lastChunk) {
+        const buf = new Uint8Array(end.byteLength + (start?.byteLength ?? 0));
+        buf.set(new Uint8Array(end));
+        buf.set(new Uint8Array(start), end.byteLength);
 
-    handleRemainder(buf, pc, gc);
-    pc.forEach((c) => (c.offset = chunkLengthSum));
-    gc.forEach((c) => (c.offset = chunkLengthSum));
-    chunkLengthSum += pc[0].length;
+        handleRemainder(buf, parsed, generated);
+    }
+    parsed.forEach((chunk) => (chunk.offset = chunkLengthSum));
+    generated.forEach((chunk) => (chunk.offset = chunkLengthSum));
+    chunkLengthSum += parsed[0].length;
 
     parsedChunks.delete(nextChunkToBeFinished);
     generatedChunks.delete(nextChunkToBeFinished);
@@ -159,7 +163,7 @@ function finishChunk(): boolean {
     startRemainders.delete(nextChunkToBeFinished + 1);
 
     const data: MainInterface.ProcessedData = {
-        chunks: [...pc, ...gc],
+        chunks: [...parsed, ...generated],
     };
     const msg: MainInterface.MessageData = {
         type: MainInterface.MessageType.Processed,
@@ -172,15 +176,17 @@ function finishChunk(): boolean {
     return true;
 }
 
-function handleRemainder(buf: Uint8Array, pc: Chunk[], gc: Chunk[]): void {
+function handleRemainder(buf: Uint8Array, parsed: Chunk[], generated: Chunk[]): void {
     const text = new TextDecoder().decode(buf);
     const valueTexts = splitLine(text, setup.options.delimiter);
     const values = parseLine(valueTexts, setup.columns);
-    values.forEach((v, vi) => storeValue(v, pc[vi].length - 1, pc[vi]));
+    values.forEach((value, column) => storeValue(value, parsed[column].length - 1, parsed[column]));
 
     const gen = setup.generatedColumns;
     const genValues = gen.map((g) => g.func(valueTexts, values));
-    genValues.forEach((v, vi) => storeValue(v, gc[vi].length - 1, gc[vi]));
+    genValues.forEach((value, column) =>
+        storeValue(value, generated[column].length - 1, generated[column])
+    );
 }
 
 function done(): void {
