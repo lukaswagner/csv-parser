@@ -1,5 +1,5 @@
 {
     "yarn": false,
     "contents": "lib",
-    "test": false
+    "tests": false
 }
