@@ -11,6 +11,10 @@ abstract class BaseNumberChunk<A extends NumArray> extends BufferChunk<number> {
     protected _min: number;
     protected _max: number;
 
+    public get view(): A {
+        return this._view;
+    }
+
     public get min(): number {
         return this._min;
     }
