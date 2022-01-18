@@ -16,7 +16,7 @@ Quick, multi-threaded CSV parser with focus on handling huge files.
 
 ## Usage
 
-See the `apps` directory for multiple example implementations using the parser.
+See the [`apps` directory](https://github.com/lukaswagner/csv-parser/tree/master/apps) for multiple example implementations using the parser.
 
 ## Important implementation notes and limitations
 
