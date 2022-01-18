@@ -10,6 +10,7 @@ export enum DataType {
     Float64 = 'float64',
     Color = 'color',
     String = 'string',
+    Date = 'date',
 }
 
 export type ColumnGenerator = {
@@ -37,6 +38,7 @@ export function bytes(type: DataType): number {
         case DataType.Number:
             return 4;
         case DataType.Float64:
+        case DataType.Date:
             return 8;
         case DataType.Color:
             return 16;
