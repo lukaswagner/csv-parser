@@ -1,4 +1,4 @@
-import { Chunk } from '../chunk/chunk';
+import { Chunk, rebuildChunk } from '../chunk/chunk';
 import { DataType } from '../dataType';
 import { ColorColumn } from './colorColumn';
 import {
@@ -47,13 +47,16 @@ export function buildColumn(name: string, type: DataType): Column {
 }
 
 export function rebuildColumn(column: unknown): Column {
-    const oc = column as {
+    const oldColumn = column as {
         _type: DataType;
-        _chunks: Chunk[];
         _name: string;
     };
-    const nc = buildColumn(oc._name, oc._type);
-    return Object.assign(nc, column);
+    const newColumn = buildColumn(oldColumn._name, oldColumn._type);
+    Object.assign(newColumn, column);
+    newColumn.chunks.forEach((chunk, index, chunks) => {
+        chunks[index] = rebuildChunk(chunk);
+    });
+    return newColumn;
 }
 
 export * from './colorColumn';
