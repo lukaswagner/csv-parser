@@ -7,6 +7,7 @@ export async function load(url: string, dynamicTyping: boolean): Promise<number>
             delimiter: ',',
             header: true,
             dynamicTyping,
+            skipEmptyLines: true,
             complete: (result) => resolve(result.data.length),
         })
     );

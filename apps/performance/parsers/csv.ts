@@ -6,6 +6,7 @@ export async function load(url: string, cast: boolean): Promise<number> {
     const result = parse(string, {
         delimiter: ',',
         cast,
+        fromLine: 2, // skip header
     });
     return result.length;
 }

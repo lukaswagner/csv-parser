@@ -11,18 +11,19 @@ const parsers = new Map([
 ]);
 const sources = ['/1m.csv', '/5m.csv', '/10m.csv', '/25m.csv', '/50m.csv'];
 
-const select = document.getElementById('parse-select') as HTMLSelectElement;
-const source = document.getElementById('parse-source') as HTMLSelectElement;
-const start = document.getElementById('parse-start') as HTMLButtonElement;
-const time = document.getElementById('parse-time') as HTMLSpanElement;
-const rows = document.getElementById('parse-rows') as HTMLSpanElement;
-const rps = document.getElementById('parse-rps') as HTMLSpanElement;
+const parser = document.getElementById('parser') as HTMLSelectElement;
+const source = document.getElementById('source') as HTMLSelectElement;
+const start = document.getElementById('start') as HTMLButtonElement;
+const time = document.getElementById('time') as HTMLSpanElement;
+const rows = document.getElementById('rows') as HTMLSpanElement;
+const rps = document.getElementById('rps') as HTMLSpanElement;
+const benchmark = document.getElementById('benchmark') as HTMLButtonElement;
 
 parsers.forEach((_, k) => {
     const opt = document.createElement('option');
     opt.value = k;
     opt.text = k;
-    select.add(opt);
+    parser.add(opt);
 });
 
 sources.forEach((s) => {
@@ -44,14 +45,41 @@ function readable(value: number): string {
     );
 }
 
-start.onclick = () => {
-    const load = parsers.get(select.value);
-    const url = source.value;
+async function load(parser: string, url: string): Promise<string> {
+    const load = parsers.get(parser);
     const start = Date.now();
-    load(url).then((length) => {
+    return load(url).then((length) => {
         const dt = Date.now() - start;
         time.innerText = `${dt} ms`;
         rows.innerText = readable(length);
         rps.innerText = `${readable(length / (dt / 1000))} rows/s`;
+        return [
+            parser,
+            url,
+            `"${window.navigator.userAgent}"`,
+            window.navigator.hardwareConcurrency,
+            dt,
+            length,
+        ].join(',');
     });
+}
+
+start.onclick = () => {
+    load(parser.value, source.value).then(console.log);
+};
+
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// seems to run out of memory, happens in chrome and firefox
+benchmark.onclick = async () => {
+    let result = ['parser', 'url', 'userAgent', 'threads', 'time', 'rows'].join(',');
+    for (const parser of parsers.keys()) {
+        for (const source of sources) {
+            const str = await load(parser, source);
+            result = result.concat('\n', str);
+            await sleep(5000);
+        }
+    }
 };
