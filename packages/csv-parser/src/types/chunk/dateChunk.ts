@@ -22,8 +22,8 @@ export class DateChunk extends BufferChunk<Date> {
         return new Date(this._max);
     }
 
-    protected constructor(type: DataType, length: number, offset: number) {
-        super(type, length, offset);
+    public constructor(length: number, offset: number) {
+        super(DataType.Date, length, offset);
         this._data = new SharedArrayBuffer(length * bytes(DataType.Date));
         this._view = new Float64Array(this._data);
         this._min = Number.POSITIVE_INFINITY;

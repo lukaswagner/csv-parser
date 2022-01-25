@@ -7,7 +7,7 @@ export class DateColumn extends BaseColumn<Date, DateChunk> {
     protected _max: number;
 
     public constructor(name: string) {
-        super(name, DataType.Number);
+        super(name, DataType.Date);
         this._min = Number.POSITIVE_INFINITY;
         this._max = Number.NEGATIVE_INFINITY;
     }

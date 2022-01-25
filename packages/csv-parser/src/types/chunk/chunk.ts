@@ -1,5 +1,6 @@
 import { DataType } from '../dataType';
 import { ColorChunk } from './colorChunk';
+import { DateChunk } from './dateChunk';
 import {
     AnyNumberChunk,
     Float32Chunk,
@@ -14,8 +15,8 @@ import {
 } from './numberChunk';
 import { StringChunk } from './stringChunk';
 
-export type Chunk = NumberChunk | ColorChunk | StringChunk;
-export type AnyChunk = AnyNumberChunk & ColorChunk & StringChunk;
+export type Chunk = NumberChunk | ColorChunk | StringChunk | DateChunk;
+export type AnyChunk = AnyNumberChunk & ColorChunk & StringChunk & DateChunk;
 
 export function buildChunk(type: DataType, length: number, offset = 0): Chunk {
     switch (type) {
@@ -38,6 +39,8 @@ export function buildChunk(type: DataType, length: number, offset = 0): Chunk {
             return new Float64Chunk(length, offset);
         case DataType.Color:
             return new ColorChunk(length, offset);
+        case DataType.Date:
+            return new DateChunk(length, offset);
         case DataType.String:
             return new StringChunk(length, offset);
         default:
@@ -53,4 +56,5 @@ export function rebuildChunk(chunk: unknown): Chunk {
 
 export * from './colorChunk';
 export * from './numberChunk';
+export * from './dateChunk';
 export * from './stringChunk';

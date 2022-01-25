@@ -24,6 +24,7 @@ import {
     statisticsState,
 } from '../store/app';
 import { Card } from './Card';
+import { DataType } from '@lukaswagner/csv-parser';
 
 export const DataSourceLoader = (): JSX.Element => {
     const isDisabled = useRecoilValue(isLoaderDisabledState);
@@ -91,10 +92,14 @@ export const DataSourceLoader = (): JSX.Element => {
                                                 <Td>{column.name}</Td>
                                                 <Td isNumeric>{column.length}</Td>
                                                 <Td isNumeric>
-                                                    {(column as NumberColumn).min ?? '-'}
+                                                    {column.type === DataType.Number
+                                                        ? (column as NumberColumn).min
+                                                        : '-'}
                                                 </Td>
                                                 <Td isNumeric>
-                                                    {(column as NumberColumn).max ?? '-'}
+                                                    {column.type === DataType.Number
+                                                        ? (column as NumberColumn).max
+                                                        : '-'}
                                                 </Td>
                                             </Tr>
                                         ))}
