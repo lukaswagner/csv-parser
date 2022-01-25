@@ -23,6 +23,7 @@
     "devDependencies": {
         "@lukaswagner/csv-parser": "^0.1.0",
         "@types/papaparse": "^5.3.1",
+        "buffer": "^6.0.3",
         "concurrently": "^7.0.0",
         "csv": "^6.0.5",
         "html-webpack-plugin": "^5.5.0",

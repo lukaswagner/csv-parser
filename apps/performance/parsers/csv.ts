@@ -1,12 +1,32 @@
-import { parse } from 'csv-parse/browser/esm/sync';
+import { parse, Parser } from 'csv-parse/browser/esm';
+import { Buffer } from 'buffer';
 
 export async function load(url: string, cast: boolean): Promise<number> {
+    let parser: Parser;
+    const result = new Promise<number>(
+        (resolve) =>
+            (parser = parse(
+                {
+                    delimiter: ',',
+                    cast,
+                    fromLine: 2, // skip header
+                },
+                (err, records) => resolve(records.length)
+            ))
+    );
+
     const response = await fetch(url);
-    const string = await response.text();
-    const result = parse(string, {
-        delimiter: ',',
-        cast,
-        fromLine: 2, // skip header
+    const stream = response.body;
+
+    const reader = stream.getReader();
+    reader.read().then(function processText({ done, value }): void {
+        if (done) {
+            parser.end();
+            return;
+        }
+        parser.write(Buffer.from(value));
+        reader.read().then(processText);
     });
-    return result.length;
+
+    return result;
 }
