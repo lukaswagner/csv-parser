@@ -4,9 +4,14 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default function () {
     return {
-        entry: './index.js',
+        entry: './index.ts',
         mode: 'production',
-        target: 'web',
+        module: {
+            rules: [{ test: /\.ts$/, use: { loader: 'ts-loader' } }],
+        },
+        resolve: {
+            extensions: ['.ts', '...'],
+        },
         plugins: [
             new HtmlWebpackPlugin({
                 template: 'index.html',
