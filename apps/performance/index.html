@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>csv-parser</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+            label {
+                margin-right: 1em;
+                width: 6em;
+                display: inline-block;
+            }
+            div {
+                margin-bottom: 0.5em;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <label for="parse-select">Parser:</label>
+            <select id="parse-select"></select>
+        </div>
+        <div>
+            <label for="parse-source">Data Source:</label>
+            <select id="parse-source"></select>
+        </div>
+        <div>
+            <button id="parse-start">Start</button>
+        </div>
+        <div>
+            <label for="parse-result">Time:</label>
+            <span id="parse-result"></span>
+        </div>
+    </body>
+</html>
