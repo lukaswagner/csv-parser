@@ -14,7 +14,9 @@ const sources = ['/1m.csv', '/5m.csv', '/10m.csv', '/25m.csv', '/50m.csv'];
 const select = document.getElementById('parse-select') as HTMLSelectElement;
 const source = document.getElementById('parse-source') as HTMLSelectElement;
 const start = document.getElementById('parse-start') as HTMLButtonElement;
-const result = document.getElementById('parse-result') as HTMLSpanElement;
+const time = document.getElementById('parse-time') as HTMLSpanElement;
+const rows = document.getElementById('parse-rows') as HTMLSpanElement;
+const rps = document.getElementById('parse-rps') as HTMLSpanElement;
 
 parsers.forEach((_, k) => {
     const opt = document.createElement('option');
@@ -30,11 +32,26 @@ sources.forEach((s) => {
     source.add(opt);
 });
 
+function readable(value: number): string {
+    const int = Math.floor(value);
+    if (int < 1000) return int.toString();
+    return (
+        readable(int / 1000) +
+        ' ' +
+        Math.floor(int % 1000)
+            .toString()
+            .padStart(3, '0')
+    );
+}
+
 start.onclick = () => {
     const load = parsers.get(select.value);
     const url = source.value;
     const start = Date.now();
-    load(url).then(() => {
-        result.innerText = `${Date.now() - start} ms`;
+    load(url).then((length) => {
+        const dt = Date.now() - start;
+        time.innerText = `${dt} ms`;
+        rows.innerText = readable(length);
+        rps.innerText = `${readable(length / (dt / 1000))} rows/s`;
     });
 };
