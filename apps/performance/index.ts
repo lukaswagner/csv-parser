@@ -1,9 +1,13 @@
 import { load as parseOwn } from './parsers/@lukaswagner/csv-parser';
 import { load as parseCSV } from './parsers/csv';
+import { load as parsePP } from './parsers/papaparse';
 
 const parsers = new Map([
     ['@lukaswagner/csv-parser', parseOwn],
-    ['csv', parseCSV],
+    ['csv (type casting disabled)', (url) => parseCSV(url, undefined)],
+    ['csv (type casting enabled)', (url) => parseCSV(url, true)],
+    ['papaparse (type casting disabled)', (url) => parsePP(url, false)],
+    ['papaparse (type casting enabled)', (url) => parsePP(url, true)],
 ]);
 const sources = ['/1m.csv', '/5m.csv', '/10m.csv', '/25m.csv', '/50m.csv'];
 
