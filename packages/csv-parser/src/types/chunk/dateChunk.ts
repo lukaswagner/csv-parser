@@ -6,6 +6,10 @@ export class DateChunk extends BufferChunk<Date> {
     protected _min: number;
     protected _max: number;
 
+    public get view(): Float64Array {
+        return this._view;
+    }
+
     public get rawMin(): number {
         return this._min;
     }
