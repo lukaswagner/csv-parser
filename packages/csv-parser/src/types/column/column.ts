@@ -1,6 +1,7 @@
 import { Chunk, rebuildChunk } from '../chunk/chunk';
 import { DataType } from '../dataType';
 import { ColorColumn } from './colorColumn';
+import { DateColumn } from './dateColumn';
 import {
     AnyNumberColumn,
     Float32Column,
@@ -15,8 +16,8 @@ import {
 } from './numberColumn';
 import { StringColumn } from './stringColumn';
 
-export type Column = NumberColumn | ColorColumn | StringColumn;
-export type AnyColumn = AnyNumberColumn & ColorColumn & StringColumn;
+export type Column = NumberColumn | ColorColumn | StringColumn | DateColumn;
+export type AnyColumn = AnyNumberColumn & ColorColumn & StringColumn & DateColumn;
 
 export function buildColumn(name: string, type: DataType): Column {
     switch (type) {
@@ -39,6 +40,8 @@ export function buildColumn(name: string, type: DataType): Column {
             return new Float64Column(name);
         case DataType.Color:
             return new ColorColumn(name);
+        case DataType.Date:
+            return new DateColumn(name);
         case DataType.String:
             return new StringColumn(name);
         default:
@@ -61,4 +64,5 @@ export function rebuildColumn(column: unknown): Column {
 
 export * from './colorColumn';
 export * from './numberColumn';
+export * from './dateColumn';
 export * from './stringColumn';

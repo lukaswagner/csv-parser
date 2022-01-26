@@ -9,16 +9,30 @@ export function inferType(input: string): DataType {
         }
     }
 
+    // prefer parsing as number over date - every number can also parsed as date
     if (!Number.isNaN(Number(input))) {
         return DataType.Number;
+    }
+
+    if (!isNaN(Date.parse(input))) {
+        return DataType.Date;
     }
 
     return DataType.String;
 }
 
 export function lowestType(a: DataType, b: DataType): DataType {
-    if (a === DataType.String || b === DataType.String) return DataType.String;
-    if (a === DataType.Number || b === DataType.Number) return DataType.Number;
-    if (a === DataType.Color || b === DataType.Color) return DataType.Color;
+    // either is undefined -> choose the other
+    if (a === undefined) return b;
+    if (b === undefined) return a;
+
+    // both the same?
+    const set = new Set([a, b]);
+    if (set.size === 1) return set.values().next().value;
+
+    // different, but both compatible with date?
+    if (set.has(DataType.Date) && set.has(DataType.Number)) return DataType.Date;
+
+    // types seem to be incompatible -> fall back to string
     return DataType.String;
 }
