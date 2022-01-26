@@ -7,4 +7,5 @@ function copy(file) {
 }
 
 copy('README.md');
+copy('CHANGELOG.md');
 copy('LICENSE');

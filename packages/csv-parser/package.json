@@ -7,7 +7,8 @@
     "exports": "./lib/csv.js",
     "types": "./lib/types/csv.d.ts",
     "files": [
-        "lib"
+        "lib",
+        "CHANGELOG.md"
     ],
     "scripts": {
         "build": "node scripts/build.js && tsc",

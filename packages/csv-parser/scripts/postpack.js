@@ -6,4 +6,5 @@ function remove(file) {
 }
 
 remove('README.md');
+remove('CHANGELOG.md');
 remove('LICENSE');
