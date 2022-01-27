@@ -59,10 +59,11 @@ async function run(capabilities, conf) {
 }
 
 function toCSV(data) {
-    let str = Object.keys(data[0]).join(',') + '\n';
+    const keys = Object.keys(data[0]);
+    let str = keys.join(',') + '\n';
     for (const d of data) {
-        Object.values(d).forEach((v, i, a) => {
-            let s = v?.toString() ?? '';
+        keys.forEach((k, i, a) => {
+            let s = d[k]?.toString() ?? '';
             if (s.includes(',')) {
                 s = s.replaceAll('"', '\\"');
                 s = '"' + s + '"';
