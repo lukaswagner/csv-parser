@@ -4,7 +4,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default function () {
     return {
-        entry: './index.ts',
+        entry: './src/index.ts',
         mode: 'production',
         module: {
             rules: [{ test: /\.ts$/, use: { loader: 'ts-loader' } }],

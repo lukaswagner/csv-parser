@@ -1,6 +1,7 @@
 import { CSV } from '@lukaswagner/csv-parser';
+import { ImmediateResult } from '../../types';
 
-export async function load(url: string): Promise<number> {
+export async function load(url: string): Promise<ImmediateResult> {
     const loader = new CSV({
         includesHeader: true,
         delimiter: ',',
@@ -18,5 +19,5 @@ export async function load(url: string): Promise<number> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for await (const _ of dispatch());
 
-    return columns[0].length;
+    return { rows: columns[0].length };
 }

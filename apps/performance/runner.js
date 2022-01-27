@@ -1,0 +1,117 @@
+import { remote } from 'webdriverio';
+import geckodriver from 'geckodriver';
+import fs from 'node:fs';
+import os from 'node:os';
+
+const browsers = [
+    {
+        browserName: 'chrome',
+    },
+    {
+        browserName: 'firefox',
+    },
+];
+
+async function fetchConfigs() {
+    const browser = await remote({
+        capabilities: {
+            browserName: 'chrome',
+        },
+    });
+
+    await browser.url('http://localhost:8080');
+    const configurations = await browser.execute(function () {
+        // eslint-disable-next-line no-undef
+        return configurations();
+    });
+
+    await browser.deleteSession();
+
+    return configurations;
+}
+
+async function run(capabilities, conf) {
+    const browser = await remote({
+        capabilities,
+    });
+
+    await browser.url('http://localhost:8080');
+    await browser.setTimeout({ script: 120 * 1000 });
+
+    try {
+        const result = await browser.executeAsync(function (conf, done) {
+            // eslint-disable-next-line no-undef
+            run(conf, done);
+        }, conf);
+        result.os = os.type();
+        result.osVersion = os.release();
+        result.browser = browser.capabilities.browserName;
+        result.browserVersion = browser.capabilities.browserVersion;
+        result.arch = os.arch();
+        result.cpu = os.cpus()[0].model;
+        result.cores = os.cpus().length;
+        result.memory = os.totalmem();
+
+        return result;
+    } finally {
+        await browser.deleteSession();
+    }
+}
+
+function toCSV(data) {
+    let str = Object.keys(data[0]).join(',') + '\n';
+    for (const d of data) {
+        Object.values(d).forEach((v, i, a) => {
+            let s = v?.toString() ?? '';
+            if (s.includes(',')) {
+                s = s.replaceAll('"', '\\"');
+                s = '"' + s + '"';
+            }
+            str = str.concat(s);
+            if (i < a.length - 1) str = str.concat(',');
+        });
+        str = str.concat('\n');
+    }
+    return str;
+}
+
+(async () => {
+    const configurations = await fetchConfigs();
+
+    const results = [];
+
+    for (const capabilities of browsers) {
+        if (capabilities.browserName === 'firefox') {
+            geckodriver.start();
+            await new Promise((res) => setTimeout(res, 1000));
+        }
+
+        for (const conf of configurations) {
+            console.log('running', conf, 'in', capabilities.browserName);
+
+            try {
+                const result = await run(capabilities, conf);
+                if (result.error) {
+                    console.log(conf, 'error:');
+                    console.log(result.error);
+                } else if (result.rows === 0) {
+                    console.log(conf, 'empty result:');
+                    console.log(result);
+                } else {
+                    results.push(result);
+                }
+            } catch (e) {
+                console.log(conf, 'error:');
+                console.log(e);
+            }
+        }
+
+        if (capabilities.browserName === 'firefox') geckodriver.stop();
+    }
+
+    const dir = './results';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    const now = Date.now().toString();
+    fs.writeFileSync(`${dir}/${now}.json`, JSON.stringify(results));
+    fs.writeFileSync(`${dir}/${now}.csv`, toCSV(results));
+})();

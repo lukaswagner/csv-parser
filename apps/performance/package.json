@@ -12,13 +12,18 @@
     "license": "MIT",
     "dependencies": {
         "@csv-parser/data": "1.0.0",
-        "express": "^4.17.2"
+        "express": "^4.17.2",
+        "geckodriver": "^3.0.1",
+        "webdriverio": "^7.16.13"
     },
     "scripts": {
         "start": "node server.js",
         "build": "webpack build",
         "watch": "webpack watch",
-        "dev": "concurrently npm:watch npm:start"
+        "dev": "concurrently npm:watch npm:start",
+        "runner": "node runner.js",
+        "prebenchmark": "npm run build",
+        "benchmark": "concurrently npm:start npm:runner --kill-others -s first"
     },
     "devDependencies": {
         "@lukaswagner/csv-parser": "^0.1.0",

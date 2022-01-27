@@ -1,9 +1,10 @@
 import { parse, Parser } from 'csv-parse/browser/esm';
 import { Buffer } from 'buffer';
+import { ImmediateResult } from '../types';
 
-export async function load(url: string, cast: boolean): Promise<number> {
+export async function load(url: string, cast: boolean): Promise<ImmediateResult> {
     let parser: Parser;
-    const result = new Promise<number>(
+    const result = new Promise<ImmediateResult>(
         (resolve) =>
             (parser = parse(
                 {
@@ -11,7 +12,11 @@ export async function load(url: string, cast: boolean): Promise<number> {
                     cast,
                     fromLine: 2, // skip header
                 },
-                (err, records) => resolve(records.length)
+                (error, records) =>
+                    resolve({
+                        error: error?.message,
+                        rows: records.length,
+                    })
             ))
     );
 
