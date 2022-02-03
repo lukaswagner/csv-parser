@@ -1,3 +1,9 @@
+## v0.2.1
+
+### Bug Fixes
+
+-   [#29](https://github.com/lukaswagner/csv-parser/issues/29): Fixed `BaseColumn` `get`/`set` functions.
+
 ## v0.2
 
 ### Features

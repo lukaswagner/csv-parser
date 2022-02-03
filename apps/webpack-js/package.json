@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@csv-parser/data": "1.0.0",
-        "@lukaswagner/csv-parser": "^0.2.0"
+        "@lukaswagner/csv-parser": "^0.2.1"
     },
     "devDependencies": {
         "html-webpack-plugin": "^5.5.0",
