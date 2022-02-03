@@ -39,12 +39,13 @@ export abstract class BaseColumn<T, C extends BC<T>> implements IColumn<T, C> {
     }
 
     public get(index: number): T {
-        const chunk = this._chunks.find((c) => c.offset < index && c.offset + c.length >= index);
+        const chunk = this._chunks.find((c) => c.offset <= index && c.offset + c.length > index);
         if (!chunk) throw new Error('Invalid index.');
         return chunk.get(index - chunk.offset);
     }
+
     public set(index: number, value: T): void {
-        const chunk = this._chunks.find((c) => c.offset < index && c.offset + c.length >= index);
+        const chunk = this._chunks.find((c) => c.offset <= index && c.offset + c.length > index);
         if (!chunk) throw new Error('Invalid index.');
         chunk.set(index - chunk.offset, value);
     }
