@@ -14,7 +14,6 @@ import {
 } from '@chakra-ui/react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { NumberColumn } from '../../../../lib/types/types/column/numberColumn';
 import { loader } from '../api/loader';
 import {
     columnHeadersState,
@@ -24,7 +23,7 @@ import {
     statisticsState,
 } from '../store/app';
 import { Card } from './Card';
-import { DataType } from '@lukaswagner/csv-parser';
+import { DataType, NumberColumn } from '@lukaswagner/csv-parser';
 
 export const DataSourceLoader = (): JSX.Element => {
     const isDisabled = useRecoilValue(isLoaderDisabledState);

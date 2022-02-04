@@ -3,7 +3,6 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import { Box, Button, Center, IconButton, Spinner, Stack } from '@chakra-ui/react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { type ColumnHeader } from '../../../../lib/types/csv';
 import { loader } from '../api/loader';
 import {
     columnHeadersState,
@@ -18,6 +17,7 @@ import {
 import { isRemote } from '../utils/datasources';
 import { Card } from './Card';
 import { DataTypeSelect } from './DataTypeSelect';
+import { ColumnHeader, DataType } from '@lukaswagner/csv-parser';
 
 const isLocal = (dataSource: DataSource, inputData: InputData): inputData is File =>
     dataSource === 'local';
@@ -139,7 +139,7 @@ export const DataSourceOpener = (): JSX.Element => {
             setColumns((currVal) => {
                 const newVal = [...currVal];
 
-                newVal[index].type = Number(event.target.value);
+                newVal[index].type = event.target.value as DataType;
 
                 return newVal;
             });
