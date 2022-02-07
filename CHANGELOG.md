@@ -1,3 +1,9 @@
+## v0.2.2
+
+### Bug Fixes
+
+-   [#31](https://github.com/lukaswagner/csv-parser/pull/31): Fixed number of lines used for type inference
+
 ## v0.2.1
 
 ### Bug Fixes
