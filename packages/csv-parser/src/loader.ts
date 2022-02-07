@@ -128,7 +128,11 @@ export class Loader {
         const inferStart = +this._options.includesHeader;
         const inferLines = this._firstChunkSplit.slice(
             inferStart,
-            Math.max(inferStart + this._options.typeInferLines, this._firstChunkSplit.length)
+            Math.min(
+                inferStart + this._options.typeInferLines,
+                // avoid last line, could be split between chunks
+                this._firstChunkSplit.length - 1
+            )
         );
 
         const detectedTypes = inferLines
