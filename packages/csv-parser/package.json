@@ -1,6 +1,6 @@
 {
     "name": "@lukaswagner/csv-parser",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Multi-threaded CSV parser using web workers.",
     "type": "module",
     "module": "./lib/csv.js",
