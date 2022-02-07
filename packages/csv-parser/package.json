@@ -24,7 +24,11 @@
         "url": "git+https://github.com/lukaswagner/csv-parser.git"
     },
     "keywords": [
-        "csv"
+        "csv",
+        "parser",
+        "threaded",
+        "worker",
+        "parallel"
     ],
     "author": "Lukas Wagner",
     "license": "MIT",
