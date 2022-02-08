@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { RadioGroup } from '@chakra-ui/react';
+import { RadioGroup, Stack, Text } from '@chakra-ui/react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { type InputType, inputTypeState, isInputTypeDisabledState } from '../store/app';
@@ -28,16 +28,21 @@ export const InputTypeSelect = (): JSX.Element => {
     };
 
     return (
-        <RadioGroup isDisabled={isDisabled} onChange={handleInputTypeSelect} value={inputType}>
-            {inputTypes.map(({ title, value }) => (
-                <SelectionCard
-                    key={`input-type-${value}`}
-                    isDisabled={isDisabled}
-                    onClick={handleInputTypeSelect}
-                    title={title}
-                    value={value}
-                />
-            ))}
-        </RadioGroup>
+        <Stack gap={4}>
+            <Text fontSize="md" fontWeight={500} lineHeight="40px" opacity={isDisabled ? 0.5 : 1}>
+                Select input type:
+            </Text>
+            <RadioGroup isDisabled={isDisabled} onChange={handleInputTypeSelect} value={inputType}>
+                {inputTypes.map(({ title, value }) => (
+                    <SelectionCard
+                        key={`input-type-${value}`}
+                        isDisabled={isDisabled}
+                        onClick={handleInputTypeSelect}
+                        title={title}
+                        value={value}
+                    />
+                ))}
+            </RadioGroup>
+        </Stack>
     );
 };
