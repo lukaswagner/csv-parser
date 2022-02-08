@@ -1,4 +1,3 @@
-import { DeleteIcon } from '@chakra-ui/icons';
 import { Button, Flex, Spacer, Text } from '@chakra-ui/react';
 import conf from '@csv-parser/data/conf.json';
 import { useResetRecoilState, useSetRecoilState } from 'recoil';
@@ -67,7 +66,7 @@ export const Header = (): JSX.Element => {
                 <Button onClick={handleGoogleSheetClick}>Google Sheet</Button>
             ) : null}
             <Spacer />
-            <Button colorScheme="gray" leftIcon={<DeleteIcon />} onClick={handleResetClick}>
+            <Button colorScheme="gray" onClick={handleResetClick}>
                 Reset
             </Button>
         </Flex>
