@@ -300,4 +300,12 @@ export class Loader {
     public set types(columns: ColumnTypes) {
         this._types = columns;
     }
+
+    public fakeSubWorkerReference(): void {
+        new Worker(
+            // @ts-expect-error The path to the worker source is only during build.
+            new URL(__SUB_WORKER_SOURCE, import.meta.url),
+            { type: 'module' }
+        );
+    }
 }
