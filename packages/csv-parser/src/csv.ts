@@ -1,4 +1,5 @@
-import { fetchSheetDataRange, fetchSheetValues } from './helper/spreadsheets';
+import * as excel from './helper/excel-sheets';
+import * as google from './helper/spreadsheets';
 import { Loader } from './loader';
 import type { Column } from './types/column/column';
 import type { DataSource, InputData, SheetInput } from './types/dataSource';
@@ -65,18 +66,16 @@ export class CSV<D extends string> {
     }
 
     protected async openSheet(data: SheetInput): Promise<ColumnHeader[]> {
-        const { apiKey, sheetId } = data;
+        const { apiKey, sheetId, type } = data;
+        const sheetService = type === 'google' ? google : excel;
 
         // Determine range specifier for sheet area that is filled with data
-        const range = await fetchSheetDataRange(sheetId, apiKey);
+        const range = await sheetService.fetchSheetDataRange(sheetId, apiKey);
 
         // Fetch sheet values as stream
-        const stream = await fetchSheetValues(sheetId, apiKey, range);
+        const stream = await sheetService.fetchSheetValues(sheetId, apiKey, range);
 
         this._options.delimiter ??= deductDelimiter('csv');
-
-        // TODO: Determine data length ?
-
         this._loader.options = this._options;
         this._loader.stream = stream;
 
