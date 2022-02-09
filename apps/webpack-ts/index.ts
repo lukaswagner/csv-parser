@@ -9,7 +9,10 @@ import {
 } from '@lukaswagner/csv-parser';
 import pako from 'pako';
 
-const sheetAvailable = process.env.API_KEY !== undefined && process.env.SHEET_ID !== undefined;
+const googleSheetAvailable =
+    process.env.GOOGLE_API_KEY !== undefined && process.env.GOOGLE_SHEET_ID !== undefined;
+const excelSheetAvailable =
+    process.env.EXCEL_API_KEY !== undefined && process.env.EXCEL_SHEET_ID !== undefined;
 
 const dataSources = createDataSources({
     '[remote url stream]': conf.url,
@@ -21,8 +24,14 @@ const dataSources = createDataSources({
     '[5m url stream]': require('5m.csv'),
     '[10m url stream]': require('10m.csv'),
     '[google sheet]': {
-        apiKey: process.env.API_KEY,
-        sheetId: process.env.SHEET_ID,
+        type: 'google',
+        apiKey: process.env.GOOGLE_API_KEY,
+        sheetId: process.env.GOOGLE_SHEET_ID,
+    },
+    '[excel sheet]': {
+        type: 'excel',
+        apiKey: process.env.EXCEL_API_KEY,
+        sheetId: process.env.EXCEL_SHEET_ID,
     },
 });
 
@@ -131,5 +140,6 @@ testLoad('[remote url stream]')
     .then(() => testLoad('[1m gzip buffer]'))
     .then(() => testLoad('[5m url stream]'))
     .then(() => testLoad('[10m url stream]'))
-    .then(() => (sheetAvailable ? testLoad('[google sheet]') : Promise.resolve()))
+    .then(() => (googleSheetAvailable ? testLoad('[google sheet]') : Promise.resolve()))
+    .then(() => (excelSheetAvailable ? testLoad('[excel sheet]') : Promise.resolve()))
     .then(() => console.table(statistics));
