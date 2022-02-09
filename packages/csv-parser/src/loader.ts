@@ -245,6 +245,20 @@ export class Loader {
         return data;
     }
 
+    /**
+     * This is an workaround for a vite issue:
+     * https://github.com/vitejs/vite/issues/5699
+     * When using this lib as a dependency and bundling with vite, the sub worker isn't emitted.
+     * By referencing the worker in the main module, it can be forced to be emitted.
+     */
+    protected fakeSubWorkerReference(): void {
+        new Worker(
+            // @ts-expect-error The path to the worker source is only during build.
+            new URL(__SUB_WORKER_SOURCE, import.meta.url),
+            { type: 'module' }
+        );
+    }
+
     public async open(id: string): Promise<ColumnHeader[]> {
         if (this._options.delimiter === undefined) {
             throw new Error('Delimiter not specified nor deductible from filename.');
