@@ -1,3 +1,9 @@
+## v0.2.4
+
+### Bug Fixes
+
+-   Fix bug where adding columns externally would crash the loader
+
 ## v0.2.3
 
 ### Bug Fixes
