@@ -38,10 +38,24 @@ export const Header = (): JSX.Element => {
         handleResetClick();
 
         setTimeout(() => {
-            setDataSource('google-sheets');
+            setDataSource('sheets');
             setInputData({
-                apiKey: import.meta.env.VITE_API_KEY,
-                sheetId: import.meta.env.VITE_SHEET_ID,
+                apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
+                sheetId: import.meta.env.VITE_GOOGLE_SHEET_ID,
+                type: 'google',
+            });
+        });
+    };
+
+    const handleExcelSheetClick = (): void => {
+        handleResetClick();
+
+        setTimeout(() => {
+            setDataSource('sheets');
+            setInputData({
+                apiKey: import.meta.env.VITE_EXCEL_API_KEY,
+                sheetId: import.meta.env.VITE_EXCEL_SHEET_ID,
+                type: 'excel',
             });
         });
     };
@@ -62,8 +76,12 @@ export const Header = (): JSX.Element => {
             </Text>
             {conf.url ? <Button onClick={handleRemoteUrlClick}>Remote URL</Button> : null}
 
-            {import.meta.env.VITE_API_KEY && import.meta.env.VITE_SHEET_ID ? (
+            {import.meta.env.VITE_GOOGLE_API_KEY && import.meta.env.VITE_GOOGLE_SHEET_ID ? (
                 <Button onClick={handleGoogleSheetClick}>Google Sheet</Button>
+            ) : null}
+
+            {import.meta.env.VITE_EXCEL_API_KEY && import.meta.env.VITE_EXCEL_SHEET_ID ? (
+                <Button onClick={handleExcelSheetClick}>Excel Sheet</Button>
             ) : null}
             <Spacer />
             <Button colorScheme="gray" onClick={handleResetClick}>

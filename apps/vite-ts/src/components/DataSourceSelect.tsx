@@ -9,13 +9,14 @@ import {
     InputLeftAddon,
     InputRightElement,
     RadioGroup,
+    Select,
     Stack,
     Text,
     useBoolean,
 } from '@chakra-ui/react';
 import { useRecoilState } from 'recoil';
 
-import { type DataSource, dataSourceState, inputDataState } from '../store/app';
+import { type DataSource, dataSourceState, inputDataState, type Sheet } from '../store/app';
 import { isRemote, isSheet } from '../utils/datasources';
 import { FileIcon } from './icons/FileIcon';
 import { KeyIcon } from './icons/KeyIcon';
@@ -73,10 +74,19 @@ export const DataSourceSelect = (): JSX.Element => {
         }));
     };
 
+    const handleSheetsTypeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+        setInputData((currVal) => ({
+            apiKey: isSheet(currVal) ? currVal.apiKey : '',
+            sheetId: isSheet(currVal) ? currVal.sheetId : '',
+            type: event.target.value as Sheet['type'],
+        }));
+    };
+
     const handleSheetsApiKeyChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setInputData((currVal) => ({
             apiKey: event.target.value,
             sheetId: isSheet(currVal) ? currVal.sheetId : '',
+            type: isSheet(currVal) ? currVal.type : 'google',
         }));
     };
 
@@ -84,6 +94,7 @@ export const DataSourceSelect = (): JSX.Element => {
         setInputData((currVal) => ({
             apiKey: isSheet(currVal) ? currVal.apiKey : '',
             sheetId: event.target.value,
+            type: isSheet(currVal) ? currVal.type : 'google',
         }));
     };
 
@@ -141,11 +152,19 @@ export const DataSourceSelect = (): JSX.Element => {
                     </Checkbox>
                 </SelectionCard>
                 <SelectionCard
-                    isChecked={dataSource === 'google-sheets'}
+                    isChecked={dataSource === 'sheets'}
                     onClick={handleDataSourceSelect}
-                    title="Google Sheets"
-                    value="google-sheets"
+                    title="Google Sheets / Excel"
+                    value="sheets"
                 >
+                    <Select
+                        onChange={handleSheetsTypeChange}
+                        placeholder="Select sheets service"
+                        value={isSheet(inputData) ? inputData.type : ''}
+                    >
+                        <option value="google">Google Sheets</option>
+                        <option value="excel">Excel Sheets</option>
+                    </Select>
                     <InputGroup>
                         <InputLeftAddon>
                             <KeyIcon />

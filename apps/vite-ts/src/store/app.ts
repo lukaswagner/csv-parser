@@ -3,11 +3,11 @@ import { atom, selector } from 'recoil';
 
 import { isRemote, isSheet } from '../utils/datasources';
 
-export type DataSource = 'local' | 'remote' | 'google-sheets';
+export type DataSource = 'local' | 'remote' | 'sheets';
 
 export type Remote = { url: string; shouldPrefetch: boolean };
 
-export type Sheet = { apiKey: string; sheetId: string };
+export type Sheet = { apiKey: string; sheetId: string; type: 'google' | 'excel' };
 
 export type InputData = File | Remote | Sheet;
 
@@ -62,8 +62,15 @@ export const isOpenerDisabledState = selector({
         const requiresType =
             dataSource === 'local' ||
             (dataSource === 'remote' && isRemote(inputData) && inputData.shouldPrefetch);
+        const hasData =
+            (dataSource === 'sheets' &&
+                isSheet(inputData) &&
+                !!inputData.apiKey &&
+                !!inputData.sheetId &&
+                ['google', 'excel'].includes(inputData.type)) ||
+            (dataSource !== 'sheets' && inputData);
 
-        return !dataSource || (requiresType && !inputType) || !inputData;
+        return !dataSource || (requiresType && !inputType) || !hasData;
     },
 });
 
