@@ -1,3 +1,9 @@
+## v0.2.3
+
+### Bug Fixes
+
+-   [#34](https://github.com/lukaswagner/csv-parser/pull/34): Added workaround for [this vite issue](https://github.com/vitejs/vite/issues/5699)
+
 ## v0.2.2
 
 ### Bug Fixes
