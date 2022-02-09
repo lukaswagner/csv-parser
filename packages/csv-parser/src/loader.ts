@@ -226,7 +226,7 @@ export class Loader {
 
     protected onProcessed(data: ProcessedData): number {
         const chunks = data.chunks.map((chunk) => rebuildChunk(chunk));
-        this._columns.forEach((column, index) => column.push(chunks[index] as AnyChunk));
+        chunks.forEach((chunk, index) => this._columns[index]?.push(chunk as AnyChunk));
 
         return this._columns[0].length;
     }
