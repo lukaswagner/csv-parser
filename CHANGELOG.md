@@ -1,3 +1,9 @@
+## v0.2.5
+
+### Interface
+
+-   Expose `DataSource` type in declaration.
+
 ## v0.2.4
 
 ### Bug Fixes

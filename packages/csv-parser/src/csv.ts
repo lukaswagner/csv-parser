@@ -145,3 +145,4 @@ export * from './types/column/column';
 export * from './types/dataType';
 export * from './types/handlers';
 export * from './types/options';
+export * from './types/dataSource';
