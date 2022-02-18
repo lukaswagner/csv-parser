@@ -1,5 +1,4 @@
-import * as excel from './helper/excel-sheets';
-import * as google from './helper/google-sheets';
+import { excel, google, parseSheetId } from './helper/spreadsheets';
 import { Loader } from './loader';
 import type { Column } from './types/column/column';
 import type { DataSource, InputData, SheetInput } from './types/dataSource';
@@ -66,7 +65,8 @@ export class CSV<D extends string> {
     }
 
     protected async openSheet(data: SheetInput): Promise<ColumnHeader[]> {
-        const { apiKey, sheetId, type } = data;
+        const { apiKey, sheetUrl } = data;
+        const { sheetId, type } = parseSheetId(sheetUrl);
         const sheetService = type === 'google' ? google : excel;
 
         // Determine range specifier for sheet area that is filled with data
@@ -95,7 +95,7 @@ export class CSV<D extends string> {
             source instanceof Uint8Array
         ) {
             return this.openBuffer(source);
-        } else if ('sheetId' in source && 'apiKey' in source) {
+        } else if ('sheetUrl' in source && 'apiKey' in source) {
             return this.openSheet(source);
         }
     }

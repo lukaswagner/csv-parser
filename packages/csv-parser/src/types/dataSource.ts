@@ -1,4 +1,6 @@
-export type SheetInput = { apiKey: string; sheetId: string; type: 'google' | 'excel' };
+export type SheetType = 'google' | 'excel';
+
+export type SheetInput = { apiKey: string; sheetUrl: string };
 
 export type InputData =
     | Blob
