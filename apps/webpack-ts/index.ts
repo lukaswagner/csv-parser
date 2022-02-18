@@ -10,9 +10,9 @@ import {
 import pako from 'pako';
 
 const googleSheetAvailable =
-    process.env.GOOGLE_API_KEY !== undefined && process.env.GOOGLE_SHEET_ID !== undefined;
+    process.env.GOOGLE_API_KEY !== undefined && process.env.GOOGLE_SHEET_URL !== undefined;
 const excelSheetAvailable =
-    process.env.EXCEL_API_KEY !== undefined && process.env.EXCEL_SHEET_ID !== undefined;
+    process.env.EXCEL_API_KEY !== undefined && process.env.EXCEL_SHEET_URL !== undefined;
 
 const dataSources = createDataSources({
     '[remote url stream]': conf.url,
@@ -24,14 +24,12 @@ const dataSources = createDataSources({
     '[5m url stream]': require('5m.csv'),
     '[10m url stream]': require('10m.csv'),
     '[google sheet]': {
-        type: 'google',
         apiKey: process.env.GOOGLE_API_KEY,
-        sheetId: process.env.GOOGLE_SHEET_ID,
+        sheetUrl: process.env.GOOGLE_SHEET_URL,
     },
     '[excel sheet]': {
-        type: 'excel',
         apiKey: process.env.EXCEL_API_KEY,
-        sheetId: process.env.EXCEL_SHEET_ID,
+        sheetUrl: process.env.EXCEL_SHEET_URL,
     },
 });
 
