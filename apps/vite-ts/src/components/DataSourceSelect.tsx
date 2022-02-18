@@ -9,18 +9,16 @@ import {
     InputLeftAddon,
     InputRightElement,
     RadioGroup,
-    Select,
     Stack,
     Text,
     useBoolean,
 } from '@chakra-ui/react';
 import { useRecoilState } from 'recoil';
 
-import { type DataSource, dataSourceState, inputDataState, type Sheet } from '../store/app';
+import { type DataSource, dataSourceState, inputDataState } from '../store/app';
 import { isRemote, isSheet } from '../utils/datasources';
 import { FileIcon } from './icons/FileIcon';
 import { KeyIcon } from './icons/KeyIcon';
-import { SheetIcon } from './icons/SheetIcon';
 import { SelectionCard } from './SelectionCard';
 
 export const DataSourceSelect = (): JSX.Element => {
@@ -74,27 +72,17 @@ export const DataSourceSelect = (): JSX.Element => {
         }));
     };
 
-    const handleSheetsTypeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-        setInputData((currVal) => ({
-            apiKey: isSheet(currVal) ? currVal.apiKey : '',
-            sheetId: isSheet(currVal) ? currVal.sheetId : '',
-            type: event.target.value as Sheet['type'],
-        }));
-    };
-
     const handleSheetsApiKeyChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setInputData((currVal) => ({
             apiKey: event.target.value,
-            sheetId: isSheet(currVal) ? currVal.sheetId : '',
-            type: isSheet(currVal) ? currVal.type : 'google',
+            sheetUrl: isSheet(currVal) ? currVal.sheetUrl : '',
         }));
     };
 
-    const handleSheetsSheetIdChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleSheetsSheetUrlChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setInputData((currVal) => ({
             apiKey: isSheet(currVal) ? currVal.apiKey : '',
-            sheetId: event.target.value,
-            type: isSheet(currVal) ? currVal.type : 'google',
+            sheetUrl: event.target.value,
         }));
     };
 
@@ -154,17 +142,9 @@ export const DataSourceSelect = (): JSX.Element => {
                 <SelectionCard
                     isChecked={dataSource === 'sheets'}
                     onClick={handleDataSourceSelect}
-                    title="Google Sheets / Excel"
+                    title="Google / Excel Sheets"
                     value="sheets"
                 >
-                    <Select
-                        onChange={handleSheetsTypeChange}
-                        placeholder="Select sheets service"
-                        value={isSheet(inputData) ? inputData.type : ''}
-                    >
-                        <option value="google">Google Sheets</option>
-                        <option value="excel">Excel Sheets</option>
-                    </Select>
                     <InputGroup>
                         <InputLeftAddon>
                             <KeyIcon />
@@ -187,13 +167,13 @@ export const DataSourceSelect = (): JSX.Element => {
                     </InputGroup>
                     <InputGroup>
                         <InputLeftAddon>
-                            <SheetIcon />
+                            <LinkIcon />
                         </InputLeftAddon>
                         <Input
-                            onChange={handleSheetsSheetIdChange}
-                            placeholder="Sheet ID"
+                            onChange={handleSheetsSheetUrlChange}
+                            placeholder="Sheet URL"
                             type="text"
-                            value={isSheet(inputData) ? inputData.sheetId : ''}
+                            value={isSheet(inputData) ? inputData.sheetUrl : ''}
                         />
                     </InputGroup>
                 </SelectionCard>

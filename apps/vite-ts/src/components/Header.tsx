@@ -41,8 +41,7 @@ export const Header = (): JSX.Element => {
             setDataSource('sheets');
             setInputData({
                 apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
-                sheetId: import.meta.env.VITE_GOOGLE_SHEET_ID,
-                type: 'google',
+                sheetUrl: import.meta.env.VITE_GOOGLE_SHEET_URL,
             });
         });
     };
@@ -54,8 +53,7 @@ export const Header = (): JSX.Element => {
             setDataSource('sheets');
             setInputData({
                 apiKey: import.meta.env.VITE_EXCEL_API_KEY,
-                sheetId: import.meta.env.VITE_EXCEL_SHEET_ID,
-                type: 'excel',
+                sheetUrl: import.meta.env.VITE_EXCEL_SHEET_URL,
             });
         });
     };
@@ -76,11 +74,11 @@ export const Header = (): JSX.Element => {
             </Text>
             {conf.url ? <Button onClick={handleRemoteUrlClick}>Remote URL</Button> : null}
 
-            {import.meta.env.VITE_GOOGLE_API_KEY && import.meta.env.VITE_GOOGLE_SHEET_ID ? (
+            {import.meta.env.VITE_GOOGLE_API_KEY && import.meta.env.VITE_GOOGLE_SHEET_URL ? (
                 <Button onClick={handleGoogleSheetClick}>Google Sheet</Button>
             ) : null}
 
-            {import.meta.env.VITE_EXCEL_API_KEY && import.meta.env.VITE_EXCEL_SHEET_ID ? (
+            {import.meta.env.VITE_EXCEL_API_KEY && import.meta.env.VITE_EXCEL_SHEET_URL ? (
                 <Button onClick={handleExcelSheetClick}>Excel Sheet</Button>
             ) : null}
             <Spacer />

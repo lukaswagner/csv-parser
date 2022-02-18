@@ -7,7 +7,7 @@ export type DataSource = 'local' | 'remote' | 'sheets';
 
 export type Remote = { url: string; shouldPrefetch: boolean };
 
-export type Sheet = { apiKey: string; sheetId: string; type: 'google' | 'excel' };
+export type Sheet = { apiKey: string; sheetUrl: string };
 
 export type InputData = File | Remote | Sheet;
 
@@ -66,8 +66,7 @@ export const isOpenerDisabledState = selector({
             (dataSource === 'sheets' &&
                 isSheet(inputData) &&
                 !!inputData.apiKey &&
-                !!inputData.sheetId &&
-                ['google', 'excel'].includes(inputData.type)) ||
+                !!inputData.sheetUrl) ||
             (dataSource !== 'sheets' && inputData);
 
         return !dataSource || (requiresType && !inputType) || !hasData;
