@@ -1,5 +1,5 @@
 import * as excel from './helper/excel-sheets';
-import * as google from './helper/spreadsheets';
+import * as google from './helper/google-sheets';
 import { Loader } from './loader';
 import type { Column } from './types/column/column';
 import type { DataSource, InputData, SheetInput } from './types/dataSource';

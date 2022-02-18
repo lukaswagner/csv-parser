@@ -1,4 +1,4 @@
-class CsvTransformer {
+class GoogleCsvTransformer {
     protected _isInValues = false;
     protected _isInRow = false;
     protected _resultChunk = '';
@@ -99,7 +99,7 @@ export async function fetchSheetValues(
     const response = await fetchSheetData(route);
     const stream = response.body
         .pipeThrough(new TextDecoderStream())
-        .pipeThrough(new TransformStream(new CsvTransformer()))
+        .pipeThrough(new TransformStream(new GoogleCsvTransformer()))
         .pipeThrough(new TextEncoderStream());
 
     return stream;
