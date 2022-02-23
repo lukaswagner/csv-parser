@@ -1,4 +1,4 @@
-import { fetchSheetDataRange, fetchSheetValues } from './helper/spreadsheets';
+import { excel, google, parseSheetId } from './helper/spreadsheets';
 import { Loader } from './loader';
 import type { Column } from './types/column/column';
 import type { DataSource, InputData, SheetInput } from './types/dataSource';
@@ -65,18 +65,17 @@ export class CSV<D extends string> {
     }
 
     protected async openSheet(data: SheetInput): Promise<ColumnHeader[]> {
-        const { apiKey, sheetId } = data;
+        const { apiKey, sheetUrl } = data;
+        const { sheetId, type } = parseSheetId(sheetUrl);
+        const sheetService = type === 'google' ? google : excel;
 
         // Determine range specifier for sheet area that is filled with data
-        const range = await fetchSheetDataRange(sheetId, apiKey);
+        const range = await sheetService.fetchSheetDataRange(sheetId, apiKey);
 
         // Fetch sheet values as stream
-        const stream = await fetchSheetValues(sheetId, apiKey, range);
+        const stream = await sheetService.fetchSheetValues(sheetId, apiKey, range);
 
         this._options.delimiter ??= deductDelimiter('csv');
-
-        // TODO: Determine data length ?
-
         this._loader.options = this._options;
         this._loader.stream = stream;
 
@@ -96,7 +95,7 @@ export class CSV<D extends string> {
             source instanceof Uint8Array
         ) {
             return this.openBuffer(source);
-        } else if ('sheetId' in source && 'apiKey' in source) {
+        } else if ('sheetUrl' in source && 'apiKey' in source) {
             return this.openSheet(source);
         }
     }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { DeleteIcon } from '@chakra-ui/icons';
-import { Box, Button, Center, IconButton, Spinner, Stack } from '@chakra-ui/react';
+import { Box, Button, Center, Spinner, Stack } from '@chakra-ui/react';
+import { ColumnHeader, DataType } from '@lukaswagner/csv-parser';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { loader } from '../api/loader';
@@ -17,7 +17,6 @@ import {
 import { isRemote } from '../utils/datasources';
 import { Card } from './Card';
 import { DataTypeSelect } from './DataTypeSelect';
-import { ColumnHeader, DataType } from '@lukaswagner/csv-parser';
 
 const isLocal = (dataSource: DataSource, inputData: InputData): inputData is File =>
     dataSource === 'local';
@@ -163,12 +162,13 @@ export const DataSourceOpener = (): JSX.Element => {
                     ) : (
                         <Stack gap={2}>
                             <Box display="flex" justifyContent="end">
-                                <IconButton
+                                <Button
                                     aria-label="Reset column headers"
                                     colorScheme="gray"
-                                    icon={<DeleteIcon />}
                                     onClick={handleResetClick}
-                                />
+                                >
+                                    Reset
+                                </Button>
                             </Box>
                             {columns.map((column, index) => (
                                 <DataTypeSelect
