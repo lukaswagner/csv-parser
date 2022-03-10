@@ -104,32 +104,20 @@ async function testLoad(id: DataSource): Promise<void> {
     try {
         const detectedColumns = await loader.open(id);
 
-        // onOpened
         console.log(
             id,
             `opened source, detected ${detectedColumns.length} columns:\n` +
                 detectedColumns.map(({ name, type }) => `${name}: ${type}`).join('\n')
         );
 
-        const [columns, dispatch] = loader.load({
-            columns: detectedColumns.map(({ type }) => type),
-            generatedColumns: [],
+        const { columns, statistics } = await loader.load({
+            columns: detectedColumns,
+            onInit: () => console.log(id, 'received columns'),
+            onUpdate: (progress) => console.log(id, `received new data. progress: ${progress}`),
         });
 
-        // onColumns
-        console.log(id, 'received columns');
-
-        for await (const value of dispatch()) {
-            if (value.type === 'data') {
-                // onData
-                console.log(id, `received new data. progress: ${value.progress}`);
-            } else {
-                // onDone
-                logResult(columns, id, value.statistics);
-            }
-        }
+        logResult(columns, id, statistics);
     } catch (error) {
-        // onError
         console.log(id, 'error:', error);
     }
 }
