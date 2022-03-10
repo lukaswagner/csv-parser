@@ -19,11 +19,6 @@ export type ColumnGenerator = {
     func: (orig: string[], parsed: unknown[]) => unknown;
 };
 
-export type ColumnTypes = {
-    columns: DataType[];
-    generatedColumns: ColumnGenerator[];
-};
-
 export function bytes(type: DataType): number {
     switch (type) {
         case DataType.Int8:

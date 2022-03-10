@@ -1,5 +1,6 @@
-import { Measurement } from '../helper/perfMon';
-import { DataType } from './dataType';
+import type { Measurement } from '../helper/perfMon';
+import type { Column } from './column/column';
+import type { DataType } from './dataType';
 
 export type ColumnHeader = { name: string; type: DataType };
 export type LoadStatistics = {
@@ -9,8 +10,4 @@ export type LoadStatistics = {
     performance: Measurement[];
 };
 
-export type DispatchValue =
-    | { type: 'data'; progress: number }
-    | { type: 'done'; statistics: LoadStatistics };
-
-export type Dispatcher = () => AsyncGenerator<DispatchValue, void>;
+export type LoadResult = { columns: Column[]; statistics: LoadStatistics };
