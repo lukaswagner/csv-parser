@@ -12,6 +12,7 @@ import {
     Thead,
     Tr,
 } from '@chakra-ui/react';
+import { DataType, NumberColumn } from '@lukaswagner/csv-parser';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { loader } from '../api/loader';
@@ -23,7 +24,6 @@ import {
     statisticsState,
 } from '../store/app';
 import { Card } from './Card';
-import { DataType, NumberColumn } from '@lukaswagner/csv-parser';
 
 export const DataSourceLoader = (): JSX.Element => {
     const isDisabled = useRecoilValue(isLoaderDisabledState);
@@ -44,21 +44,16 @@ export const DataSourceLoader = (): JSX.Element => {
         setIsLoading(true);
         setShowCard(true);
 
-        const [columns, dispatch] = loader.load({
-            columns: columnHeaders.map(({ type }) => type),
-            generatedColumns: [],
+        const { columns: resultColumns, statistics } = await loader.load({
+            columns: columnHeaders,
         });
 
-        for await (const value of dispatch()) {
-            if (value.type === 'done') {
-                console.log({ columns, statistics: value.statistics });
+        console.log({ resultColumns, statistics });
 
-                setColumns(columns);
-                setStatistics(value.statistics);
+        setColumns(resultColumns);
+        setStatistics(statistics);
 
-                setIsLoading(false);
-            }
-        }
+        setIsLoading(false);
     };
 
     return (

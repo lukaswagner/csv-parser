@@ -1,10 +1,8 @@
 import { excel, google, parseSheetId } from './helper/spreadsheets';
 import { Loader } from './loader';
-import type { Column } from './types/column/column';
 import type { DataSource, InputData, SheetInput } from './types/dataSource';
-import type { ColumnTypes } from './types/dataType';
-import type { ColumnHeader, Dispatcher } from './types/handlers';
-import type { CsvLoaderOptions } from './types/options';
+import type { ColumnHeader, LoadResult } from './types/handlers';
+import type { CsvLoaderOptions, LoadOptions } from './types/options';
 
 export class CSV<D extends string> {
     protected _openedDataSource: D;
@@ -109,8 +107,8 @@ export class CSV<D extends string> {
         return this.openInputData(data);
     }
 
-    public load(types: ColumnTypes): [Column[], Dispatcher] {
-        this._loader.types = types;
+    public load(options: LoadOptions): Promise<LoadResult> {
+        this._loader.loadOptions = options;
 
         return this._loader.load();
     }
