@@ -17,11 +17,11 @@
         "webdriverio": "^7.18.1"
     },
     "scripts": {
-        "start": "node server.js",
+        "start": "PORT=8080 node server.js",
         "build": "webpack build",
         "watch": "webpack watch",
         "dev": "concurrently npm:watch npm:start",
-        "runner": "node runner.js",
+        "runner": "PORT=8080 node runner.js",
         "prebenchmark": "npm run build",
         "benchmark": "concurrently npm:start npm:runner --kill-others -s first"
     },

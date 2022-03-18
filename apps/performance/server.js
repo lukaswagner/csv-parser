@@ -9,4 +9,4 @@ const options = {
 };
 app.use(express.static('./dist', options));
 app.use(express.static('../data', options));
-app.listen(8080);
+app.listen(process.env.PORT);

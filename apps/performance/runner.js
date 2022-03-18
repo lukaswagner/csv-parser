@@ -1,7 +1,7 @@
-import { remote } from 'webdriverio';
-import geckodriver from 'geckodriver';
 import fs from 'node:fs';
 import os from 'node:os';
+import geckodriver from 'geckodriver';
+import { remote } from 'webdriverio';
 
 const browsers = [
     {
@@ -22,7 +22,7 @@ async function fetchConfigs() {
         },
     });
 
-    await browser.url('http://localhost:8080');
+    await browser.url(`http://localhost:${process.env.PORT}`);
     const configurations = await browser.execute(function () {
         // eslint-disable-next-line no-undef
         return configurations();
@@ -38,7 +38,7 @@ async function run(capabilities, conf) {
         capabilities,
     });
 
-    await browser.url('http://localhost:8080');
+    await browser.url(`http://localhost:${process.env.PORT}`);
     await browser.setTimeout({ script: 120 * 1000 });
 
     try {
