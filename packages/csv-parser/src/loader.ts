@@ -4,9 +4,8 @@ import { PerfMon } from './helper/perfMon';
 import { splitLine } from './helper/splitLine';
 import { AnyChunk, rebuildChunk } from './types/chunk/chunk';
 import { buildColumn, Column } from './types/column/column';
-import { ColumnTypes } from './types/dataType';
-import type { ColumnHeader, Dispatcher, DispatchValue, LoadStatistics } from './types/handlers';
-import { CsvLoaderOptions } from './types/options';
+import type { ColumnHeader, LoadResult, LoadStatistics } from './types/handlers';
+import { CsvLoaderOptions, LoadOptions } from './types/options';
 import {
     AddChunkData,
     FinishedData,
@@ -24,11 +23,11 @@ export class Loader {
     protected _buffer: ArrayBufferLike;
     protected _openedSourceId: string;
     protected _options: CsvLoaderOptions;
+    protected _loadOptions: LoadOptions;
 
     protected _reader: ReadableStreamDefaultReader<Uint8Array>;
     protected _firstChunk: ArrayBuffer;
     protected _firstChunkSplit: string[][];
-    protected _types: ColumnTypes;
     protected _columns: Column[];
     protected _worker: Worker;
     protected _perfMon = new PerfMon();
@@ -128,7 +127,11 @@ export class Loader {
         const inferStart = +this._options.includesHeader;
         const inferLines = this._firstChunkSplit.slice(
             inferStart,
-            Math.max(inferStart + this._options.typeInferLines, this._firstChunkSplit.length)
+            Math.min(
+                inferStart + this._options.typeInferLines,
+                // avoid last line, could be split between chunks
+                this._firstChunkSplit.length - 1
+            )
         );
 
         const detectedTypes = inferLines
@@ -147,7 +150,7 @@ export class Loader {
 
     protected setupColumns(): Column[] {
         this._columns = [
-            ...this._types.columns.map((type, index) =>
+            ...this._loadOptions.columns.map(({ type }, index) =>
                 buildColumn(
                     this._options.includesHeader
                         ? this._firstChunkSplit[0][index]
@@ -155,74 +158,70 @@ export class Loader {
                     type
                 )
             ),
-            ...this._types.generatedColumns.map(({ name, type }) => buildColumn(name, type)),
+            ...(this._loadOptions.generatedColumns ?? []).map(({ name, type }) =>
+                buildColumn(name, type)
+            ),
         ];
         this._firstChunkSplit = undefined;
 
         return this._columns;
     }
 
-    protected setupWorker(): ReadableStream<DispatchValue> {
-        class WorkerSource {
-            public constructor(private readonly loader: Loader) {}
+    protected setupWorker(): Promise<LoadStatistics> {
+        return new Promise((resolve, reject) => {
+            this._worker = new Worker(
+                // @ts-expect-error The path to the worker source is only during build.
+                new URL(__MAIN_WORKER_SOURCE, import.meta.url),
+                { type: 'module' }
+            );
 
-            public start(controller: ReadableStreamController<DispatchValue>): void {
-                this.loader._worker = new Worker(
-                    // @ts-expect-error The path to the worker source is only during build.
-                    new URL(__MAIN_WORKER_SOURCE, import.meta.url),
-                    { type: 'module' }
-                );
+            this._worker.onmessage = (event: MessageEvent<MessageData>) => {
+                const message = event.data;
+                switch (message.type) {
+                    case MessageType.Processed: {
+                        const progress = this.onProcessed(message.data as ProcessedData);
 
-                this.loader._worker.onmessage = (event: MessageEvent<MessageData>) => {
-                    const message = event.data;
-                    switch (message.type) {
-                        case MessageType.Processed:
-                            controller.enqueue({
-                                type: 'data',
-                                progress: this.loader.onProcessed(message.data as ProcessedData),
-                            });
-                            break;
-                        case MessageType.Finished:
-                            controller.enqueue({
-                                type: 'done',
-                                statistics: this.loader.onFinished(message.data as FinishedData),
-                            });
-                            this.loader._worker.terminate();
-                            controller.close();
-                            break;
-                        default:
-                            if (this.loader._options.verbose)
-                                console.log('received invalid msg from main worker:', message);
-
-                            controller.error(['received invalid msg from main worker:', message]);
-                            break;
+                        this._loadOptions.onUpdate?.(progress);
+                        break;
                     }
-                };
 
-                const setup: SetupData = {
-                    columns: this.loader._types.columns,
-                    generatedColumns: this.loader._types.generatedColumns,
-                    options: {
-                        delimiter: this.loader._options.delimiter,
-                        includesHeader: this.loader._options.includesHeader,
-                        verbose: this.loader._options.verbose,
-                    },
-                };
-                const message: MessageData = {
-                    type: MessageType.Setup,
-                    data: setup,
-                };
+                    case MessageType.Finished: {
+                        this._worker.terminate();
+                        resolve(this.onFinished(message.data as FinishedData));
+                        break;
+                    }
 
-                this.loader._worker.postMessage(message);
-            }
-        }
+                    default: {
+                        if (this._options.verbose)
+                            console.log('received invalid msg from main worker:', message);
 
-        return new ReadableStream(new WorkerSource(this));
+                        reject(['received invalid msg from main worker:', message]);
+                        break;
+                    }
+                }
+            };
+
+            const setup: SetupData = {
+                columns: this._loadOptions.columns.map((column) => column.type),
+                generatedColumns: this._loadOptions.generatedColumns ?? [],
+                options: {
+                    delimiter: this._options.delimiter,
+                    includesHeader: this._options.includesHeader,
+                    verbose: this._options.verbose,
+                },
+            };
+            const message: MessageData = {
+                type: MessageType.Setup,
+                data: setup,
+            };
+
+            this._worker.postMessage(message);
+        });
     }
 
     protected onProcessed(data: ProcessedData): number {
         const chunks = data.chunks.map((chunk) => rebuildChunk(chunk));
-        this._columns.forEach((column, index) => column.push(chunks[index] as AnyChunk));
+        chunks.forEach((chunk, index) => this._columns[index]?.push(chunk as AnyChunk));
 
         return this._columns[0].length;
     }
@@ -239,6 +238,19 @@ export class Loader {
         this._openedSourceId = null;
 
         return data;
+    }
+
+    /**
+     * This is an workaround for a Vite (<=~2.8.0) issue: https://github.com/vitejs/vite/issues/5699
+     * When using this lib as a dependency and bundling with Vite, the sub worker isn't emitted.
+     * By referencing the worker in the main module, it can be forced to be emitted.
+     */
+    protected fakeSubWorkerReference(): void {
+        new Worker(
+            // @ts-expect-error The path to the worker source is only during build.
+            new URL(__SUB_WORKER_SOURCE, import.meta.url),
+            { type: 'module' }
+        );
     }
 
     public async open(id: string): Promise<ColumnHeader[]> {
@@ -259,22 +271,14 @@ export class Loader {
         }
     }
 
-    public load(): [Column[], Dispatcher] {
+    public async load(): Promise<LoadResult> {
         this._perfMon.start(`${this._openedSourceId}-load`);
 
         const columns = this.setupColumns();
-        const resultStream = this.setupWorker();
-        const dispatch = async function* (): AsyncGenerator<DispatchValue, void> {
-            const reader = resultStream.getReader();
 
-            while (true) {
-                const { done, value } = await reader.read();
+        this._loadOptions.onInit?.(columns);
 
-                if (done) return;
-
-                yield value;
-            }
-        };
+        const statistics = this.setupWorker();
 
         if (this._stream) {
             this.readStreamFirstChunk();
@@ -282,7 +286,7 @@ export class Loader {
             this.readBuffer();
         }
 
-        return [columns, dispatch];
+        return { columns, statistics: await statistics };
     }
 
     public set stream(stream: ReadableStream) {
@@ -297,7 +301,7 @@ export class Loader {
         this._options = options;
     }
 
-    public set types(columns: ColumnTypes) {
-        this._types = columns;
+    public set loadOptions(options: LoadOptions) {
+        this._loadOptions = options;
     }
 }

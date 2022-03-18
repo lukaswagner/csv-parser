@@ -1,13 +1,13 @@
-import type { Column, ColumnHeader, LoadStatistics } from 'csv-parser';
+import type { Column, ColumnHeader, LoadStatistics } from '@lukaswagner/csv-parser';
 import { atom, selector } from 'recoil';
 
 import { isRemote, isSheet } from '../utils/datasources';
 
-export type DataSource = 'local' | 'remote' | 'google-sheets';
+export type DataSource = 'local' | 'remote' | 'sheets';
 
 export type Remote = { url: string; shouldPrefetch: boolean };
 
-export type Sheet = { apiKey: string; sheetId: string };
+export type Sheet = { apiKey: string; sheetUrl: string };
 
 export type InputData = File | Remote | Sheet;
 
@@ -62,8 +62,14 @@ export const isOpenerDisabledState = selector({
         const requiresType =
             dataSource === 'local' ||
             (dataSource === 'remote' && isRemote(inputData) && inputData.shouldPrefetch);
+        const hasData =
+            (dataSource === 'sheets' &&
+                isSheet(inputData) &&
+                !!inputData.apiKey &&
+                !!inputData.sheetUrl) ||
+            (dataSource !== 'sheets' && inputData);
 
-        return !dataSource || (requiresType && !inputType) || !inputData;
+        return !dataSource || (requiresType && !inputType) || !hasData;
     },
 });
 

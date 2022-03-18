@@ -1,10 +1,8 @@
-import { fetchSheetDataRange, fetchSheetValues } from './helper/spreadsheets';
+import { excel, google, parseSheetId } from './helper/spreadsheets';
 import { Loader } from './loader';
-import type { Column } from './types/column/column';
 import type { DataSource, InputData, SheetInput } from './types/dataSource';
-import type { ColumnTypes } from './types/dataType';
-import type { ColumnHeader, Dispatcher } from './types/handlers';
-import type { CsvLoaderOptions } from './types/options';
+import type { ColumnHeader, LoadResult } from './types/handlers';
+import type { CsvLoaderOptions, LoadOptions } from './types/options';
 
 export class CSV<D extends string> {
     protected _openedDataSource: D;
@@ -65,18 +63,17 @@ export class CSV<D extends string> {
     }
 
     protected async openSheet(data: SheetInput): Promise<ColumnHeader[]> {
-        const { apiKey, sheetId } = data;
+        const { apiKey, sheetUrl } = data;
+        const { sheetId, type } = parseSheetId(sheetUrl);
+        const sheetService = type === 'google' ? google : excel;
 
         // Determine range specifier for sheet area that is filled with data
-        const range = await fetchSheetDataRange(sheetId, apiKey);
+        const range = await sheetService.fetchSheetDataRange(sheetId, apiKey);
 
         // Fetch sheet values as stream
-        const stream = await fetchSheetValues(sheetId, apiKey, range);
+        const stream = await sheetService.fetchSheetValues(sheetId, apiKey, range);
 
         this._options.delimiter ??= deductDelimiter('csv');
-
-        // TODO: Determine data length ?
-
         this._loader.options = this._options;
         this._loader.stream = stream;
 
@@ -96,7 +93,7 @@ export class CSV<D extends string> {
             source instanceof Uint8Array
         ) {
             return this.openBuffer(source);
-        } else if ('sheetId' in source && 'apiKey' in source) {
+        } else if ('sheetUrl' in source && 'apiKey' in source) {
             return this.openSheet(source);
         }
     }
@@ -110,8 +107,8 @@ export class CSV<D extends string> {
         return this.openInputData(data);
     }
 
-    public load(types: ColumnTypes): [Column[], Dispatcher] {
-        this._loader.types = types;
+    public load(options: LoadOptions): Promise<LoadResult> {
+        this._loader.loadOptions = options;
 
         return this._loader.load();
     }
@@ -145,3 +142,4 @@ export * from './types/column/column';
 export * from './types/dataType';
 export * from './types/handlers';
 export * from './types/options';
+export * from './types/dataSource';

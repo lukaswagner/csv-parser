@@ -12,8 +12,8 @@
     "license": "MIT",
     "dependencies": {
         "@csv-parser/data": "1.0.0",
-        "@lukaswagner/csv-parser": "^0.1.0",
-        "express": "^4.17.2"
+        "@lukaswagner/csv-parser": "^0.2.5",
+        "express": "^4.17.3"
     },
     "scripts": {
         "dev": "node server.js"

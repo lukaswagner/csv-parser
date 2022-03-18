@@ -26,6 +26,7 @@ export const DataTypeSelect = (props: Props): JSX.Element => {
                 <option value={DataType.Float32}>Float32</option>
                 <option value={DataType.Float64}>Float64</option>
                 <option value={DataType.Color}>Color</option>
+                <option value={DataType.Date}>Date</option>
                 <option value={DataType.String}>String</option>
             </Select>
         </Box>

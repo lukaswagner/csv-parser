@@ -11,18 +11,12 @@ async function loadDataSource(id) {
     const detectedColumns = await loader.open(id);
     console.log(id, 'opened, found', detectedColumns.length, 'columns');
 
-    const [, dispatch] = loader.load({
-        columns: detectedColumns.map(({ type }) => type),
-        generatedColumns: [],
+    await loader.load({
+        columns: detectedColumns,
+        onUpdate: (progress) => console.log(id, `received new data. progress: ${progress}`),
     });
 
-    for await (const value of dispatch()) {
-        if (value.type === 'data') {
-            console.log(id, `received new data. progress: ${value.progress}`);
-        } else {
-            console.log(id, 'done');
-        }
-    }
+    console.log(id, 'done');
 }
 
 async function load() {

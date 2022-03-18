@@ -9,7 +9,10 @@ import {
 } from '@lukaswagner/csv-parser';
 import pako from 'pako';
 
-const sheetAvailable = process.env.API_KEY !== undefined && process.env.SHEET_ID !== undefined;
+const googleSheetAvailable =
+    process.env.GOOGLE_API_KEY !== undefined && process.env.GOOGLE_SHEET_URL !== undefined;
+const excelSheetAvailable =
+    process.env.EXCEL_API_KEY !== undefined && process.env.EXCEL_SHEET_URL !== undefined;
 
 const dataSources = createDataSources({
     '[remote url stream]': conf.url,
@@ -21,8 +24,12 @@ const dataSources = createDataSources({
     '[5m url stream]': require('5m.csv'),
     '[10m url stream]': require('10m.csv'),
     '[google sheet]': {
-        apiKey: process.env.API_KEY,
-        sheetId: process.env.SHEET_ID,
+        apiKey: process.env.GOOGLE_API_KEY,
+        sheetUrl: process.env.GOOGLE_SHEET_URL,
+    },
+    '[excel sheet]': {
+        apiKey: process.env.EXCEL_API_KEY,
+        sheetUrl: process.env.EXCEL_SHEET_URL,
     },
 });
 
@@ -97,32 +104,20 @@ async function testLoad(id: DataSource): Promise<void> {
     try {
         const detectedColumns = await loader.open(id);
 
-        // onOpened
         console.log(
             id,
             `opened source, detected ${detectedColumns.length} columns:\n` +
                 detectedColumns.map(({ name, type }) => `${name}: ${type}`).join('\n')
         );
 
-        const [columns, dispatch] = loader.load({
-            columns: detectedColumns.map(({ type }) => type),
-            generatedColumns: [],
+        const { columns, statistics } = await loader.load({
+            columns: detectedColumns,
+            onInit: () => console.log(id, 'received columns'),
+            onUpdate: (progress) => console.log(id, `received new data. progress: ${progress}`),
         });
 
-        // onColumns
-        console.log(id, 'received columns');
-
-        for await (const value of dispatch()) {
-            if (value.type === 'data') {
-                // onData
-                console.log(id, `received new data. progress: ${value.progress}`);
-            } else {
-                // onDone
-                logResult(columns, id, value.statistics);
-            }
-        }
+        logResult(columns, id, statistics);
     } catch (error) {
-        // onError
         console.log(id, 'error:', error);
     }
 }
@@ -131,5 +126,6 @@ testLoad('[remote url stream]')
     .then(() => testLoad('[1m gzip buffer]'))
     .then(() => testLoad('[5m url stream]'))
     .then(() => testLoad('[10m url stream]'))
-    .then(() => (sheetAvailable ? testLoad('[google sheet]') : Promise.resolve()))
+    .then(() => (googleSheetAvailable ? testLoad('[google sheet]') : Promise.resolve()))
+    .then(() => (excelSheetAvailable ? testLoad('[excel sheet]') : Promise.resolve()))
     .then(() => console.table(statistics));

@@ -1,4 +1,4 @@
-import { Chunk, StringChunk } from '../types/chunk/chunk';
+import { Chunk, DateChunk, StringChunk } from '../types/chunk/chunk';
 import { ColorChunk } from '../types/chunk/colorChunk';
 import { NumberChunk } from '../types/chunk/numberChunk';
 import { DataType } from '../types/dataType';
@@ -11,6 +11,9 @@ export function storeValue(value: unknown, index: number, chunk: Chunk): void {
             break;
         case DataType.Color:
             (chunk as ColorChunk).set(index, value as vec4);
+            break;
+        case DataType.Date:
+            (chunk as DateChunk).set(index, value as Date);
             break;
         case DataType.String:
             (chunk as StringChunk).set(index, value as string);

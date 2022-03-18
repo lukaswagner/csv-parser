@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { DeleteIcon } from '@chakra-ui/icons';
-import { Box, Button, Center, IconButton, Spinner, Stack } from '@chakra-ui/react';
+import { Box, Button, Center, Spinner, Stack } from '@chakra-ui/react';
+import { ColumnHeader, DataType } from '@lukaswagner/csv-parser';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { type ColumnHeader } from '../../../../lib/types/csv';
 import { loader } from '../api/loader';
 import {
     columnHeadersState,
@@ -139,7 +138,7 @@ export const DataSourceOpener = (): JSX.Element => {
             setColumns((currVal) => {
                 const newVal = [...currVal];
 
-                newVal[index].type = Number(event.target.value);
+                newVal[index].type = event.target.value as DataType;
 
                 return newVal;
             });
@@ -163,12 +162,13 @@ export const DataSourceOpener = (): JSX.Element => {
                     ) : (
                         <Stack gap={2}>
                             <Box display="flex" justifyContent="end">
-                                <IconButton
+                                <Button
                                     aria-label="Reset column headers"
                                     colorScheme="gray"
-                                    icon={<DeleteIcon />}
                                     onClick={handleResetClick}
-                                />
+                                >
+                                    Reset
+                                </Button>
                             </Box>
                             {columns.map((column, index) => (
                                 <DataTypeSelect

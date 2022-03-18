@@ -5,6 +5,10 @@ import { BufferChunk } from './bufferChunk';
 export class ColorChunk extends BufferChunk<vec4> {
     protected _view: Float32Array;
 
+    public get view(): Float32Array {
+        return this._view;
+    }
+
     public constructor(length: number, offset: number) {
         super(DataType.Color, length, offset);
         this._data = new SharedArrayBuffer(length * 4 * 4);
