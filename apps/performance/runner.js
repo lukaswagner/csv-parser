@@ -12,6 +12,9 @@ const browsers = [
     },
 ];
 
+const warmupPasses = 1;
+const benchmarkPasses = 3;
+
 async function fetchConfigs() {
     const browser = await remote({
         capabilities: {
@@ -90,20 +93,22 @@ function toCSV(data) {
         for (const conf of configurations) {
             console.log('running', conf, 'in', capabilities.browserName);
 
-            try {
-                const result = await run(capabilities, conf);
-                if (result.error) {
+            for (let pass = 0; pass < warmupPasses + benchmarkPasses; pass++) {
+                try {
+                    const result = await run(capabilities, conf);
+                    if (result.error) {
+                        console.log(conf, 'error:');
+                        console.log(result.error);
+                    } else if (result.rows === 0) {
+                        console.log(conf, 'empty result:');
+                        console.log(result);
+                    } else {
+                        if (pass >= warmupPasses) results.push(result);
+                    }
+                } catch (e) {
                     console.log(conf, 'error:');
-                    console.log(result.error);
-                } else if (result.rows === 0) {
-                    console.log(conf, 'empty result:');
-                    console.log(result);
-                } else {
-                    results.push(result);
+                    console.log(e);
                 }
-            } catch (e) {
-                console.log(conf, 'error:');
-                console.log(e);
             }
         }
 
