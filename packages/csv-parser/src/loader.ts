@@ -169,11 +169,9 @@ export class Loader {
 
     protected setupWorker(): Promise<LoadStatistics> {
         return new Promise((resolve, reject) => {
-            this._worker = new Worker(
-                // @ts-expect-error The path to the worker source is only during build.
-                new URL(__MAIN_WORKER_SOURCE, import.meta.url),
-                { type: 'module' }
-            );
+            this._worker = new Worker(new URL('./worker/main/worker.ts', import.meta.url), {
+                type: 'module',
+            });
 
             this._worker.onmessage = (event: MessageEvent<MessageData>) => {
                 const message = event.data;
@@ -238,19 +236,6 @@ export class Loader {
         this._openedSourceId = null;
 
         return data;
-    }
-
-    /**
-     * This is an workaround for a Vite (<=~2.8.0) issue: https://github.com/vitejs/vite/issues/5699
-     * When using this lib as a dependency and bundling with Vite, the sub worker isn't emitted.
-     * By referencing the worker in the main module, it can be forced to be emitted.
-     */
-    protected fakeSubWorkerReference(): void {
-        new Worker(
-            // @ts-expect-error The path to the worker source is only during build.
-            new URL(__SUB_WORKER_SOURCE, import.meta.url),
-            { type: 'module' }
-        );
     }
 
     public async open(id: string): Promise<ColumnHeader[]> {

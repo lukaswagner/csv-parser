@@ -78,11 +78,7 @@ function startSubWorker(): void {
     const workerChunks = chunks.splice(0, numChunks);
     const workerId = nextWorker++;
 
-    const subWorker = new Worker(
-        // @ts-expect-error The path to the worker source is only during build.
-        new URL(__SUB_WORKER_SOURCE, import.meta.url),
-        { type: 'module' }
-    );
+    const subWorker = new Worker(new URL('../sub/worker.ts', import.meta.url), { type: 'module' });
 
     subWorker.onmessage = (e: MessageEvent<SubInterface.MessageData>) => {
         const msg = e.data;
