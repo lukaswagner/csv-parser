@@ -18,8 +18,8 @@ export type StartData = {
 export type FinishedData = {
     chunks: Array<Chunk>;
     generatedChunks: Array<Chunk>;
-    startRemainder: SharedArrayBuffer;
-    endRemainder: SharedArrayBuffer;
+    startRemainder: ArrayBufferLike;
+    endRemainder: ArrayBufferLike;
 };
 
 export type MessageData = {

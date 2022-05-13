@@ -49,7 +49,7 @@ export function buildColumn(name: string, type: DataType): Column {
     }
 }
 
-export function rebuildColumn(column: unknown): Column {
+export function rebuildColumn(column: unknown, shared: boolean): Column {
     const oldColumn = column as {
         _type: DataType;
         _name: string;
@@ -57,7 +57,7 @@ export function rebuildColumn(column: unknown): Column {
     const newColumn = buildColumn(oldColumn._name, oldColumn._type);
     Object.assign(newColumn, column);
     newColumn.chunks.forEach((chunk, index, chunks) => {
-        chunks[index] = rebuildChunk(chunk);
+        chunks[index] = rebuildChunk(chunk, shared);
     });
     return newColumn;
 }

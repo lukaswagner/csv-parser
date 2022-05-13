@@ -1,3 +1,4 @@
+import { buffer } from '../../helper/buffer';
 import { DataType } from '../dataType';
 import { vec4 } from '../tuples';
 import { BufferChunk } from './bufferChunk';
@@ -9,9 +10,9 @@ export class ColorChunk extends BufferChunk<vec4> {
         return this._view;
     }
 
-    public constructor(length: number, offset: number) {
+    public constructor(length: number, offset: number, shared: boolean) {
         super(DataType.Color, length, offset);
-        this._data = new SharedArrayBuffer(length * 4 * 4);
+        this._data = buffer(length * 4 * 4, shared);
         this._view = new Float32Array(this._data);
     }
 

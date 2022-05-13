@@ -1,22 +1,23 @@
+import { buffer } from './buffer';
 import { findLastIndex } from './findLastIndex';
 import { Position } from './position';
 
 export type RemainderInfo = {
-    startRemainder: SharedArrayBuffer;
+    startRemainder: ArrayBufferLike;
     start: Position;
-    endRemainder: SharedArrayBuffer;
+    endRemainder: ArrayBufferLike;
     end: Position;
 };
 
-export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
+export function detectRemainders(chunks: ArrayBuffer[], shared: boolean): RemainderInfo {
     const lf = 0x0a;
     const cr = 0x0d;
 
     const start: Position = { chunk: 0, char: 0 };
     const end: Position = { chunk: 0, char: 0 };
 
-    let startRemainder: SharedArrayBuffer;
-    let endRemainder: SharedArrayBuffer;
+    let startRemainder: ArrayBufferLike;
+    let endRemainder: ArrayBufferLike;
 
     let remainderLength = 0;
 
@@ -42,7 +43,7 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
 
         // prepare buffer for start remainder
         const crFix = chunk[lfPos - 1] === cr ? -1 : 0;
-        startRemainder = new SharedArrayBuffer(remainderLength + lfPos + crFix);
+        startRemainder = buffer(remainderLength + lfPos + crFix, shared);
         break;
     }
 
@@ -75,7 +76,7 @@ export function detectRemainders(chunks: ArrayBuffer[]): RemainderInfo {
         end.char = lfPos;
 
         // prepare buffer for start remainder
-        endRemainder = new SharedArrayBuffer(remainderLength + chunk.length - 1 - lfPos);
+        endRemainder = buffer(remainderLength + chunk.length - 1 - lfPos, shared);
         break;
     }
 

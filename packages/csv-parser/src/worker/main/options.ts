@@ -3,4 +3,5 @@ export type MainWorkerOptions = {
     includesHeader: boolean;
     size?: number;
     verbose?: boolean;
+    sharedArrayBuffer?: boolean;
 };

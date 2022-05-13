@@ -1,3 +1,4 @@
+import { buffer } from '../../helper/buffer';
 import { bytes, DataType } from '../dataType';
 import { BufferChunk } from './bufferChunk';
 
@@ -26,9 +27,9 @@ export class DateChunk extends BufferChunk<Date> {
         return new Date(this._max);
     }
 
-    public constructor(length: number, offset: number) {
+    public constructor(length: number, offset: number, shared: boolean) {
         super(DataType.Date, length, offset);
-        this._data = new SharedArrayBuffer(length * bytes(DataType.Date));
+        this._data = buffer(length * bytes(DataType.Date), shared);
         this._view = new Float64Array(this._data);
         this._min = Number.POSITIVE_INFINITY;
         this._max = Number.NEGATIVE_INFINITY;
