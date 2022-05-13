@@ -1,3 +1,9 @@
+## v0.3.0
+
+### Feature
+
+-   Add `sharedArrayBuffer` option for enabling/disabling use of `SharedArrayBuffer` for data storage. If false, `ArrayBuffer` is used instead. This defaults to false, which marks a change compared to previous behavior.
+
 ## v0.2.5
 
 ### Interface

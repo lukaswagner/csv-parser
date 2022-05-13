@@ -12,7 +12,7 @@
     "license": "MIT",
     "dependencies": {
         "@csv-parser/data": "1.0.0",
-        "@lukaswagner/csv-parser": "^0.2.5",
+        "@lukaswagner/csv-parser": "^0.3.0",
         "express": "^4.17.3"
     },
     "scripts": {
