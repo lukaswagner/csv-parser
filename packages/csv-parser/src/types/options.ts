@@ -5,7 +5,7 @@ export interface CsvLoaderOptions {
     includesHeader: boolean;
     typeInferLines: number;
     verbose: boolean;
-
     delimiter?: string;
     size?: number;
+    sharedArrayBuffer?: boolean;
 }

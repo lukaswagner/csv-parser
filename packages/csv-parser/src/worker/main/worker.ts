@@ -2,11 +2,16 @@ import { parseLine } from '../../helper/parseLine';
 import { PerfMon } from '../../helper/perfMon';
 import { splitLine } from '../../helper/splitLine';
 import { storeValue } from '../../helper/storeValue';
-import { Chunk, rebuildChunk } from '../../types/chunk/chunk';
+import { Chunk, rebuildChunk, AnyChunk } from '../../types/chunk/chunk';
 import * as SubInterface from '../sub/interface';
 import * as MainInterface from './interface';
 
 const mainWorker: Worker = self as unknown as Worker;
+
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function postMessage(message: any, transfer?: Transferable[]): void;
+}
 
 let setup: MainInterface.SetupData;
 const chunks = new Array<ArrayBufferLike>();
@@ -21,8 +26,8 @@ const perfMon = new PerfMon();
 const runningWorkers = new Map<number, Worker>();
 const parsedChunks = new Map<number, Chunk[]>();
 const generatedChunks = new Map<number, Chunk[]>();
-const startRemainders = new Map<number, SharedArrayBuffer>();
-const endRemainders = new Map<number, SharedArrayBuffer>();
+const startRemainders = new Map<number, ArrayBufferLike>();
+const endRemainders = new Map<number, ArrayBufferLike>();
 let nextChunkToBeFinished = 0;
 let chunkLengthSum = 0;
 
@@ -121,8 +126,14 @@ function onSubWorkerFinished(data: SubInterface.FinishedData, workerId: number):
     const subWorker = runningWorkers.get(workerId);
     runningWorkers.delete(workerId);
 
-    parsedChunks.set(workerId, data.chunks.map(rebuildChunk));
-    generatedChunks.set(workerId, data.generatedChunks.map(rebuildChunk));
+    parsedChunks.set(
+        workerId,
+        data.chunks.map((c) => rebuildChunk(c, setup.options.sharedArrayBuffer))
+    );
+    generatedChunks.set(
+        workerId,
+        data.generatedChunks.map((c) => rebuildChunk(c, setup.options.sharedArrayBuffer))
+    );
     startRemainders.set(workerId, data.startRemainder);
     endRemainders.set(workerId, data.endRemainder);
 
@@ -169,7 +180,8 @@ function finishChunk(): boolean {
         type: MainInterface.MessageType.Processed,
         data,
     };
-    postMessage(msg);
+    const transf = setup.options.sharedArrayBuffer ? data.chunks.map((c: AnyChunk) => c.data) : [];
+    postMessage(msg, transf);
 
     nextChunkToBeFinished++;
 

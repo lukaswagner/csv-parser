@@ -225,7 +225,9 @@ export class Loader {
     }
 
     protected onProcessed(data: ProcessedData): number {
-        const chunks = data.chunks.map((chunk) => rebuildChunk(chunk));
+        const chunks = data.chunks.map((chunk) =>
+            rebuildChunk(chunk, this._options.sharedArrayBuffer)
+        );
         chunks.forEach((chunk, index) => this._columns[index]?.push(chunk as AnyChunk));
 
         return this._columns[0].length;
@@ -313,6 +315,10 @@ export class Loader {
 
     public set options(options: CsvLoaderOptions) {
         this._options = options;
+        if (options.sharedArrayBuffer && !SharedArrayBuffer) {
+            console.error('Shared buffer requested, but not available!');
+            this._options = Object.assign({}, options, { sharedArrayBuffer: false });
+        }
     }
 
     public set types(columns: ColumnTypes) {

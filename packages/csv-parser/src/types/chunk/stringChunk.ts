@@ -4,7 +4,9 @@ import { BaseChunk } from './baseChunk';
 export class StringChunk extends BaseChunk<string> {
     protected _data: Array<string>;
 
-    public constructor(length: number, offset: number) {
+    // shared option included for consistency
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public constructor(length: number, offset: number, shared: boolean) {
         super(DataType.String, length, offset);
         this._data = new Array<string>(length);
     }

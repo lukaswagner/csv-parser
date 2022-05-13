@@ -1,3 +1,4 @@
+import { buffer } from '../../helper/buffer';
 import { bytes, DataType } from '../dataType';
 import { BufferChunk } from './bufferChunk';
 
@@ -23,9 +24,9 @@ abstract class BaseNumberChunk<A extends NumArray> extends BufferChunk<number> {
         return this._max;
     }
 
-    protected constructor(length: number, offset: number, bytes: number) {
+    protected constructor(length: number, offset: number, bytes: number, shared: boolean) {
         super(DataType.Number, length, offset);
-        this._data = new SharedArrayBuffer(length * bytes);
+        this._data = buffer(length * bytes, shared);
         this._min = Number.POSITIVE_INFINITY;
         this._max = Number.NEGATIVE_INFINITY;
     }
@@ -42,57 +43,57 @@ abstract class BaseNumberChunk<A extends NumArray> extends BufferChunk<number> {
 }
 
 export class Int8Chunk extends BaseNumberChunk<Int8Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Int8));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Int8), shared);
         this._view = new Int8Array(this._data);
     }
 }
 
 export class Uint8Chunk extends BaseNumberChunk<Uint8Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Uint8));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Uint8), shared);
         this._view = new Uint8Array(this._data);
     }
 }
 
 export class Int16Chunk extends BaseNumberChunk<Int16Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Int16));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Int16), shared);
         this._view = new Int16Array(this._data);
     }
 }
 
 export class Uint16Chunk extends BaseNumberChunk<Uint16Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Uint16));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Uint16), shared);
         this._view = new Uint16Array(this._data);
     }
 }
 
 export class Int32Chunk extends BaseNumberChunk<Int32Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Int32));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Int32), shared);
         this._view = new Int32Array(this._data);
     }
 }
 
 export class Uint32Chunk extends BaseNumberChunk<Uint32Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Uint32));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Uint32), shared);
         this._view = new Uint32Array(this._data);
     }
 }
 
 export class Float32Chunk extends BaseNumberChunk<Float32Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Float32));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Float32), shared);
         this._view = new Float32Array(this._data);
     }
 }
 
 export class Float64Chunk extends BaseNumberChunk<Float64Array> {
-    public constructor(length: number, offset: number) {
-        super(length, offset, bytes(DataType.Float64));
+    public constructor(length: number, offset: number, shared: boolean) {
+        super(length, offset, bytes(DataType.Float64), shared);
         this._view = new Float64Array(this._data);
     }
 }
